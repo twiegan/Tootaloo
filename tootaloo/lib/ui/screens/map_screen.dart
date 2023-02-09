@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
   final String title;
@@ -9,17 +11,19 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final int index = 3;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Map"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
-        ),
+      body: const Center(
+        child: Text("Map!"),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: index,
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, required this.title});
   final String title;
@@ -9,17 +11,19 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  final int index = 2;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Search"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
-        ),
+      body: const Center(
+        child: Text("Search!"),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: index,
       ),
     );
   }

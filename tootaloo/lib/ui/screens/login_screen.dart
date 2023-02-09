@@ -15,11 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
-        ),
+      body: const Center(
+        child: Text("Login!"),
       ),
     );
   }
