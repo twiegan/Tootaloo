@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, required this.title});
@@ -16,9 +17,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Search"),
-      ),
+      appBar: const TopNavBar(title: "Search"),
       body: const Center(
         child: Text("Search!"),
       ),

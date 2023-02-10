@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
@@ -26,9 +27,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Trending"),
-      ),
+      appBar: const TopNavBar(title: "Trending"),
       body: const Center(
         child: Text("Trending!"),
       ),

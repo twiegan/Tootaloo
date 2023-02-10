@@ -56,9 +56,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
           backgroundColor: Colors.black,
         ),
       ],
-      currentIndex: widget.selectedIndex,
-      selectedItemColor: Colors.amber[800],
+      currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
+      selectedItemColor:
+          widget.selectedIndex == -1 ? Colors.white : Colors.amber[800],
       unselectedItemColor: Colors.white,
+      showSelectedLabels: widget.selectedIndex == -1 ? false : true,
+      showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
       onTap: _onItemTapped,
     );
   }

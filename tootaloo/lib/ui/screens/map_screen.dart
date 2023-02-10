@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -16,9 +17,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Map"),
-      ),
+      appBar: const TopNavBar(title: "Map"),
       body: const Center(
         child: Text("Map!"),
       ),

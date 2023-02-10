@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
 class SettingsAppScreen extends StatefulWidget {
   const SettingsAppScreen({super.key, required this.title});
@@ -16,9 +17,7 @@ class _SettingsAppScreenState extends State<SettingsAppScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: const TopNavBar(title: "App Settings"),
       body: const Center(
         child: Text("App Settings!"),
       ),

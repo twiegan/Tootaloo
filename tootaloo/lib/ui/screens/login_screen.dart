@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:tootaloo/ui/components/login_button.dart';
+
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.title});
-  final String title;
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -12,11 +13,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: const Center(
-        child: Text("Login!"),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'Login!',
+            ),
+            const LoginButton(),
+          ],
+        ),
       ),
     );
   }
