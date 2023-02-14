@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'ui/screens/trending_screen.dart';
-import 'package:flutter_config/flutter_config.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await FlutterConfig.loadEnvVariables();
-
+void main() {
   runApp(const MyApp());
 }
 
@@ -18,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tootaloo',
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
+        primarySwatch: Colors.blue,
       ),
       home: const TrendingScreen(title: 'Trending'),
     );

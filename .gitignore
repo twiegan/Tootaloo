@@ -6,8 +6,3 @@ tootalooBackend/.venv
 
 flutter/
 .DS_STORE
-
-tootaloo/.flutter-plugins
-tootaloo/.flutter-plugins-dependencies
-
-tootaloo/.env
