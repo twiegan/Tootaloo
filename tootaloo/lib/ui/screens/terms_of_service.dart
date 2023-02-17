@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:tootaloo/ui/screens/login_screen.dart';
 
@@ -10,6 +13,16 @@ class TermsOfServiceScreen extends StatefulWidget {
 }
 
 class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
+  String tosText = 'Empty';
+
+  _read() async {
+    String fileText;
+    fileText = await rootBundle.loadString("assets/terms_of_service.text");
+    setState(() {
+      tosText = fileText;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +30,8 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Terms of service text here!',
+            Text(
+              _read(),
             ),
             TextButton(
                 onPressed: () {
