@@ -27,7 +27,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+        pageBuilder: (BuildContext context, Animation<double> animation1,
+            Animation<double> animation2) {
           return _navBarPages.elementAt(index);
         },
         transitionDuration: Duration.zero,
@@ -66,11 +67,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ),
       ],
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
-      selectedItemColor:widget.selectedIndex == -1 ? Colors.white : Color.fromRGBO(221, 239, 254, 1.0),
+      selectedItemColor: widget.selectedIndex == -1
+          ? Colors.white
+          : Color.fromRGBO(185, 223, 255, 0.844),
       unselectedItemColor: Colors.white,
-      // unselectedItemColor: Colors.white,
-      // showSelectedLabels: widget.selectedIndex == -1 ? false : true,
-      // showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
+      selectedFontSize: 12,
+      unselectedFontSize: 12,
       onTap: _onItemTapped,
     );
   }
