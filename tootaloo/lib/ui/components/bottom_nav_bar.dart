@@ -58,11 +58,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ],
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
       selectedItemColor:
-          widget.selectedIndex == -1 ? Colors.black : const Color.fromRGBO(221, 239, 254, 1.0),
-      unselectedItemColor: Colors.white,
-      showSelectedLabels: widget.selectedIndex == -1 ? false : true,
-      showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
-      onTap: _onItemTapped,
+          widget.selectedIndex == -1 ? Colors.white : const Color.fromRGBO(221, 239, 254, 1.0),
+      // unselectedItemColor: Colors.white,
+      // showSelectedLabels: widget.selectedIndex == -1 ? false : true,
+      // showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
+      // onTap: _onItemTapped,
     );
   }
 }
