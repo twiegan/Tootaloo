@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 

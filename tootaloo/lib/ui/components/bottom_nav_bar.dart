@@ -24,16 +24,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
   // general methods
 
   void _onItemTapped(int index) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
-          return _navBarPages.elementAt(index);
-        },
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return _navBarPages.elementAt(index);
+    }));
   }
 
   // build method
@@ -41,37 +34,35 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.black,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Trending',
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.black,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.wc),
           label: 'Review',
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.black,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
           label: 'Search',
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.black,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.map),
           label: 'Map',
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.black,
         ),
       ],
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
-      selectedItemColor:const Color.fromRGBO(221, 239, 254, 1.0),
-      unselectedItemColor: Colors.white,
+      selectedItemColor:
+          widget.selectedIndex == -1 ? Colors.white : const Color.fromRGBO(221, 239, 254, 1.0),
       // unselectedItemColor: Colors.white,
       // showSelectedLabels: widget.selectedIndex == -1 ? false : true,
       // showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
-      onTap: _onItemTapped,
+      // onTap: _onItemTapped,
     );
   }
 }
