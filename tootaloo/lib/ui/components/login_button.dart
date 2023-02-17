@@ -15,6 +15,6 @@ class LoginButton extends StatelessWidget {
             );
           }));
         },
-        child: const Text("Login"));
+        child: const Text("Login", style: TextStyle(color: Colors.black),));
   }
 }
