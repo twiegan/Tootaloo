@@ -21,9 +21,16 @@ class _TopNavBarState extends State<TopNavBar> {
       leading: IconButton(
         icon: const Icon(Icons.settings),
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return const SettingsAppScreen(title: "App Settings");
-          }));
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+                return const SettingsUserScreen(title: "App Settings");
+              },
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         },
         color: Colors.black,
       ),
@@ -32,9 +39,16 @@ class _TopNavBarState extends State<TopNavBar> {
         IconButton(
             icon: const Icon(Icons.account_circle_rounded),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const SettingsUserScreen(title: "User Settings");
-              }));
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+                    return const SettingsUserScreen(title: "User Settings");
+                  },
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
+              );
             },
             color: Colors.black,
         ),
