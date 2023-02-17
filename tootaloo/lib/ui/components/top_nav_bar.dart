@@ -25,8 +25,9 @@ class _TopNavBarState extends State<TopNavBar> {
             return const SettingsAppScreen(title: "App Settings");
           }));
         },
+        color: Colors.black,
       ),
-      title: Text(widget.title),
+      title: Text(widget.title, style: const TextStyle(color: Colors.black)),
       actions: <Widget>[
         IconButton(
             icon: const Icon(Icons.account_circle_rounded),
@@ -34,8 +35,11 @@ class _TopNavBarState extends State<TopNavBar> {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return const SettingsUserScreen(title: "User Settings");
               }));
-            }),
+            },
+            color: Colors.black,
+        ),
       ],
+      backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
     );
   }
 }
