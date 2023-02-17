@@ -4,6 +4,8 @@ tootalooBackend/server/__pycache__
 tootalooBackend/server/migrations/__pycache__
 tootalooBackend/.venv
 
+.vscode
+
 flutter/
 .DS_STORE
 
