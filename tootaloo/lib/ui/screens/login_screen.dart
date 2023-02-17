@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:tootaloo/ui/components/login_button.dart';
+import '../../firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +11,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,44 +46,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Image.asset('assets/images/tootaloo_logo.png')),
               ),
             ),
-            const Padding(
+            Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Email',
                     hintText: 'Enter valid email id as abc@gmail.com',
                     filled: true,
                     fillColor: Colors.white,
                     ),
+                controller: emailController,
 
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(
+            Padding(
+              padding: const EdgeInsets.only(
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
 
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Password',
                     hintText: 'Enter secure password',
                     filled: true,
                     fillColor: Colors.white,),
+                controller: passwordController,
               ),
             ),
-            // FlatButton(
-            //   onPressed: (){
-            //     //TODO FORGOT PASSWORD SCREEN GOES HERE
-            //   },
-            //   child: Text(
-            //     'Forgot Password',
-            //     style: TextStyle(color: Colors.blue, fontSize: 15),
-            //   ),
-            // ),
             const Padding(
               padding: EdgeInsets.only(
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
@@ -83,17 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 250,
               decoration: BoxDecoration(
                   color: const Color.fromRGBO(181, 211, 235, 1), borderRadius: BorderRadius.circular(20)),
-              child: const LoginButton()
-              // child: FlatButton(
-              //   onPressed: () {
-              //     Navigator.push(
-              //         context, MaterialPageRoute(builder: (_) => HomePage()));
-              //   },
-              //   child: Text(
-              //     'Login',
-              //     style: TextStyle(color: Colors.white, fontSize: 25),
-              //   ),
-              // ),
+              child: LoginButton(email: emailController.text, password: passwordController.text,)
             ),
             const SizedBox(
               height: 130,
