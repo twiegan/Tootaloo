@@ -4,9 +4,9 @@ import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import 'package:tootaloo/ui/screens/posts/popular_restroom_screen.dart';
 
-
 class PostNavBar extends StatefulWidget implements PreferredSizeWidget {
-  const PostNavBar({super.key, required this.title, required this.selectedIndex});
+  const PostNavBar(
+      {super.key, required this.title, required this.selectedIndex});
   final String title;
   final int selectedIndex;
 
@@ -25,12 +25,13 @@ class _PostNavBarState extends State<PostNavBar> {
     FollowingScreen(title: "Following"),
     PopularRestroomScreen(title: "Popular Restrooms"),
   ];
-  
+
   void _onItemTapped(int index) {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+        pageBuilder: (BuildContext context, Animation<double> animation1,
+            Animation<double> animation2) {
           return _navBarPages.elementAt(index);
         },
         transitionDuration: Duration.zero,
@@ -38,6 +39,7 @@ class _PostNavBarState extends State<PostNavBar> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -45,21 +47,18 @@ class _PostNavBarState extends State<PostNavBar> {
       flexibleSpace: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up),
-            label: "Trending"
-          ),
+              icon: Icon(Icons.trending_up), label: "Trending"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Following"),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Following"
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bathroom),
-            label: "Hot Restrooms"
-          ),
+              icon: Icon(Icons.bathroom), label: "Hot Restrooms"),
         ],
         currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
-        selectedItemColor:widget.selectedIndex == -1 ? Colors.white : const Color.fromRGBO(48, 157, 247, 1),
+        selectedItemColor: widget.selectedIndex == -1
+            ? Colors.white
+            : const Color.fromRGBO(48, 157, 247, 1),
         unselectedItemColor: Colors.black,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
         onTap: _onItemTapped,
       ),
     );
