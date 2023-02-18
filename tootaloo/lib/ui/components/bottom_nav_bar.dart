@@ -66,8 +66,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ),
       ],
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
-      selectedItemColor:const Color.fromRGBO(221, 239, 254, 1.0),
-      unselectedItemColor: Colors.white,
+      selectedItemColor: widget.selectedIndex == -1
+          ? Colors.white
+          : const Color.fromRGBO(221, 239, 254, 1.0),
       // unselectedItemColor: Colors.white,
       // showSelectedLabels: widget.selectedIndex == -1 ? false : true,
       // showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
