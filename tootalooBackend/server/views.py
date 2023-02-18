@@ -13,33 +13,33 @@ environ.Env.read_env()
 
 
 import pymongo
+import json
+from bson import json_util
+from bson.json_util import dumps
+
 
 #PyMongo client
 client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
-# TODO: delete below later
-# trying connection with MongoDB with sample data
-dbname = client['sample_db']
-collection = dbname['sample_collection']
 
-route_1 = {
-	"rating": "good",
-	"location": "here"
-}
 
-collection.insert_one(route_1)
+def buildings(request):
 
-review_details = collection.find({})
+	print("got GET request for buildings")
 
-# for r in route_details:
-# 	print("src_airport")
-# 	print(r['src_airport'])
-# 	print("dest_airport")
-# 	print(r['dst_airport'])
+	db = client['tootaloo']
+	buildings_collection = db['buildings']
+
+	buildings = buildings_collection.find()
+
+	resp = HttpResponse(dumps(buildings, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	
+	return resp
 
 def index(request):
-		return HttpResponse(review_details)
-    #return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
+		#return HttpResponse(review_details)
+    return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
 
 
 
