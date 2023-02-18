@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+import 'package:tootaloo/ui/components/post_nav_bar.dart';
 
 
-class TrendingScreen extends StatefulWidget {
-  const TrendingScreen({super.key, required this.title});
+class FollowingScreen extends StatefulWidget {
+  const FollowingScreen({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -19,18 +20,19 @@ class TrendingScreen extends StatefulWidget {
   final String title;
 
   @override
-  State<TrendingScreen> createState() => _TrendingScreenState();
+  State<FollowingScreen> createState() => _FollowingScreenState();
 }
 
-class _TrendingScreenState extends State<TrendingScreen> {
+class _FollowingScreenState extends State<FollowingScreen> {
   final int index = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const TopNavBar(title: "Trending"),
-      body: Container(
-        child: Center(
+      appBar: const TopNavBar(title: "Following"),
+      body: Scaffold(
+        appBar: const PostNavBar(title: "bitches", selectedIndex: 1),
+        body: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
             children: List.generate(20, (index) => ListTileItem(

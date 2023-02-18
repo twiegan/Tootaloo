@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ui/screens/trending_screen.dart';
+import 'ui/screens/posts/trending_screen.dart';
 import 'package:flutter_config/flutter_config.dart';
 
 void main() async {

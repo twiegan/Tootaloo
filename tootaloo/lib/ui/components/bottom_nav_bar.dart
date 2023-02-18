@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tootaloo/ui/screens/trending_screen.dart';
+import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 import 'package:tootaloo/ui/screens/search_screen.dart';
 import 'package:tootaloo/ui/screens/map_screen.dart';
