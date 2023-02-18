@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:marquee/marquee.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
@@ -36,6 +37,7 @@ class Building {
 class _MapScreenState extends State<MapScreen> {
   final LatLng _initialcameraposition = const LatLng(40.4237, -86.9212);
   final Location location = Location();
+
   late List<MarkerData> _customMarkers;
   late GoogleMapController _controller;
 
@@ -68,8 +70,33 @@ class _MapScreenState extends State<MapScreen> {
                 MarkerData data = MarkerData(
                     marker: Marker(
                         markerId: MarkerId(building.id),
-                        position:
-                            LatLng(building.latitude, building.longitude)),
+                        position: LatLng(building.latitude, building.longitude),
+                        infoWindow: InfoWindow(
+                            title: building.name,
+                            snippet:
+                                'There are ${building.restroomCount} restrooms in this building.'), //TODO: delete this later if not needed
+                        onTap: () {
+                          // hide currently open snackbar
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          // show the snackbar for the tapped building
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: _customSnackBarContent(building),
+                              backgroundColor: Colors.black87,
+                              duration: const Duration(milliseconds: 10000),
+                              width: 320.0, // Width of the SnackBar.
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal:
+                                      15.0, // Inner padding for SnackBar content.
+                                  vertical: 10.0),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(35.0),
+                              ),
+                            ),
+                          );
+                        }),
                     child: _customMarker(building.restroomCount, Colors.black));
                 _customMarkers.add(data);
               })
@@ -135,26 +162,84 @@ class _MapScreenState extends State<MapScreen> {
     mapController.setMapStyle(mapStyle);
   }
 
-  _customMarker(int numberOfBathrooms, Color color) {
+  Widget _customMarker(int numberOfBathrooms, Color color) {
     return Stack(
       children: [
-        IconButton(
-          icon: const Icon(Icons.add_location),
+        Icon(
+          Icons.add_location,
           color: color,
-          onPressed: () => {print("pressed this button$numberOfBathrooms")},
-          iconSize: 40,
+          size: 50,
         ),
         Positioned(
-          left: 19.5,
-          top: 14,
+          left: 15,
+          top: 8,
           child: Container(
-            width: 17,
-            height: 17,
+            width: 20,
+            height: 20,
             decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(10)),
             child: Center(child: Text(numberOfBathrooms.toString())),
           ),
         )
+      ],
+    );
+  }
+
+  Widget _customSnackBarContent(Building building) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          margin: const EdgeInsets.only(
+              left: 8.0, top: 8.0, bottom: 8.0, right: 12.0),
+          width: 15.0,
+          height: 15.0,
+          decoration: BoxDecoration(
+              color: Colors.greenAccent, //TODO: change color if favorited
+              borderRadius: BorderRadius.circular(40.0)),
+        ), //Dot on the left
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(children: <Widget>[
+              Text(
+                "${building.id}: ",
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                  width: 150,
+                  height: 20,
+                  child: Marquee(
+                    text: building.name,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold),
+                    blankSpace: 30.0,
+                    velocity: 50.0,
+                    showFadingOnlyWhenScrolling: true,
+                    fadingEdgeStartFraction: 0.1,
+                    fadingEdgeEndFraction: 0.1,
+                  ))
+            ]),
+            Text(
+              '# of Restrooms: ${building.restroomCount}',
+              style: const TextStyle(color: Colors.white, fontSize: 11.0),
+            )
+          ],
+        ),
+        const Spacer(), // extra spacing
+        IconButton(
+            onPressed: () => {
+                  print(
+                      "pressed ${building.id}") // TODO: change this to showing floor plans
+                },
+            icon: const Icon(Icons.navigate_next, color: Colors.white)),
+        //Icon(Icons.navigate_next, color: Colors.white) // This Icon
       ],
     );
   }
