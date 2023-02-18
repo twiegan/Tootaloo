@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tootaloo/ui/screens/trending_screen.dart';
+import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 import 'package:tootaloo/ui/screens/search_screen.dart';
 import 'package:tootaloo/ui/screens/map_screen.dart';
@@ -68,7 +68,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
       selectedItemColor:widget.selectedIndex == -1 ? Colors.white : Color.fromRGBO(221, 239, 254, 1.0),
       unselectedItemColor: Colors.white,
-      // unselectedItemColor: Colors.white,
       // showSelectedLabels: widget.selectedIndex == -1 ? false : true,
       // showUnselectedLabels: widget.selectedIndex == -1 ? false : true,
       onTap: _onItemTapped,
