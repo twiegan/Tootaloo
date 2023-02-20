@@ -2,9 +2,9 @@ import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+import 'package:location/location.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -41,30 +41,30 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _customMarkers = [
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-1'), position: locations[0]),
-          child: _customMarker('3', Colors.black)),
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-5'), position: locations[4]),
-          child: _customMarker('3', Colors.black)),
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-2'), position: locations[1]),
-          child: _customMarker('4', Colors.black)),
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-3'), position: locations[2]),
-          child: _customMarker('3', Colors.black)),
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-4'), position: locations[3]),
-          child: _customMarker('2', Colors.black)),
-      MarkerData(
-          marker:
-              Marker(markerId: const MarkerId('id-5'), position: locations[4]),
-          child: _customMarker('1', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-1'), position: locations[0]),
+      //     child: _customMarker('3', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-5'), position: locations[4]),
+      //     child: _customMarker('3', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-2'), position: locations[1]),
+      //     child: _customMarker('4', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-3'), position: locations[2]),
+      //     child: _customMarker('3', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-4'), position: locations[3]),
+      //     child: _customMarker('2', Colors.black)),
+      // MarkerData(
+      //     marker:
+      //         Marker(markerId: const MarkerId('id-5'), position: locations[4]),
+      //     child: _customMarker('1', Colors.black)),
     ];
   }
 

@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/components/login_button.dart';
-import '../../firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tootaloo/ui/screens/trending_screen.dart';
+import 'package:tootaloo/ui/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,9 +12,25 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  var email;
+  var password;
+
+  @override
+  void initState() {
+    super.initState();
+    emailController.addListener((refreshEmail));
+    passwordController.addListener((refreshPassword));
+  }
+
+  bool validateEmail(String value) {
+    Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = RegExp(pattern as String);
+    return (!regex.hasMatch(value)) ? false : true;
+  }
 
   @override
   void dispose() {
@@ -23,12 +40,21 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void refreshEmail() {
+    email = emailController.text;
+  }
+
+  void refreshPassword() {
+    password = passwordController.text;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
       appBar: AppBar(
-        title: const Text("Tootaloo Login", style: TextStyle(color: Colors.black)),
+        title:
+            const Text("Tootaloo Login", style: TextStyle(color: Colors.black)),
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
       ),
       body: SingleChildScrollView(
@@ -51,14 +77,16 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Email',
-                    hintText: 'Enter valid email id as abc@gmail.com',
-                    filled: true,
-                    fillColor: Colors.white,
-                    ),
+                  border: OutlineInputBorder(),
+                  labelText: 'Email',
+                  hintText: 'Enter valid email id as abc@gmail.com',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
                 controller: emailController,
-
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
             ),
             Padding(
@@ -66,35 +94,41 @@ class _LoginScreenState extends State<LoginScreen> {
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-
                 obscureText: true,
                 decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter secure password',
-                    filled: true,
-                    fillColor: Colors.white,),
+                  border: OutlineInputBorder(),
+                  labelText: 'Password',
+                  hintText: 'Enter secure password',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
                 controller: passwordController,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
-              child: Text(
-                  "Forgot Password" //TODO FORGOT PASSWORD SCREEN,
-              ),
+              padding:
+                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
+              child: Text("Forgot Password" //TODO FORGOT PASSWORD SCREEN,
+                  ),
             ),
             Container(
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: const Color.fromRGBO(181, 211, 235, 1), borderRadius: BorderRadius.circular(20)),
-              child: LoginButton(email: emailController.text, password: passwordController.text,)
-            ),
+                height: 50,
+                width: 250,
+                decoration: BoxDecoration(
+                    color: const Color.fromRGBO(181, 211, 235, 1),
+                    borderRadius: BorderRadius.circular(20)),
+                child: LoginButton(
+                  email: emailController.text,
+                  password: passwordController.text,
+                  firebase_auth: firebaseAuth,
+                )),
             const SizedBox(
               height: 130,
             ),
-            const Text('New User? Create Account') //TODO CREATE ACCOUNT PAGE
+            const Text('New User? Create Account'), //TODO CREATE ACCOUNT PAGE
           ],
         ),
       ),

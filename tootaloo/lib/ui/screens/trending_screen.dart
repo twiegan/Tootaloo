@@ -4,7 +4,6 @@ import 'package:faker/faker.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
-
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
 
@@ -34,10 +33,14 @@ class _TrendingScreenState extends State<TrendingScreen> {
         child: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
-            children: List.generate(20, (index) => ListTileItem(
-                title: '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}', 
-                subtitle: '${faker.lorem.sentence()} ${faker.lorem.sentence()}',
-              )),
+            children: List.generate(
+                20,
+                (index) => ListTileItem(
+                      title:
+                          '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}',
+                      subtitle:
+                          '${faker.lorem.sentence()} ${faker.lorem.sentence()}',
+                    )),
           ),
         ),
       ),
@@ -106,46 +109,48 @@ class _ListTileItemState extends State<ListTileItem> {
           trailing: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min, 
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, 
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(0),
-                    constraints: const BoxConstraints(),
-
-                    icon: const Icon(Icons.arrow_upward, color: Colors.green),
-                    onPressed: () {
-                      setState(() {
-                        _upvotes += 1;
-                      });
-                    },
-                  ),
-                  Text('$_upvotes', style: const TextStyle(color: Colors.green),)
-                ]
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_upward, color: Colors.green),
+                      onPressed: () {
+                        setState(() {
+                          _upvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '$_upvotes',
+                      style: const TextStyle(color: Colors.green),
+                    )
+                  ]),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, 
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(0),
-                    constraints: const BoxConstraints(),
-
-                    icon: const Icon(Icons.arrow_downward, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        _downvotes += 1;
-                      });
-                    },
-                  ),
-                  Text('$_downvotes', style: const TextStyle(color: Colors.red),)
-                ]
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_downward, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _downvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '$_downvotes',
+                      style: const TextStyle(color: Colors.red),
+                    )
+                  ]),
             ],
           ),
         ),

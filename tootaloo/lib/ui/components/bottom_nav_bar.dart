@@ -27,7 +27,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+        pageBuilder: (BuildContext context, Animation<double> animation1,
+            Animation<double> animation2) {
           return _navBarPages.elementAt(index);
         },
         transitionDuration: Duration.zero,
