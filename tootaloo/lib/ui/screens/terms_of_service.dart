@@ -17,7 +17,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
 
   _read() async {
     String fileText;
-    fileText = await rootBundle.loadString("assets/terms_of_service.text");
+    fileText = await rootBundle.loadString("assets/terms_of_service.txt");
     setState(() {
       tosText = fileText;
     });
@@ -25,13 +25,26 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _read();
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              _read(),
+            Expanded(
+              flex: 1,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(25.0, 100.0, 25.0, 50.0),
+                scrollDirection: Axis.vertical, //.horizontal
+                child: Text(
+                  tosText,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ),
             TextButton(
                 onPressed: () {
