@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/login_button.dart';
+import 'package:tootaloo/ui/screens/terms_of_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,7 +16,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
       appBar: AppBar(
-        title: const Text("Tootaloo Login", style: TextStyle(color: Colors.black)),
+        title:
+            const Text("Tootaloo Login", style: TextStyle(color: Colors.black)),
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
       ),
       body: SingleChildScrollView(
@@ -38,28 +40,27 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Email',
-                    hintText: 'Enter valid email id as abc@gmail.com',
-                    filled: true,
-                    fillColor: Colors.white,
-                    ),
-
+                  border: OutlineInputBorder(),
+                  labelText: 'Email',
+                  hintText: 'Enter valid email id as abc@gmail.com',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
+              padding:
+                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-
                 obscureText: true,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter secure password',
-                    filled: true,
-                    fillColor: Colors.white,),
+                  border: OutlineInputBorder(),
+                  labelText: 'Password',
+                  hintText: 'Enter secure password',
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
               ),
             ),
             // FlatButton(
@@ -72,29 +73,36 @@ class _LoginScreenState extends State<LoginScreen> {
             //   ),
             // ),
             const Padding(
-              padding: EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
-              child: Text(
-                  "Forgot Password" //TODO FORGOT PASSWORD SCREEN,
-              ),
+              padding:
+                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
+              child: Text("Forgot Password" //TODO FORGOT PASSWORD SCREEN,
+                  ),
             ),
+            TextButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const TermsOfServiceScreen();
+                  }));
+                },
+                child: const Text("Terms Of Service")),
             Container(
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: const Color.fromRGBO(181, 211, 235, 1), borderRadius: BorderRadius.circular(20)),
-              child: const LoginButton()
-              // child: FlatButton(
-              //   onPressed: () {
-              //     Navigator.push(
-              //         context, MaterialPageRoute(builder: (_) => HomePage()));
-              //   },
-              //   child: Text(
-              //     'Login',
-              //     style: TextStyle(color: Colors.white, fontSize: 25),
-              //   ),
-              // ),
-            ),
+                height: 50,
+                width: 250,
+                decoration: BoxDecoration(
+                    color: const Color.fromRGBO(181, 211, 235, 1),
+                    borderRadius: BorderRadius.circular(20)),
+                child: const LoginButton()
+                // child: FlatButton(
+                //   onPressed: () {
+                //     Navigator.push(
+                //         context, MaterialPageRoute(builder: (_) => HomePage()));
+                //   },
+                //   child: Text(
+                //     'Login',
+                //     style: TextStyle(color: Colors.white, fontSize: 25),
+                //   ),
+                // ),
+                ),
             const SizedBox(
               height: 130,
             ),
