@@ -24,11 +24,7 @@ class _TopNavBarState extends State<TopNavBar> {
             PageRouteBuilder(
               pageBuilder: (BuildContext context, Animation<double> animation1,
                   Animation<double> animation2) {
-<<<<<<< HEAD
-                return const SettingsAppScreen(title: "App Settings");
-=======
                 return const SettingsUserScreen(title: "App Settings");
->>>>>>> login-screen-functionality
               },
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
