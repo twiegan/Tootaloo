@@ -68,10 +68,10 @@ class Rating {
   final String by;
   final String room;
   final String review;
-  // final double overallRating;
-  // final double internet;
-  // final double cleanliness;
-  // final double vibe;
+  final num overallRating;
+  final num internet;
+  final num cleanliness;
+  final num vibe;
   final int upvotes;
   final int downvotes;
 
@@ -80,10 +80,10 @@ class Rating {
     required this.by,
     required this.room,
     required this.review,
-    // required this.overallRating,
-    // required this.internet,
-    // required this.cleanliness,
-    // required this.vibe,
+    required this.overallRating,
+    required this.internet,
+    required this.cleanliness,
+    required this.vibe,
     required this.upvotes,
     required this.downvotes,
   });
@@ -103,10 +103,10 @@ Future<List<Rating>> _getRatings() async {
         by: rating["by"],
         room: rating["room"],
         review: rating["review"],
-        // overallRating: rating["overall_rating"],
-        // internet: rating["internet"],
-        // cleanliness: rating["cleanliness"],
-        // vibe: rating["vibe"],
+        overallRating: rating["overall_rating"],
+        internet: rating["internet"],
+        cleanliness: rating["cleanliness"],
+        vibe: rating["vibe"],
         upvotes: rating["upvotes"],
         downvotes: rating["downvotes"]);
     ratings.add(ratingData);
@@ -193,7 +193,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       },
                     ),
                     Text(
-                      '$_upvotes',
+                      '${widget.rating.upvotes + _upvotes}',
                       style: const TextStyle(color: Colors.green),
                     )
                   ]),
@@ -213,7 +213,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       },
                     ),
                     Text(
-                      '$_downvotes',
+                      '${widget.rating.downvotes + _downvotes}',
                       style: const TextStyle(color: Colors.red),
                     )
                   ]),
