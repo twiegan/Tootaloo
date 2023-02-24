@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/components/login_button.dart';
-import 'package:tootaloo/ui/screens/trending_screen.dart';
-import 'package:tootaloo/ui/services/auth_service.dart';
+import 'package:tootaloo/ui/screens/user_registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,13 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     emailController.addListener((refreshEmail));
     passwordController.addListener((refreshPassword));
-  }
-
-  bool validateEmail(String value) {
-    Pattern pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex = RegExp(pattern as String);
-    return (!regex.hasMatch(value)) ? false : true;
   }
 
   @override
@@ -108,12 +100,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
             ),
-            const Padding(
-              padding:
-                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
-              child: Text("Forgot Password" //TODO FORGOT PASSWORD SCREEN,
-                  ),
-            ),
+            // const Padding(
+            //   padding:
+            //       EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
+            //   child: Text("Forgot Password" //TODO FORGOT PASSWORD SCREEN,
+            //       ),
+            // ),
             Container(
                 height: 50,
                 width: 250,
@@ -126,9 +118,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   firebase_auth: firebaseAuth,
                 )),
             const SizedBox(
-              height: 130,
+              height: 100,
             ),
-            const Text('New User? Create Account'), //TODO CREATE ACCOUNT PAGE
+            TextButton(
+                onPressed: () => {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const RegistrationScreen();
+                      }))
+                    },
+                child: const Text(
+                    'New User? Create Account')), //TODO CREATE ACCOUNT PAGE
           ],
         ),
       ),
