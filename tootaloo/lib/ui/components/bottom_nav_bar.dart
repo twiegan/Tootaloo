@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
-import 'package:tootaloo/ui/screens/search_screen.dart';
+import 'package:tootaloo/ui/screens/searches/restroom_search_screen.dart';
 import 'package:tootaloo/ui/screens/map_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -17,7 +17,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   static const List<Widget> _navBarPages = <Widget>[
     TrendingScreen(title: "Trending"),
     ReviewScreen(title: "Review"),
-    SearchScreen(title: "Search"),
+    RestroomSearchScreen(title: "Search"),
     MapScreen(title: "Map"),
   ];
 
