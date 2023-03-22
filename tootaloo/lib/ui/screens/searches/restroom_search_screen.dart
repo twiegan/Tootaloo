@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+import 'package:tootaloo/ui/screens/search_screen.dart';
 
 /* Define the screen itself */
 class RestroomSearchScreen extends StatefulWidget {
@@ -26,6 +27,12 @@ double roundDouble(double value, int places) {
 class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
   final int index = 0;
 
+  List<RestroomTileItem> _restrooms = [];
+
+  TextEditingController buildingController = TextEditingController();
+  TextEditingController roomController = TextEditingController();
+  TextEditingController floorController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,35 +40,74 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
       body: Scaffold(
         appBar: const SearchNavBar(title: "Restroom Search", selectedIndex: 0),
         body: Column(children: [
-          Center(
-            child: OutlinedButton.icon(
-                onPressed: () {},
+          Row(children: [
+            Flexible(
+                child: TextField(
+              controller: buildingController,
+              decoration: const InputDecoration(
+                  hintText: 'Building',
+                  contentPadding: EdgeInsets.all(2.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
+                  )),
+            )),
+            Flexible(
+                child: TextField(
+              controller: roomController,
+              decoration: const InputDecoration(
+                  hintText: 'Room',
+                  contentPadding: EdgeInsets.all(2.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
+                  )),
+            )),
+            Flexible(
+                child: TextField(
+              controller: floorController,
+              decoration: const InputDecoration(
+                  hintText: 'Floor',
+                  contentPadding: EdgeInsets.all(2.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
+                  )),
+            )),
+            OutlinedButton.icon(
+                onPressed: () {
+                  _restrooms = [];
+                  _getSearchedRestrooms(buildingController.text,
+                          roomController.text, int.parse(floorController.text))
+                      .then((restrooms) => {
+                            for (var restroom in restrooms)
+                              {
+                                setState(() {
+                                  RestroomTileItem restroomTileItem =
+                                      RestroomTileItem(
+                                          name:
+                                              "${restroom.building}-${restroom.room}-${restroom.floor}",
+                                          cleanliness: restroom.cleanliness,
+                                          internet: restroom.internet,
+                                          vibe: restroom.vibe,
+                                          rating: restroom.rating);
+                                  _restrooms.add(restroomTileItem);
+                                })
+                              }
+                          });
+                },
                 icon: const Icon(Icons.search),
                 label: const Text('Search'),
                 style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.lightBlue)),
-          ),
+          ]),
           Expanded(
               child: Center(
             child: ListView(
-              // children: articles.map(_buildArticle).toList(),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: List.generate(
-                  20,
-                  (index) => BathroomTileItem(
-                        name:
-                            '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}',
-                        cleanliness:
-                            roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                        internet:
-                            roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                        vibe:
-                            roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                        rating:
-                            roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                      )),
-            ),
+                // children: articles.map(_buildArticle).toList(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                children: _restrooms),
           ))
         ]),
       ),
@@ -72,10 +118,10 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
   }
 
   Future<List<Restroom>> _getSearchedRestrooms(
-      String building, String room, String floor) async {
+      String building, String room, int floor) async {
     // Send request to backend and parse response
     // TODO: change this url later
-    const String url = "http://127.0.0.1:8000/restrooms/";
+    const String url = "http://b6e7-128-210-106-52.ngrok.io/restrooms/";
     final response = await http.get(Uri.parse(url));
     var responseData = json.decode(response.body);
 
@@ -83,7 +129,6 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
     List<Restroom> restrooms = [];
     for (var restroom in responseData) {
       Restroom restroomData = Restroom(
-        id: restroom["_id"],
         building: restroom["building"],
         room: restroom["room"],
         floor: restroom["floor"],
@@ -101,7 +146,6 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
 
 /* Define MongoDB models */
 class Restroom {
-  final String id;
   final String building;
   final String room;
   final int floor;
@@ -111,8 +155,7 @@ class Restroom {
   final double vibe;
 
   Restroom(
-      {required this.id,
-      required this.building,
+      {required this.building,
       required this.room,
       required this.floor,
       required this.rating,
@@ -148,14 +191,14 @@ class Rating {
       required this.by});
 }
 
-/* Define Bathroom List Items */
-class BathroomTileItem extends StatefulWidget {
+/* Define Restroom List Items */
+class RestroomTileItem extends StatefulWidget {
   final String name;
   final double cleanliness;
   final double internet;
   final double vibe;
   final double rating;
-  const BathroomTileItem(
+  const RestroomTileItem(
       {super.key,
       required this.name,
       required this.cleanliness,
@@ -163,10 +206,10 @@ class BathroomTileItem extends StatefulWidget {
       required this.vibe,
       required this.rating});
   @override
-  _BathroomTileItemState createState() => _BathroomTileItemState();
+  _RestroomTileItemState createState() => _RestroomTileItemState();
 }
 
-class _BathroomTileItemState extends State<BathroomTileItem> {
+class _RestroomTileItemState extends State<RestroomTileItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -195,7 +238,7 @@ class _BathroomTileItemState extends State<BathroomTileItem> {
                           ),
                           Text(
                             widget.name,
-                            style: const TextStyle(fontSize: 40),
+                            style: const TextStyle(fontSize: 18),
                           ),
                         ],
                       ),
