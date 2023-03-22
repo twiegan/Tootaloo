@@ -37,6 +37,37 @@ def buildings(request):
 	
 	return resp
 
+
+def ratings(request):
+
+	print("GET request received: ratings")
+
+	db = client['tootaloo']
+	ratings_collection = db['ratings']
+
+	ratings = ratings_collection.find()
+
+	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	
+	return resp
+
+
+def restrooms(request):
+
+	print("GET request received: restrooms")
+
+	db = client['tootaloo']
+	restrooms_collection = db['restrooms']
+
+	restrooms = restrooms_collection.find()
+
+	resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	
+	return resp
+
+
 def index(request):
 		#return HttpResponse(review_details)
     return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
