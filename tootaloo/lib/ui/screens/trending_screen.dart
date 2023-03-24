@@ -1,15 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
+
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
-import 'package:tootaloo/ui/components/post_nav_bar.dart';
-import 'package:http/http.dart' as http;
 
-
-class FollowingScreen extends StatefulWidget {
-  const FollowingScreen({super.key, required this.title});
+class TrendingScreen extends StatefulWidget {
+  const TrendingScreen({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -23,38 +19,28 @@ class FollowingScreen extends StatefulWidget {
   final String title;
 
   @override
-  State<FollowingScreen> createState() => _FollowingScreenState();
+  State<TrendingScreen> createState() => _TrendingScreenState();
 }
 
-class _FollowingScreenState extends State<FollowingScreen> {
+class _TrendingScreenState extends State<TrendingScreen> {
   final int index = 0;
-
-  late List<Rating> _ratings;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _ratings = [];
-    _getRatings().then((ratings) => {
-          setState(() {
-            for (var rating in ratings) {
-              _ratings.add(rating);
-            }
-          })
-        });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const TopNavBar(title: "Following"),
-      body: Scaffold(
-        appBar: const PostNavBar(title: "bitches", selectedIndex: 1),
-        body: Center(
+      appBar: const TopNavBar(title: "Trending"),
+      body: Container(
+        child: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
-            children: _ratings.map((rating) => ListTileItem(rating: rating)).toList(),
+            children: List.generate(
+                20,
+                (index) => ListTileItem(
+                      title:
+                          '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}',
+                      subtitle:
+                          '${faker.lorem.sentence()} ${faker.lorem.sentence()}',
+                    )),
           ),
         ),
       ),
@@ -63,61 +49,10 @@ class _FollowingScreenState extends State<FollowingScreen> {
   }
 }
 
-class Rating {
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-
-  Rating({
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-  });
-}
-
-Future<List<Rating>> _getRatings() async {
-  // get the building markers from the database/backend
-  // TODO: change this url later
-  const String url = "http://127.0.0.1:8000/following_ratings/";
-  final response = await http.get(Uri.parse(url));
-  var responseData = json.decode(response.body);
-
-  List<Rating> ratings = [];
-  for (var rating in responseData) {
-    Rating ratingData = Rating(
-        building: rating["building"],
-        by: rating["by"],
-        room: rating["room"],
-        review: rating["review"],
-        overallRating: rating["overall_rating"],
-        internet: rating["internet"],
-        cleanliness: rating["cleanliness"],
-        vibe: rating["vibe"],
-        upvotes: rating["upvotes"],
-        downvotes: rating["downvotes"]);
-    ratings.add(ratingData);
-  }
-
-  return ratings;
-}
-
 class ListTileItem extends StatefulWidget {
-  final Rating rating;
-  const ListTileItem({super.key, required this.rating});
+  final String title;
+  final String subtitle;
+  const ListTileItem({super.key, required this.title, required this.subtitle});
   @override
   _ListTileItemState createState() => _ListTileItemState();
 }
@@ -127,7 +62,6 @@ class _ListTileItemState extends State<ListTileItem> {
   int _downvotes = 0;
   @override
   Widget build(BuildContext context) {
-    print("builtTile");
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -148,9 +82,9 @@ class _ListTileItemState extends State<ListTileItem> {
               Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.account_circle, size: 40),
-                Text(widget.rating.by)
+              children: const [
+                Icon(Icons.account_circle, size: 40),
+                Text("Username")
               ],
             ),
             Flexible(
@@ -168,10 +102,10 @@ class _ListTileItemState extends State<ListTileItem> {
             ),
           ]),
           title: Text(
-            widget.rating.building + widget.rating.room,
+            widget.title,
             style: const TextStyle(fontSize: 20),
           ),
-          subtitle: Text(widget.rating.review),
+          subtitle: Text(widget.subtitle),
           trailing: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -193,7 +127,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       },
                     ),
                     Text(
-                      '${widget.rating.upvotes + _upvotes}',
+                      '$_upvotes',
                       style: const TextStyle(color: Colors.green),
                     )
                   ]),
@@ -213,7 +147,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       },
                     ),
                     Text(
-                      '${widget.rating.downvotes + _downvotes}',
+                      '$_downvotes',
                       style: const TextStyle(color: Colors.red),
                     )
                   ]),

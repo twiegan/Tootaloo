@@ -69,7 +69,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       currentIndex: widget.selectedIndex == -1 ? 0 : widget.selectedIndex,
       selectedItemColor: widget.selectedIndex == -1
           ? Colors.white
-          : Color.fromRGBO(185, 223, 255, 0.844),
+          : const Color.fromRGBO(185, 223, 255, 0.844),
       unselectedItemColor: Colors.white,
       selectedFontSize: 12,
       unselectedFontSize: 12,

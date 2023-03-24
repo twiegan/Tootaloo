@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'package:tootaloo/ui/screens/settings_app_screen.dart';
 import 'package:tootaloo/ui/screens/settings_user_screen.dart';
 
 class TopNavBar extends StatefulWidget implements PreferredSizeWidget {
@@ -26,7 +24,7 @@ class _TopNavBarState extends State<TopNavBar> {
             PageRouteBuilder(
               pageBuilder: (BuildContext context, Animation<double> animation1,
                   Animation<double> animation2) {
-                return const SettingsAppScreen(title: "App Settings");
+                return const SettingsUserScreen(title: "App Settings");
               },
               transitionDuration: Duration.zero,
               reverseTransitionDuration: Duration.zero,
