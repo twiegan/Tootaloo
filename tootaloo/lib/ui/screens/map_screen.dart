@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:custom_map_markers/custom_map_markers.dart';
@@ -10,6 +11,8 @@ import 'package:http/http.dart' as http;
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+
+import 'floor_map_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -25,13 +28,15 @@ class Building {
   final int restroomCount;
   final double latitude;
   final double longitude;
+  final List<dynamic> floors;
 
   Building(
       {required this.id,
       required this.name,
       required this.restroomCount,
       required this.latitude,
-      required this.longitude});
+      required this.longitude,
+      required this.floors});
 }
 
 class _MapScreenState extends State<MapScreen> {
@@ -84,7 +89,7 @@ class _MapScreenState extends State<MapScreen> {
                             SnackBar(
                               content: _customSnackBarContent(building),
                               backgroundColor: Colors.black87,
-                              duration: const Duration(milliseconds: 10000),
+                              duration: const Duration(milliseconds: 5000),
                               width: 320.0, // Width of the SnackBar.
                               padding: const EdgeInsets.symmetric(
                                   horizontal:
@@ -142,14 +147,19 @@ class _MapScreenState extends State<MapScreen> {
 
     List<Building> buildings = [];
     for (var building in responseData) {
-      Building buildingData = Building(
-        id: building["_id"],
-        name: building["name"],
-        restroomCount: building["restroomCount"],
-        latitude: building["latitude"],
-        longitude: building["longitude"],
-      );
-      buildings.add(buildingData);
+      try {
+        Building buildingData = Building(
+          id: building["_id"],
+          name: building["name"],
+          restroomCount: building["restroomCount"],
+          latitude: building["latitude"],
+          longitude: building["longitude"],
+          floors: building["floors"],
+        );
+        buildings.add(buildingData);
+      } catch (e) {
+        print(e);
+      }
     }
 
     return buildings;
@@ -234,10 +244,14 @@ class _MapScreenState extends State<MapScreen> {
         ),
         const Spacer(), // extra spacing
         IconButton(
-            onPressed: () => {
-                  print(
-                      "pressed ${building.id}") // TODO: change this to showing floor plans
-                },
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FloorMap(building: building)),
+              );
+            },
             icon: const Icon(Icons.navigate_next, color: Colors.white)),
         //Icon(Icons.navigate_next, color: Colors.white) // This Icon
       ],
