@@ -99,19 +99,18 @@ Future<List<Rating>> _getRatings() async {
   List<Rating> ratings = [];
   for (var rating in responseData) {
     Rating ratingData = Rating(
-        building: rating["building"],
-        by: rating["by"],
-        room: rating["room"],
-        review: rating["review"],
-        overallRating: rating["overall_rating"],
-        internet: rating["internet"],
-        cleanliness: rating["cleanliness"],
-        vibe: rating["vibe"],
-        upvotes: rating["upvotes"],
-        downvotes: rating["downvotes"]);
+      building: rating["building"],
+      by: rating["by"],
+      room: rating["room"],
+      review: rating["review"],
+      overallRating: rating["overall_rating"],
+      internet: rating["internet"],
+      cleanliness: rating["cleanliness"],
+      vibe: rating["vibe"],
+      upvotes: rating["upvotes"],
+      downvotes: rating["downvotes"]);
     ratings.add(ratingData);
   }
-
   return ratings;
 }
 
@@ -144,8 +143,7 @@ class _ListTileItemState extends State<ListTileItem> {
           //     throw 'Could not launch ${e.url}';
           //   }
           // },
-          leading:
-              Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          leading: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -178,45 +176,47 @@ class _ListTileItemState extends State<ListTileItem> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(Icons.arrow_upward, color: Colors.green),
-                      onPressed: () {
-                        setState(() {
-                          _upvotes += 1;
-                        });
-                      },
-                    ),
-                    Text(
-                      '${widget.rating.upvotes + _upvotes}',
-                      style: const TextStyle(color: Colors.green),
-                    )
-                  ]),
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    padding: const EdgeInsets.all(0),
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.arrow_upward, color: Colors.green),
+                    onPressed: () {
+                      setState(() {
+                        _upvotes += 1;
+                      });
+                    },
+                  ),
+                  Text(
+                    '${widget.rating.upvotes + _upvotes}',
+                    style: const TextStyle(color: Colors.green),
+                  )
+                ]
+              ),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      padding: const EdgeInsets.all(0),
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(Icons.arrow_downward, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          _downvotes += 1;
-                        });
-                      },
-                    ),
-                    Text(
-                      '${widget.rating.downvotes + _downvotes}',
-                      style: const TextStyle(color: Colors.red),
-                    )
-                  ]),
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    padding: const EdgeInsets.all(0),
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.arrow_downward, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        _downvotes += 1;
+                      });
+                    },
+                  ),
+                  Text(
+                    '${widget.rating.downvotes + _downvotes}',
+                    style: const TextStyle(color: Colors.red),
+                  )
+                ]
+              ),
             ],
           ),
         ),

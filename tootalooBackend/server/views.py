@@ -20,6 +20,19 @@ environ.Env.read_env()
 client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
 
+def update_upvotes(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	id_query = { "_id":  body['id']}
+	new_upvotes = { "$set": { "upvotes": body["upvotes"] } }
+
+	db = client['tootaloo']
+
+	ratings_collection = db['ratings']
+
+	ratings_collection.update_one(id_query, new_upvotes)
+
+
 def restrooms(request):
 	db = client['tootaloo']
 	restrooms_collection = db['restrooms']
