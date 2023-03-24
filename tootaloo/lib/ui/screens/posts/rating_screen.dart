@@ -58,9 +58,7 @@ class _ExampleScreenState extends State<RatingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-
             mainAxisAlignment: MainAxisAlignment.start,
-            // crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text('Restroom: ', style: TextStyle(fontSize: 20)),
               Flexible(
