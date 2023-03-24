@@ -65,7 +65,22 @@ class _TrendingScreenState extends State<TrendingScreen> {
   }
 }
 
+void _updateVotes(id, int votes, String type) async {
+  final response = await http.post(
+    Uri.parse('http://127.0.0.1:8000/update_votes/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'type': type,
+      'id': id.toString(),
+      'votes': votes.toString(),
+    }),
+  );
+}
+
 class Rating {
+  final id;
   final String building;
   final String by;
   final String room;
@@ -78,6 +93,7 @@ class Rating {
   final int downvotes;
 
   Rating({
+    required this.id,
     required this.building,
     required this.by,
     required this.room,
@@ -101,6 +117,7 @@ Future<List<Rating>> _getRatings() async {
   List<Rating> ratings = [];
   for (var rating in responseData) {
     Rating ratingData = Rating(
+        id: rating["_id"],
         building: rating["building"],
         by: rating["by"],
         room: rating["room"],
@@ -113,7 +130,6 @@ Future<List<Rating>> _getRatings() async {
         downvotes: rating["downvotes"]);
     ratings.add(ratingData);
   }
-
   return ratings;
 }
 
@@ -190,7 +206,10 @@ class _ListTileItemState extends State<ListTileItem> {
                       icon: const Icon(Icons.arrow_upward, color: Colors.green),
                       onPressed: () {
                         setState(() {
-                          _upvotes += 1;
+                          if (_upvotes < 1) {
+                            _upvotes += 1;
+                            _updateVotes(widget.rating.id, widget.rating.upvotes + _upvotes, "upvotes");
+                          }
                         });
                       },
                     ),
@@ -210,7 +229,10 @@ class _ListTileItemState extends State<ListTileItem> {
                       icon: const Icon(Icons.arrow_downward, color: Colors.red),
                       onPressed: () {
                         setState(() {
-                          _downvotes += 1;
+                          if (_downvotes < 1) {
+                            _downvotes += 1;
+                            _updateVotes(widget.rating.id, widget.rating.downvotes + _downvotes, "downvotes");
+                          }
                         });
                       },
                     ),
