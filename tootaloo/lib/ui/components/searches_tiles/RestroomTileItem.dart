@@ -1,118 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
-import 'package:tootaloo/ui/components/search_nav_bar.dart';
-import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
-import 'package:tootaloo/ui/screens/searches/ratings_view_screen.dart';
+import 'package:tootaloo/ui/components/searches_tiles/RatingTileItem.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/ui/models/restroom.dart';
-
-/* Define the screen itself */
-class RestroomSearchScreen extends StatefulWidget {
-  const RestroomSearchScreen({super.key, required this.title});
-  final String title;
-
-  @override
-  State<RestroomSearchScreen> createState() => _RestroomSearchScreenState();
-}
-
-double roundDouble(double value, int places) {
-  num mod = pow(10.0, places);
-  return ((value * mod).round().toDouble() / mod);
-}
-
-/* Define screen state */
-class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
-  final int index = 0;
-
-  List<RestroomTileItem> _restrooms = [];
-
-  TextEditingController buildingController = TextEditingController();
-  TextEditingController roomController = TextEditingController();
-  TextEditingController floorController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TopNavBar(title: "Restroom Search"),
-      body: Scaffold(
-        appBar: const SearchNavBar(title: "Restroom Search", selectedIndex: 0),
-        body: Column(children: [
-          Row(children: [
-            Flexible(
-                child: TextField(
-              controller: buildingController,
-              decoration: const InputDecoration(
-                  hintText: 'Building',
-                  contentPadding: EdgeInsets.all(2.0),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
-                  )),
-            )),
-            Flexible(
-                child: TextField(
-              controller: roomController,
-              decoration: const InputDecoration(
-                  hintText: 'Room',
-                  contentPadding: EdgeInsets.all(2.0),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
-                  )),
-            )),
-            Flexible(
-                child: TextField(
-              controller: floorController,
-              decoration: const InputDecoration(
-                  hintText: 'Floor',
-                  contentPadding: EdgeInsets.all(2.0),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                    borderSide: BorderSide(color: Colors.blue, width: 0.5),
-                  )),
-            )),
-            OutlinedButton.icon(
-                onPressed: () {
-                  _restrooms = [];
-                  if (buildingController.text.isEmpty) return; // Sanity Check
-                  getSearchedRestrooms(buildingController.text,
-                          roomController.text, floorController.text)
-                      .then((restrooms) => {
-                            for (var restroom in restrooms)
-                              {
-                                setState(() {
-                                  RestroomTileItem restroomTileItem =
-                                      RestroomTileItem(restroom: restroom);
-                                  _restrooms.add(restroomTileItem);
-                                })
-                              }
-                          });
-                },
-                icon: const Icon(Icons.search),
-                label: const Text('Search'),
-                style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.lightBlue)),
-          ]),
-          Expanded(
-              child: Center(
-            child: ListView(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                children: _restrooms),
-          ))
-        ]),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        selectedIndex: index,
-      ),
-    );
-  }
-}
+import 'package:tootaloo/ui/screens/searches/ratings_view_screen.dart';
 
 Future<List<Restroom>> getSearchedRestrooms(
     String building, String room, String floor) async {
@@ -261,6 +154,44 @@ class _RestroomTileItemState extends State<RestroomTileItem> {
                                             ),
                                           )
                                         });
+                                // List<Rating> ratings = (await getRating((widget
+                                //         .restroom.ratings_ids)
+                                //     .map((item) => item.values.single as String)
+                                //     .toList()));
+
+                                // List<RatingTileItem> ratingTileItems = [];
+
+                                // for (Rating rating in ratings) {
+                                // RatingTileItem ratingTileItem =
+                                //     RatingTileItem(rating: rating);
+                                // ratingTileItems.add(ratingTileItem);
+                                // }
+
+                                //~~~~~~
+
+                                // Navigator.push(
+                                //   context,
+                                //   PageRouteBuilder(
+                                //     pageBuilder: (BuildContext context,
+                                //         Animation<double> animation1,
+                                //         Animation<double> animation2) {
+                                //       return RatingsViewScreen(
+                                //           title:
+                                //               "${widget.restroom.building}-${widget.restroom.room} Reviews",
+                                //           ratingTileItems: ratingTileItems);
+                                //     },
+                                //     transitionDuration: Duration.zero,
+                                //     reverseTransitionDuration: Duration.zero,
+                                //   ),
+                                // );
+
+                                // for (var rating in ratings) {
+                                //   setState(() {
+                                //     RatingTileItem ratingTileItem =
+                                //         RatingTileItem(rating: rating);
+                                //     _ratings.add(ratingTileItem);
+                                //   });
+                                // }
                               })
                         ],
                       ),
@@ -268,6 +199,107 @@ class _RestroomTileItemState extends State<RestroomTileItem> {
                   ],
                 ))
               ])),
+    );
+  }
+}
+
+/* Define Rating Tile Items */
+class RatingTileItem extends StatefulWidget {
+  final Rating rating;
+  const RatingTileItem({super.key, required this.rating});
+  @override
+  _RatingTileItemState createState() => _RatingTileItemState();
+}
+
+class _RatingTileItemState extends State<RatingTileItem> {
+  int _upvotes = 0;
+  int _downvotes = 0;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Container(
+        color: Colors.white10,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(5),
+          dense: true,
+          leading:
+              Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.account_circle, size: 40),
+                Text(widget.rating.by)
+              ],
+            ),
+            Flexible(
+              flex: 5,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
+                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
+                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
+                  Icon(Icons.star),
+                  Icon(Icons.star),
+                ],
+              ),
+            ),
+          ]),
+          title: Text(
+            "${widget.rating.building}-${widget.rating.room}",
+            style: const TextStyle(fontSize: 20),
+          ),
+          subtitle: Text(widget.rating.review),
+          trailing: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_upward, color: Colors.green),
+                      onPressed: () {
+                        setState(() {
+                          _upvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '$_upvotes',
+                      style: const TextStyle(color: Colors.green),
+                    )
+                  ]),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_downward, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _downvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '$_downvotes',
+                      style: const TextStyle(color: Colors.red),
+                    )
+                  ]),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
