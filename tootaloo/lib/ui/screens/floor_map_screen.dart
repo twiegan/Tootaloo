@@ -5,8 +5,8 @@ import 'map_screen.dart';
 
 late List<String> list;
 late String imagePath;
-String dropdownValue = list.first;
-String buildingId = "";
+late String dropdownValue;
+late String buildingId;
 
 class FloorMap extends StatefulWidget {
   const FloorMap({super.key, required this.building});
@@ -20,7 +20,10 @@ class FloorMapState extends State<FloorMap> {
   @override
   initState() {
     super.initState();
-    imagePath = "";
+    list = (widget.building.floors).map((item) => item as String).toList();
+    dropdownValue = list.first;
+    buildingId = widget.building.id;
+    imagePath = 'assets/images/floor_maps/$buildingId/$dropdownValue.jpg';
   }
 
   void callback(String newDropdownValue, String newPath) {
@@ -32,12 +35,6 @@ class FloorMapState extends State<FloorMap> {
 
   @override
   Widget build(BuildContext context) {
-    list = (widget.building.floors).map((item) => item as String).toList();
-    buildingId = widget.building.id;
-
-    callback(dropdownValue,
-        'assets/images/floor_maps/$buildingId/$dropdownValue.jpg');
-
     return Scaffold(
         appBar: AppBar(
           title: SizedBox(
