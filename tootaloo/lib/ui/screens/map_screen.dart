@@ -31,20 +31,36 @@ class Building {
   final double latitude;
   final double longitude;
   final List<dynamic> floors;
+  final int maleCount;
+  final int femaleCount;
+  final int unisexCount;
 
-  Building(
-      {required this.id,
-      required this.name,
-      required this.restroomCount,
-      required this.latitude,
-      required this.longitude,
-      required this.floors});
+  Building({
+    required this.id,
+    required this.name,
+    required this.restroomCount,
+    required this.latitude,
+    required this.longitude,
+    required this.floors,
+    required this.maleCount,
+    required this.femaleCount,
+    required this.unisexCount,
+  });
+
+  double manhattanDistance(LocationData locationData) {
+    return (locationData.latitude! - latitude).abs() +
+        (locationData.longitude! - longitude).abs();
+  }
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final LatLng _initialcameraposition = const LatLng(40.4237, -86.9212);
+  final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
   final Location location = Location();
 
+  late double _zoomLevel;
+  late LocationData _currLocation;
+  late Map<String, String> _ratingValueMap;
+  late List<Building> _buildings;
   late List<MarkerData> _customMarkers;
   late GoogleMapController _controller;
 
@@ -56,9 +72,15 @@ class _MapScreenState extends State<MapScreen> {
 
     // update camera position when user location changes
     location.onLocationChanged.listen((l) {
+      setState(() {
+        _currLocation = l;
+        print(
+            "setting current location to: ${_currLocation.latitude}, ${_currLocation.longitude}");
+      });
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(l.latitude!, l.longitude!), zoom: 14),
+          CameraPosition(
+              target: LatLng(l.latitude!, l.longitude!), zoom: _zoomLevel),
         ),
       );
     });
@@ -68,13 +90,27 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
 
+    _zoomLevel = 14.0;
+    setState(() => {
+          _currLocation = LocationData.fromMap({
+            'latitude': _initialcameraposition.latitude,
+            'longitude': _initialcameraposition.longitude,
+          })
+        });
+
     // add the custom markers retrieved to _customMarkers
+    _ratingValueMap = <String, String>{};
     _customMarkers = [];
     _getBuildingMarkers().then((buildings) {
+      setState(() {
+        _buildings = buildings;
+      });
+
       for (var building in buildings) {
         // get rating and build marker for each building
         _getSummaryRatingForBuilding(building.id).then((ratingValue) => {
               setState(() {
+                _ratingValueMap.addAll({building.id: ratingValue});
                 MarkerData data = MarkerData(
                     marker: Marker(
                         markerId: MarkerId(building.id),
@@ -86,7 +122,6 @@ class _MapScreenState extends State<MapScreen> {
                         onTap: () {
                           // hide currently open snackbar
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
                           // show the snackbar for the tapped building
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -127,8 +162,10 @@ class _MapScreenState extends State<MapScreen> {
           }
           return GoogleMap(
             zoomGesturesEnabled: true,
-            initialCameraPosition:
-                CameraPosition(target: _initialcameraposition, zoom: 14),
+            initialCameraPosition: CameraPosition(
+                target:
+                    LatLng(_currLocation.latitude!, _currLocation.longitude!),
+                zoom: _zoomLevel), //TODO: change target lat long if needed
             mapType: MapType.normal,
             onMapCreated: _onMapCreated,
             myLocationEnabled: true,
@@ -136,9 +173,121 @@ class _MapScreenState extends State<MapScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // hide all currently open snackbar
+          ScaffoldMessenger.of(context).clearSnackBars();
+
+          // show the snackbar for info
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: _customSnackBarInfoContent(),
+              backgroundColor: Colors.black87,
+              duration: const Duration(milliseconds: 2000),
+              width: 320.0, // Width of the SnackBar.
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 15.0, // Inner padding for SnackBar content.
+                  vertical: 10.0),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(35.0),
+              ),
+            ),
+          );
+
+          List<Building> matchingPrefBuildings = _buildings;
+
+          // TODO: get actual user preference
+          String userPreference = "male";
+
+          // Sort the matching buildings by manhattan distance
+          matchingPrefBuildings.sort((a, b) => a
+              .manhattanDistance(_currLocation)
+              .compareTo(b.manhattanDistance(_currLocation)));
+
+          setState(() {
+            _customMarkers.clear();
+            int counter = 0;
+            for (Building building in matchingPrefBuildings) {
+              int preferredRestroomCount;
+
+              if (userPreference == "male") {
+                preferredRestroomCount = building.maleCount;
+              } else if (userPreference == "female") {
+                preferredRestroomCount = building.femaleCount;
+              } else if (userPreference == "unisex") {
+                preferredRestroomCount = building.unisexCount;
+              } else {
+                preferredRestroomCount = 0;
+              }
+
+              if (preferredRestroomCount == 0) {
+                continue;
+              }
+
+              MarkerData data = MarkerData(
+                  marker: Marker(
+                      markerId: MarkerId(building.id),
+                      position: LatLng(building.latitude, building.longitude),
+                      infoWindow: InfoWindow(
+                          title: building.name,
+                          snippet:
+                              'There are $preferredRestroomCount restrooms matching your preference in this building.\n${_ratingValueMap[building.id]}'),
+                      onTap: () {
+                        // hide currently open snackbar
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        // show the snackbar for the tapped building
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: _customSnackBarContent(building),
+                            backgroundColor: Colors.black87,
+                            duration: const Duration(milliseconds: 5000),
+                            width: 320.0, // Width of the SnackBar.
+                            padding: const EdgeInsets.symmetric(
+                                horizontal:
+                                    15.0, // Inner padding for SnackBar content.
+                                vertical: 10.0),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(35.0),
+                            ),
+                          ),
+                        );
+                      }),
+                  child: _customMarker(
+                      preferredRestroomCount,
+                      Color.fromRGBO(
+                          0, 30 + counter * 10, 50 + counter * 40, 0.75)));
+              _customMarkers.add(data);
+              counter += 1;
+            } // end of for loop
+
+            // zoom in to current location
+            _zoomLevel = 15.7;
+
+            // move the map to the current position
+            // _controller.animateCamera(
+            //   CameraUpdate.newCameraPosition(
+            //     CameraPosition(
+            //         target: LatLng(
+            //             _currLocation.latitude!, _currLocation.longitude!),
+            //         zoom: _zoomLevel),
+            //   ),
+            // );
+          });
+
+          // hide the info snackbar
+          //ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        },
+        label: const Text('Nearby'),
+        icon: const Icon(Icons.saved_search),
+        backgroundColor: Colors.blue,
+      ),
       bottomNavigationBar: BottomNavBar(
         selectedIndex: index,
       ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 
@@ -166,10 +315,14 @@ class _MapScreenState extends State<MapScreen> {
           latitude: building["latitude"],
           longitude: building["longitude"],
           floors: building["floors"],
+          maleCount: building["maleCount"],
+          femaleCount: building["femaleCount"],
+          unisexCount: building["unisexCount"],
         );
         buildings.add(buildingData);
       } catch (e) {
         print(e);
+        print("here");
       }
     }
 
@@ -264,7 +417,40 @@ class _MapScreenState extends State<MapScreen> {
               );
             },
             icon: const Icon(Icons.navigate_next, color: Colors.white)),
-        //Icon(Icons.navigate_next, color: Colors.white) // This Icon
+      ],
+    );
+  }
+
+  Widget _customSnackBarInfoContent() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          margin: const EdgeInsets.only(
+              left: 8.0, top: 8.0, bottom: 8.0, right: 25.0),
+          width: 24,
+          height: 24,
+          padding: const EdgeInsets.all(2.0),
+          child: const CircularProgressIndicator(
+            color: Colors.greenAccent,
+            strokeWidth: 3,
+          ),
+        ),
+        Column(children: const [
+          Text(
+            "Finding closest restrooms\nmatching your preference.",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold),
+          ),
+          Text("(Closer the darker the marker)",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.0,
+                  fontStyle: FontStyle.normal)),
+        ]),
       ],
     );
   }
