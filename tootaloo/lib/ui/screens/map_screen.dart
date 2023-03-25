@@ -14,6 +14,8 @@ import 'package:tootaloo/ui/components/top_nav_bar.dart';
 
 import 'floor_map_screen.dart';
 
+const String URL = 'http://127.0.0.1:8000'; //TODO: change this url later
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
   final String title;
@@ -68,9 +70,10 @@ class _MapScreenState extends State<MapScreen> {
 
     // add the custom markers retrieved to _customMarkers
     _customMarkers = [];
-    _getBuildingMarkers().then((buildings) => {
-          for (var building in buildings)
-            {
+    _getBuildingMarkers().then((buildings) {
+      for (var building in buildings) {
+        // get rating and build marker for each building
+        _getSummaryRatingForBuilding(building.id).then((ratingValue) => {
               setState(() {
                 MarkerData data = MarkerData(
                     marker: Marker(
@@ -79,7 +82,7 @@ class _MapScreenState extends State<MapScreen> {
                         infoWindow: InfoWindow(
                             title: building.name,
                             snippet:
-                                'There are ${building.restroomCount} restrooms in this building.'), //TODO: delete this later if not needed
+                                'There are ${building.restroomCount} restrooms in this building.\n$ratingValue'),
                         onTap: () {
                           // hide currently open snackbar
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -105,8 +108,9 @@ class _MapScreenState extends State<MapScreen> {
                     child: _customMarker(building.restroomCount, Colors.black));
                 _customMarkers.add(data);
               })
-            }
-        });
+            });
+      }
+    });
   }
 
   final int index = 3;
@@ -138,10 +142,17 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Future<String> _getSummaryRatingForBuilding(String buildingId) async {
+    Uri uri = Uri.parse("$URL/summary_ratings_building");
+    uri = uri.replace(query: "building=$buildingId");
+
+    final response = await http.get(uri);
+    return response.body;
+  }
+
   Future<List<Building>> _getBuildingMarkers() async {
     // get the building markers from the database/backend
-    // TODO: change this url later
-    const String url = "http://127.0.0.1:8000/buildings/";
+    const String url = "$URL/buildings/";
     final response = await http.get(Uri.parse(url));
     var responseData = json.decode(response.body);
 

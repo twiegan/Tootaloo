@@ -65,7 +65,6 @@ def following_ratings(request):
 
 
 def buildings(request):
-
 	print("got GET request for buildings")
 
 	db = client['tootaloo']
@@ -77,6 +76,44 @@ def buildings(request):
 	resp['Content-Type'] = 'application/json'
 	
 	return resp
+
+def summary_ratings_building(request):  
+  buildingId = request.GET.get('building')
+  
+  db = client['tootaloo']
+  
+  ratings_collection = db['ratings']	
+  
+  numRatings = ratings_collection.count_documents({'building': buildingId})
+  if numRatings == 0:
+    resp = HttpResponse("No ratings for this building.")
+    resp['Content-Type'] = 'text/plain'
+    return resp
+  
+  ratings = ratings_collection.find({'building': buildingId}, {'overall_rating': 1, 'cleanliness': 1, 'internet': 1, 'vibe': 1, '_id': 0})  
+  
+  overallRatingAvg = 0
+  cleanlinessAvg = 0
+  internetAvg = 0
+  vibeAvg = 0
+  
+  for rating in ratings:
+    overallRatingAvg += rating['overall_rating']
+    cleanlinessAvg += rating['cleanliness']
+    internetAvg += rating['internet']
+    vibeAvg += rating['vibe']
+    
+  overallRatingAvg /= numRatings
+  cleanlinessAvg /= numRatings
+  internetAvg /= numRatings
+  vibeAvg /= numRatings
+  
+  ratingResult = "Average ratings: Overall: {0:.2f}\nCleanliness: {1:.2f}, Internet: {2:.2f}, Vibe: {3:.2f}".format(overallRatingAvg, cleanlinessAvg, internetAvg, vibeAvg)
+  
+  resp = HttpResponse(ratingResult)
+  resp['Content-Type'] = 'application/json'
+  
+  return resp
 
 def index(request):
 		#return HttpResponse(review_details)
