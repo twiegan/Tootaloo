@@ -1,38 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:tootaloo/ui/models/rating.dart';
-import 'package:tootaloo/ui/models/restroom.dart';
 
-Future<List<Rating>> getRating(List<String> ids) async {
-  // Send request to backend and parse response
-  // TODO: change this url later
-  Map<String, dynamic> queryParams = {"ids[]": ids};
-  Uri uri = Uri.https(
-      "2ea4-128-210-106-52.ngrok.io", "/ratings-by-ids/", queryParams);
-  final response = await http.get(uri);
-  dynamic responseData = json.decode(response.body);
-
-  // Build rating list based on response
-  List<Rating> ratings = [];
-
-  for (var rating in responseData) {
-    Rating ratingData = Rating(
-        building: rating["building"],
-        room: rating["room"],
-        overall_rating: rating["overall_rating"],
-        cleanliness: rating["cleanliness"],
-        internet: rating["internet"],
-        vibe: rating["vibe"],
-        review: rating["review"],
-        by: rating["by"]);
-    ratings.add(ratingData);
-  }
-
-  return ratings;
-}
-
+/* Define Rating Tile Items */
 class RatingTileItem extends StatefulWidget {
   final Rating rating;
   const RatingTileItem({super.key, required this.rating});
