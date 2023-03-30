@@ -9,4 +9,5 @@ urlpatterns = [
   path('ratings/', views.ratings, name='ratings'),
   path('following_ratings/', views.following_ratings, name='following_ratings'),
   path('summary_ratings_building/', views.summary_ratings_building, name='summary_ratings_building'),
+  path('submit_rating/', views.submit_rating, name='submit_raitng'),
 ]

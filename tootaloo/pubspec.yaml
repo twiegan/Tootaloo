@@ -44,6 +44,7 @@ dependencies:
   marquee: ^2.2.3
   firebase_core: ^2.6.1
   firebase_auth: ^4.2.8
+  dropdown_search: ^5.0.6
   
 
 dev_dependencies:
