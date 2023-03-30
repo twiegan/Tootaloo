@@ -4,8 +4,10 @@ import certifi
 import environ
 import pymongo
 import json
-from bson import json_util
+from bson import ObjectId, json_util
 from bson.json_util import dumps
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
 # Initialize environment variables .env inside of tootalooBackend/
 env = environ.Env()
@@ -19,11 +21,33 @@ environ.Env.read_env()
 #PyMongo client
 client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
+@csrf_exempt 
+def submit_rating(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	building = ''
+	room = ''
+	if ' ' in body['restroom']:
+		building, room = body['restroom'].split()
+	
+	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0)}
+
+
+	db = client['tootaloo']
+	restroom_collection = db['restrooms']
+	restroom = restroom_collection.find_one({'building': building, 'room': room})
+	if restroom:
+		print('restroom exits')
+		ratings_collection = db['ratings']
+		ratings_collection.insert_one(new_rating)
+
+	return HttpResponse()
+
 
 def restrooms(request):
 	db = client['tootaloo']
 	restrooms_collection = db['restrooms']
-	restrooms = restrooms_collection.find().sort("rating", -1).limit(20)
+	restrooms = restrooms_collection.find().sort("rating", -1)
 	print(restrooms)
 	resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
