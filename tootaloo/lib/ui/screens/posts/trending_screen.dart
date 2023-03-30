@@ -37,12 +37,12 @@ class _TrendingScreenState extends State<TrendingScreen> {
 
     _ratings = [];
     _getRatings().then((ratings) => {
-          setState(() {
-            for (var rating in ratings) {
-              _ratings.add(rating);
-            }
-          })
-        });
+      setState(() {
+        for (var rating in ratings) {
+          _ratings.add(rating);
+        }
+      })
+    });
   }
 
   @override
