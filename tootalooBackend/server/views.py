@@ -139,6 +139,31 @@ def summary_ratings_building(request):
   
   return resp
 
+@csrf_exempt
+def login(request):
+  body_unicode = request.body.decode('utf-8')
+  body = json.loads(body_unicode)
+  username = body['username']
+  passHash = body['passHash']
+
+  db = client['tootaloo']
+  user_collection = db['users']
+
+  user = user_collection.find_one({'username': username})
+  userID = str(user.get('_id'))
+
+
+  if user == None:
+    response = "user_dne " + userID
+    return HttpResponse(response)
+
+  if user['passHash'] == passHash:
+    response = "good_login " + userID
+    return HttpResponse(response)
+
+  response = "bad_password " + userID
+  return HttpResponse(response)
+
 def index(request):
 		#return HttpResponse(review_details)
     return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
