@@ -1,59 +1,81 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'package:tootaloo/AppUser.dart';
 
 class LoginButton extends StatelessWidget {
-  String email;
+  String username;
   String password;
-  FirebaseAuth firebase_auth;
 
   LoginButton(
       {super.key,
-      required String this.email,
-      required String this.password,
-      required FirebaseAuth this.firebase_auth});
+      required String this.username,
+      required String this.password});
 
   Future<String?> signIn(
-      {required String email, required String password}) async {
-    try {
-      print("EMAIL AND PASSWORD: $email  ,  $password");
-      await firebase_auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      return "Signed in";
-    } on FirebaseAuthException catch (e) {
-      var errorCode = e.code;
-      var errorMessage = e.message;
+      {required String username, required String password}) async {
 
-      if (errorCode == 'auth/wrong-password') {
-        return ("Wrong Password.");
-      } else {
-        return errorMessage;
-      }
-    }
+    final bytes = utf8.encode(password);
+    final passHash = sha256.convert(bytes);
+    print("PASSHASH: $passHash");
+    const String url = "http://10.44.57.40:8000/login/";
+    final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': username,
+          'passHash': passHash.toString(),
+        })
+    );
+    final tester = response.body.toString();
+    print("RESPONSE BODY: $tester");
+    return response.body.toString();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
         onPressed: () async {
-          print("EMAIL AND PASSWORD: " + email + "  :  " + password);
+          print("EMAIL: $username  PASSWORD:  $password");
 
-          String? response = await signIn(email: email, password: password);
-          if (response != null) print("Response: " + response);
-          switch (response) {
-            case "Signed in":
-              print("Signed in!");
-              // ignore: use_build_context_synchronously
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const TrendingScreen(
-                  title: "Trending",
-                );
-              }));
-              break;
-            case "Wrong Password.":
-              print("wrong password");
-              break;
+          String? response = await signIn(username: username, password: password);
+          String responseVal = '';
+          String userID = '';
+          if (response != null) {
+            List<String> resSplit = response.split(' ');
+            responseVal = resSplit[0];
+            userID = resSplit[1];
+            print("ResponseVal: $responseVal, userID: $userID");
+            
           }
+            switch (responseVal) {
+              case "good_login":
+                print("Signed in!");
+                UserPreferences.setUsername(username);
+                UserPreferences.setId(userID);
+                // AppUser currUser = await UserPreferences.getUser();
+                // if(currUser.id != null) {
+                //   print(currUser.id);
+                // }
+                // ignore: use_build_context_synchronously
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const TrendingScreen(
+                    title: "Trending",
+                  );
+                }));
+                break;
+              case "bad_password":
+                print("wrong password");
+                break;
+              case "user_dne":
+                print("user does not exist");
+                break;
+            }
         },
         child: const Text(
           "Login",

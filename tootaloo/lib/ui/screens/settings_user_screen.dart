@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
@@ -15,7 +14,6 @@ class SettingsUserScreen extends StatefulWidget {
 
 class _SettingsUserScreenState extends State<SettingsUserScreen> {
   final int index = -1;
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,6 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
               'User Settings!',
             ),
             LogoutButton(
-              firebaseAuth: firebaseAuth,
             )
           ],
         ),

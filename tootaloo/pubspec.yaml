@@ -42,10 +42,8 @@ dependencies:
   faker: ^2.1.0  
   http: ^0.13.5
   marquee: ^2.2.3
-  firebase_core: ^2.6.1
-  firebase_auth: ^4.2.8
   dropdown_search: ^5.0.6
-  
+  shared_preferences: ^2.0.20
 
 dev_dependencies:
   flutter_test:

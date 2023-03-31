@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/screens/login_screen.dart';
 
@@ -13,7 +12,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordController2 = TextEditingController();
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   var email;
   var password;
   var password2;
@@ -53,16 +51,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     password2 = passwordController2.text;
   }
 
-  Future<String?> signUp(
-      {required String email, required String password}) async {
-    try {
-      await firebaseAuth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      return "Signed up";
-    } on FirebaseAuthException catch (e) {
-      return e.message;
-    }
-  }
+  // Future<String?> signUp(
+  //     {required String email, required String password}) async {
+  //   try {
+  //     await firebaseAuth.createUserWithEmailAndPassword(
+  //         email: email, password: password);
+  //     return "Signed up";
+  //   } on FirebaseAuthException catch (e) {
+  //     return e.message;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -159,17 +157,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         print("MISMATCHED PASSWORDS");
                         return; //TODO add mismatched passwords popup window
                       }
-                      String? response =
-                          await signUp(email: email, password: password);
-                      if (response != null) print("Response: $response");
-                      switch (response) {
-                        case "Signed up":
-                          // ignore: use_build_context_synchronously
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return const LoginScreen();
-                          }));
-                      }
+                      // String? response =
+                      //     await signUp(email: email, password: password);
+                      // if (response != null) print("Response: $response");
+                      // switch (response) {
+                      //   case "Signed up":
+                      //     // ignore: use_build_context_synchronously
+                      //     Navigator.push(context,
+                      //         MaterialPageRoute(builder: (context) {
+                      //       return const LoginScreen();
+                      //     }));
+                      // }
                     },
                     child: const Text(
                       "Signup",

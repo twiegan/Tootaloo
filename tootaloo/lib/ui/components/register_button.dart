@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/screens/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterButton extends StatelessWidget {
   String email;
   String password;
-  FirebaseAuth firebase_auth;
 
   RegisterButton(
       {super.key,
       required String this.email,
       required String this.password,
-      required FirebaseAuth this.firebase_auth});
+      });
 
   Future<String?> signUp(
       {required String email, required String password}) async {
-    try {
-      await firebase_auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      return "Signed up";
-    } on FirebaseAuthException catch (e) {
-      return e.message;
-    }
+    // try {
+    //   await firebase_auth.createUserWithEmailAndPassword(
+    //       email: email, password: password);
+    //   return "Signed up";
+    // } on FirebaseAuthException catch (e) {
+    //   return e.message;
+    // }
+    //TODO IMPLEMENT SIGNUP
+    print("signup");
   }
 
   @override
