@@ -354,18 +354,28 @@ def login(request):
 
   user = user_collection.find_one({'username': username})
   userID = str(user.get('_id'))
-
+  bathroom_preference = user['bathroom_preference']
+  
+  response = {}
+  
+  
 
   if user == None:
-    response = "user_dne " + userID
-    return HttpResponse(response)
+    response = {'status': "user_dne", 'user_id': userID, 'bathroom_preference': bathroom_preference}
+    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
   if user['passHash'] == passHash:
-    response = "good_login " + userID
-    return HttpResponse(response)
+    response = {'status': "good_login", 'user_id': userID, 'bathroom_preference': bathroom_preference}
+    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
-  response = "bad_password " + userID
-  return HttpResponse(response)
+  response = {'status': "bad_password", 'user_id': userID, 'bathroom_preference': bathroom_preference}
+  resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+  resp['Content-Type'] = 'application/json'
+  return resp
 
 @csrf_exempt
 def user_register(request):

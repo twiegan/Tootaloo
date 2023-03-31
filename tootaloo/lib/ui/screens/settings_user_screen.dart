@@ -8,7 +8,7 @@ import 'package:tootaloo/ui/components/logout_button.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:tootaloo/SharedPref.dart' as sharedPref;
 
 class SettingsUserScreen extends StatefulWidget {
   const SettingsUserScreen({super.key, required this.title});
@@ -22,23 +22,20 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
   final int index = -1;
   String _bathroom_preference = '';
 
-  Future<String?> saveSettings(
-      {required String bathroom_preference}) async {
+  Future<String?> saveSettings({required String bathroom_preference}) async {
     AppUser _user = await UserPreferences.getUser();
     String? _username = _user.username;
-    String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/save_user_settings/";
-    final response = await http.post(
-        Uri.parse(url),
+    String url =
+        "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/save_user_settings/";
+    final response = await http.post(Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'username': _username as String,
           'bathroom_preference': bathroom_preference,
-        })
-    );
+        }));
     final tester = response.body.toString();
-    print("RESPONSE BODY: $tester");
     return response.body.toString();
   }
 
@@ -47,7 +44,8 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog( // <-- SEE HERE
+        return AlertDialog(
+          // <-- SEE HERE
           title: const Text(''),
           content: SingleChildScrollView(
             child: ListBody(
@@ -88,13 +86,12 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
               items: const ['male', 'female', 'unisex'],
               dropdownDecoratorProps: const DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: "Bathroom Preference",
-                    hintText: "Select Your Bathroom Preference",
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                  )
-              ),
+                labelText: "Bathroom Preference",
+                hintText: "Select Your Bathroom Preference",
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+              )),
               onChanged: (value) {
                 _bathroom_preference = (value != null) ? value : '';
               },
@@ -102,19 +99,22 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
             ),
             TextButton(
                 onPressed: () async {
-
-                  String? response =
-                  await saveSettings(bathroom_preference: _bathroom_preference);
+                  String? response = await saveSettings(
+                      bathroom_preference: _bathroom_preference);
                   if (response != null) print("Response: $response");
 
                   switch (response) {
                     case "save_success":
                       // ignore: use_build_context_synchronously
-                      _showAlertDialog("Your Settings Were Saved Successfully!");
+                      sharedPref.UserPreferences.setPreference(
+                          _bathroom_preference);
+                      _showAlertDialog(
+                          "Your Settings Were Saved Successfully!");
                       break;
                     case "save_fail":
                       //TODO IMPLEMENT ERROR POPUP
-                      _showAlertDialog("Your Settings Were not Saved, Please try Again");
+                      _showAlertDialog(
+                          "Your Settings Were not Saved, Please try Again");
                       break;
                   }
                 },
@@ -122,8 +122,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
                   "Save Settings",
                   style: TextStyle(color: Colors.black),
                 )),
-            const LogoutButton(
-            )
+            const LogoutButton()
           ],
         ),
       ),
