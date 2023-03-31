@@ -14,4 +14,5 @@ urlpatterns = [
   path('login/', views.login, name='login'),
   path('user_register/', views.user_register, name='user_register'),
   path('save_user_settings/', views.save_user_settings, name='save_user_settings'),
+  path('check_votes/', views.check_votes, name='check_votes'),
 ]

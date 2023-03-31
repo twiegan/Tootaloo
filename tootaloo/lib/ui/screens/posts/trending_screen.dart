@@ -5,6 +5,8 @@ import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/AppUser.dart';
 
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
@@ -35,12 +37,12 @@ class _TrendingScreenState extends State<TrendingScreen> {
 
     _ratings = [];
     _getRatings().then((ratings) => {
-      setState(() {
-        for (var rating in ratings) {
-          _ratings.add(rating);
-        }
-      })
-    });
+          setState(() {
+            for (var rating in ratings) {
+              _ratings.add(rating);
+            }
+          })
+        });
   }
 
   @override
@@ -75,6 +77,27 @@ void _updateVotes(id, int votes, String type) async {
       'votes': votes.toString(),
     }),
   );
+}
+
+Future<bool> _checkVoted(ratingId) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return true;
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse('http://127.0.0.1:8000/check_votes/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body:
+        jsonEncode(<String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
+  );
+  if (response.body.toString() == 'false') {
+    return false;
+  }
+  return true;
 }
 
 class Rating {
@@ -170,15 +193,15 @@ class _ListTileItemState extends State<ListTileItem> {
                 Text(widget.rating.by)
               ],
             ),
-            Expanded(child: RatingBarIndicator(
-              rating: widget.rating.overallRating.toDouble(),
-              itemCount: 5,
-              itemSize: 20.0,
-              itemBuilder: (context, _) => const Icon(
-                Icons.star,
-                color: Color.fromARGB(255, 218, 196, 0),
-              )
-            ))
+            Expanded(
+                child: RatingBarIndicator(
+                    rating: widget.rating.overallRating.toDouble(),
+                    itemCount: 5,
+                    itemSize: 20.0,
+                    itemBuilder: (context, _) => const Icon(
+                          Icons.star,
+                          color: Color.fromARGB(255, 218, 196, 0),
+                        )))
           ]),
           title: Text(
             widget.rating.building + widget.rating.room,
@@ -200,12 +223,19 @@ class _ListTileItemState extends State<ListTileItem> {
                       constraints: const BoxConstraints(),
                       icon: const Icon(Icons.arrow_upward, color: Colors.green),
                       onPressed: () {
-                        setState(() {
-                          if (_upvotes < 1) {
-                            _upvotes += 1;
-                            _updateVotes(widget.rating.id, widget.rating.upvotes + _upvotes, "upvotes");
-                          }
-                        });
+                        // setState(() {
+                          
+                        // });
+                        if (_upvotes < 1) {
+                          _checkVoted(widget.rating.id).then((value) {
+                            if (!value) {
+                              setState(() {
+                                _upvotes += 1;
+                              });
+                              _updateVotes(widget.rating.id, widget.rating.upvotes + _upvotes, "upvotes");
+                            }
+                          });
+                        }
                       },
                     ),
                     Text(
@@ -223,12 +253,16 @@ class _ListTileItemState extends State<ListTileItem> {
                       constraints: const BoxConstraints(),
                       icon: const Icon(Icons.arrow_downward, color: Colors.red),
                       onPressed: () {
-                        setState(() {
-                          if (_downvotes < 1) {
-                            _downvotes += 1;
-                            _updateVotes(widget.rating.id, widget.rating.downvotes + _downvotes, "downvotes");
-                          }
-                        });
+                        if (_downvotes < 1) {
+                          _checkVoted(widget.rating.id).then((value) {
+                            if (!value) {
+                              setState(() {
+                                _downvotes += 1;
+                              });
+                              _updateVotes(widget.rating.id, widget.rating.downvotes + _downvotes, "downvotes");
+                            }
+                          });
+                        }
                       },
                     ),
                     Text(

@@ -36,6 +36,38 @@ def update_votes(request):
 	ratings_collection.update_one(id_query, new_upvotes)
 
 	print(ratings_collection.find_one({'_id': rating_id}))
+        
+	return HttpResponse()
+        
+
+@csrf_exempt
+def check_votes(request):
+    print("running check votes")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    print(rating_id)
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('true')
+    user_id = ObjectId(user_id)
+    print(user_id)
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
+    print(rating['voted_users'])
+    
+    if rating != None and rating['voted_users'] != None and user_id in rating['voted_users']:
+        print('true')
+        return HttpResponse('true')
+    
+    if rating != None and rating['voted_users'] != None and user_id not in rating['voted_users']:
+        print('updating votes')
+        id_query = { '_id':  rating_id}
+        new_voted = { '$push': { 'voted_users': user_id } }
+        ratings_collection.update_one(id_query, new_voted)
+
+    return HttpResponse('false')
 
 	
 def submit_rating(request):
