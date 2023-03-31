@@ -222,7 +222,7 @@ def userByUsername(request):
 	db = client['tootaloo']
 	user_collection = db['users']
 
-	users = user_collection.find({"username": username}, {"_id": 0, "passHash": 0})
+	users = user_collection.find({"username": username}, {"passHash": 0})
 
 	for user in users:
 		print("User: ", user)
@@ -282,6 +282,26 @@ def unfollowUserByUsername(request):
 		except pymongo.errors.PyMongoError as e:
 			resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
 			resp['Content-Type'] = 'application/json'
+
+
+def checkFollowingByUsername(request):
+	followerUsername = request.GET.get('followerUsername', '')
+	targetUsername = request.GET.get('targetUsername', '')
+
+	db = client['tootaloo']
+	user_collection = db['users']
+
+	followerUserFollowing = user_collection.find_one({"username": followerUsername}, {"_id": 0, "following": 1})
+	targetUserId = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+
+	if targetUserId in followerUserFollowing["following"]:
+		resp = HttpResponse(dumps({"response": "Following"}, sort_keys=True, indent=4, default=json_util.default))
+		resp['Content-Type'] = 'application/json'
+		return resp
+	else:
+		resp = HttpResponse(dumps({"response": "Not Following"}, sort_keys=True, indent=4, default=json_util.default))
+		resp['Content-Type'] = 'application/json'
+		return resp
 
 
 def summary_ratings_building(request):  

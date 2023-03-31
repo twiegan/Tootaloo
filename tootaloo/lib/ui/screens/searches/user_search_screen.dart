@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tootaloo/AppUser.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/UserTileItem.dart';
 import 'package:tootaloo/ui/models/User.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/AppUser.dart';
 
 /* Define the screen itself */
 class UserSearchScreen extends StatefulWidget {
@@ -45,14 +48,13 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                   )),
             )),
             OutlinedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   if (userController.text.isEmpty) return; // Sanity Check
+                  AppUser appUser = await UserPreferences.getUser();
+                  bool followed = await checkFollowed(
+                      appUser.username, userController.text);
                   getSearchedUser(userController.text).then((user) => {
                         setState(() {
-                          bool followed = false;
-                          // TODO: define currently logged in user here
-                          // TODO: adjust `followed` based on currently logged in user's `following` list
-
                           UserTileItem userTileItem = UserTileItem(
                             username: user.username,
                             followed: followed,
@@ -88,15 +90,39 @@ Future<User> getSearchedUser(String username) async {
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"username": username};
   Uri uri = Uri.https(
-      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/user-by-username/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/user-by-username/",
+      queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 
   // Build User model based on response
   User userData = User(
+      id: responseData["_id"],
       username: responseData["username"],
       posts_ids: responseData["posts"],
       following_ids: responseData["following"]);
 
   return userData;
+}
+
+Future<bool> checkFollowed(String? follower, String target) async {
+  if (follower == null) return false; // Sanity check
+
+  Map<String, dynamic> queryParams = {
+    "followerUsername": follower,
+    "targetUsername": target
+  };
+  Uri uri = Uri.https(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/check-following-by-username/",
+      queryParams);
+  final response = await http.get(uri);
+  dynamic responseData = json.decode(response.body);
+
+  if (responseData["response"] == "Success") {
+    return true;
+  } else {
+    return false;
+  }
 }

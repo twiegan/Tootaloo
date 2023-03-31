@@ -10,6 +10,7 @@ urlpatterns = [
   path('user-by-username/', views.userByUsername, name='user-by-username'),
   path('follow-user-by-username/', views.followUserByUsername, name='follow-user-by-username'),
   path('unfollow-user-by-username/', views.unfollowUserByUsername, name='unfollow-user-by-username'),
+  path('check-following-by-username/', views.checkFollowingByUsername, name='check-following-by-username'),
   path('restrooms/', views.restrooms, name='restrooms'),
   path('ratings/', views.ratings, name='ratings'),
   path('following_ratings/', views.following_ratings, name='following_ratings'),

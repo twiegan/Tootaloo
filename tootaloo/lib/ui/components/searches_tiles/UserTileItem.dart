@@ -7,7 +7,8 @@ class UserTileItem extends StatefulWidget {
   final String username;
   final bool followed;
 
-  const UserTileItem({super.key, required this.username, required this.followed});
+  const UserTileItem(
+      {super.key, required this.username, required this.followed});
   @override
   _UserTileItemState createState() => _UserTileItemState();
 }
@@ -16,8 +17,12 @@ class _UserTileItemState extends State<UserTileItem> {
   bool _followed = false;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    _followed = widget.followed;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -42,23 +47,30 @@ class _UserTileItemState extends State<UserTileItem> {
             mainAxisSize: MainAxisSize.min,
             children: [
               OutlinedButton.icon(
-                  onPressed: ()  {
+                  onPressed: () {
                     // TODO: define currently logged in user here
                     const String loggedInUsername = "ThomasTest";
                     _followed
-                      ? unfollowUser(loggedInUsername, widget.username).then((unfollowed) => {
-                        setState(() {
-                          unfollowed ? _followed = false : _followed = true;
-                        })
-                      })
-                      : followUser(loggedInUsername, widget.username).then((followed) => {
-                        setState(() {
-                          followed ? _followed = true : _followed = false;
-                        })
-                      });
-                            
+                        ? unfollowUser(loggedInUsername, widget.username)
+                            .then((unfollowed) => {
+                                  setState(() {
+                                    unfollowed
+                                        ? _followed = false
+                                        : _followed = true;
+                                  })
+                                })
+                        : followUser(loggedInUsername, widget.username)
+                            .then((followed) => {
+                                  setState(() {
+                                    followed
+                                        ? _followed = true
+                                        : _followed = false;
+                                  })
+                                });
                   },
-                  icon: _followed ? const Icon(Icons.favorite_rounded) : const Icon(Icons.favorite_outline_rounded),
+                  icon: _followed
+                      ? const Icon(Icons.favorite_rounded)
+                      : const Icon(Icons.favorite_outline_rounded),
                   label: _followed
                       ? const Text('Followed')
                       : const Text('Not Followed'),
@@ -80,7 +92,9 @@ Future<bool> followUser(String followerUsername, String targetUsername) async {
     "targetUsername": targetUsername
   };
   Uri uri = Uri.https(
-      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/follow-user-by-username/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/follow-user-by-username/",
+      queryParams);
   final response = await http.post(uri);
   dynamic responseData = json.decode(response.body);
 
@@ -95,8 +109,10 @@ Future<bool> unfollowUser(
     "followerUsername": followerUsername,
     "targetUsername": targetUsername
   };
-  Uri uri = Uri.https(dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
-      "/unfollow-user-by-username/", queryParams);
+  Uri uri = Uri.https(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/unfollow-user-by-username/",
+      queryParams);
   final response = await http.post(uri);
   dynamic responseData = json.decode(response.body);
 
