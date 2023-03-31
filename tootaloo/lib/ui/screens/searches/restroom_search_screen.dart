@@ -113,7 +113,7 @@ Future<List<Restroom>> getSearchedRestrooms(
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"building": building, "floor": floor};
   Uri uri =
-      Uri.https("3091-128-210-106-49.ngrok.io", "/restrooms/", queryParams);
+      Uri.https("340c-128-210-106-52.ngrok.io", "/restrooms-by-building-and-floor/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 

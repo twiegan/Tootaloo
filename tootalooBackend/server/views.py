@@ -64,7 +64,7 @@ def ratingsByIds(request):
 	return resp
 
 
-def restrooms(request):
+def restroomsByBuildingAndFloor(request):
 
 	# TODO: refactor as restroomsByBuildingAndOrFloor
 
