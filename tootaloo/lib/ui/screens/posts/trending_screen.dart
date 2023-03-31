@@ -4,6 +4,7 @@ import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
@@ -149,23 +150,19 @@ class _ListTileItemState extends State<ListTileItem> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.account_circle, size: 40),
+                const Icon(Icons.account_circle, size: 30),
                 Text(widget.rating.by)
               ],
             ),
-            Flexible(
-              flex: 5,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star),
-                  Icon(Icons.star),
-                ],
-              ),
-            ),
+            Expanded(child: RatingBarIndicator(
+              rating: widget.rating.overallRating.toDouble(),
+              itemCount: 5,
+              itemSize: 20.0,
+              itemBuilder: (context, _) => const Icon(
+                Icons.star,
+                color: Color.fromARGB(255, 218, 196, 0),
+              )
+            ))
           ]),
           title: Text(
             widget.rating.building + widget.rating.room,

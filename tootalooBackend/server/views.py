@@ -30,7 +30,7 @@ def submit_rating(request):
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	
-	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0)}
+	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': ObjectId('507f191e810c19729de860ea')}
 
 
 	db = client['tootaloo']
@@ -62,7 +62,8 @@ def ratings(request):
 
 	ratings_collection = db['ratings']	
 
-	ratings = ratings_collection.find()
+	ratings = ratings_collection.find().sort("upvotes", -1).limit(40)
+
 	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
 	
@@ -78,9 +79,12 @@ def following_ratings(request):
 
 	user = user_collection.find({'username': 'FakeUser1'})
 	following = user[0]['following']
+	print(user[0]['_id'])
+	following.append(user[0]['_id'])
+	print(following)
 	ratings_collection = db['ratings']	
 
-	ratings = ratings_collection.find({'by' : {'$in' : following}}).sort("upvotes", -1).limit(20)
+	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort("createdAt", -1).limit(40)
 
 	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
