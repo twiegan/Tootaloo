@@ -189,6 +189,29 @@ def user_register(request):
   else:
     return HttpResponse("username_taken")
 
+@csrf_exempt
+def save_user_settings(request):
+  body_unicode = request.body.decode('utf-8')
+  body = json.loads(body_unicode)
+
+  username = body['username']
+
+  db = client['tootaloo']
+  user_collection = db['users']
+  pre_existing_user = user_collection.find_one({'username': username})
+
+  if pre_existing_user != None:
+    user_collection.update_one({
+      'username': pre_existing_user['username']
+    },{
+      '$set': {
+        'bathroom_preference': body['bathroom_preference']
+      }
+    })
+    return HttpResponse("save_success")
+  else:
+    return HttpResponse("save_fail")
+
 
 
 def index(request):
