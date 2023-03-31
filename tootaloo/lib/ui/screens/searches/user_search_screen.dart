@@ -7,6 +7,7 @@ import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/UserTileItem.dart';
 import 'package:tootaloo/ui/models/User.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /* Define the screen itself */
 class UserSearchScreen extends StatefulWidget {
@@ -87,7 +88,7 @@ Future<User> getSearchedUser(String username) async {
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"username": username};
   Uri uri = Uri.https(
-      "3091-128-210-106-49.ngrok.io", "/user-by-username/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/user-by-username/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 

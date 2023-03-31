@@ -7,6 +7,7 @@ import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/RestroomTileItem.dart';
 import 'package:tootaloo/ui/models/restroom.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /* Define the screen itself */
 class RestroomSearchScreen extends StatefulWidget {
@@ -113,7 +114,7 @@ Future<List<Restroom>> getSearchedRestrooms(
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"building": building, "floor": floor};
   Uri uri =
-      Uri.https("340c-128-210-106-52.ngrok.io", "/restrooms-by-building-and-floor/", queryParams);
+      Uri.https(dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/restrooms-by-building-and-floor/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 

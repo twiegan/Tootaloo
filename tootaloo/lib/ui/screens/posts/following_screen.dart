@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class FollowingScreen extends StatefulWidget {
@@ -26,6 +31,22 @@ class FollowingScreen extends StatefulWidget {
 class _FollowingScreenState extends State<FollowingScreen> {
   final int index = 0;
 
+  late List<Rating> _ratings;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _ratings = [];
+    _getRatings().then((ratings) => {
+          setState(() {
+            for (var rating in ratings) {
+              _ratings.add(rating);
+            }
+          })
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,10 +56,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
         body: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
-            children: List.generate(20, (index) => ListTileItem(
-                title: '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}', 
-                subtitle: '${faker.lorem.sentence()} ${faker.lorem.sentence()}',
-              )),
+            children: _ratings.map((rating) => ListTileItem(rating: rating)).toList(),
           ),
         ),
       ),
@@ -47,10 +65,61 @@ class _FollowingScreenState extends State<FollowingScreen> {
   }
 }
 
+class Rating {
+  final String building;
+  final String by;
+  final String room;
+  final String review;
+  final num overallRating;
+  final num internet;
+  final num cleanliness;
+  final num vibe;
+  final int upvotes;
+  final int downvotes;
+
+  Rating({
+    required this.building,
+    required this.by,
+    required this.room,
+    required this.review,
+    required this.overallRating,
+    required this.internet,
+    required this.cleanliness,
+    required this.vibe,
+    required this.upvotes,
+    required this.downvotes,
+  });
+}
+
+Future<List<Rating>> _getRatings() async {
+  // get the building markers from the database/backend
+  // TODO: change this url later
+  String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/following_ratings/";
+  final response = await http.get(Uri.parse(url));
+  var responseData = json.decode(response.body);
+
+  List<Rating> ratings = [];
+  for (var rating in responseData) {
+    Rating ratingData = Rating(
+        building: rating["building"],
+        by: rating["by"],
+        room: rating["room"],
+        review: rating["review"],
+        overallRating: rating["overall_rating"],
+        internet: rating["internet"],
+        cleanliness: rating["cleanliness"],
+        vibe: rating["vibe"],
+        upvotes: rating["upvotes"],
+        downvotes: rating["downvotes"]);
+    ratings.add(ratingData);
+  }
+
+  return ratings;
+}
+
 class ListTileItem extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  const ListTileItem({super.key, required this.title, required this.subtitle});
+  final Rating rating;
+  const ListTileItem({super.key, required this.rating});
   @override
   _ListTileItemState createState() => _ListTileItemState();
 }
@@ -60,6 +129,7 @@ class _ListTileItemState extends State<ListTileItem> {
   int _downvotes = 0;
   @override
   Widget build(BuildContext context) {
+    print("builtTile");
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -80,73 +150,71 @@ class _ListTileItemState extends State<ListTileItem> {
               Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.account_circle, size: 40),
-                Text("Username")
+              children: [
+                const Icon(Icons.account_circle, size: 30),
+                Text(widget.rating.by)
               ],
             ),
-            Flexible(
-              flex: 5,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star),
-                  Icon(Icons.star),
-                ],
-              ),
-            ),
+            Expanded(child: RatingBarIndicator(
+              rating: widget.rating.overallRating.toDouble(),
+              itemCount: 5,
+              itemSize: 20.0,
+              itemBuilder: (context, _) => const Icon(
+                Icons.star,
+                color: Color.fromARGB(255, 218, 196, 0),
+              )
+            ))
           ]),
           title: Text(
-            widget.title,
+            widget.rating.building + widget.rating.room,
             style: const TextStyle(fontSize: 20),
           ),
-          subtitle: Text(widget.subtitle),
+          subtitle: Text(widget.rating.review),
           trailing: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min, 
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, 
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(0),
-                    constraints: const BoxConstraints(),
-
-                    icon: const Icon(Icons.arrow_upward, color: Colors.green),
-                    onPressed: () {
-                      setState(() {
-                        _upvotes += 1;
-                      });
-                    },
-                  ),
-                  Text('$_upvotes', style: const TextStyle(color: Colors.green),)
-                ]
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_upward, color: Colors.green),
+                      onPressed: () {
+                        setState(() {
+                          _upvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '${widget.rating.upvotes + _upvotes}',
+                      style: const TextStyle(color: Colors.green),
+                    )
+                  ]),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, 
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(0),
-                    constraints: const BoxConstraints(),
-
-                    icon: const Icon(Icons.arrow_downward, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        _downvotes += 1;
-                      });
-                    },
-                  ),
-                  Text('$_downvotes', style: const TextStyle(color: Colors.red),)
-                ]
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_downward, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _downvotes += 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      '${widget.rating.downvotes + _downvotes}',
+                      style: const TextStyle(color: Colors.red),
+                    )
+                  ]),
             ],
           ),
         ),

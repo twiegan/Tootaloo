@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:tootaloo/ui/components/login_button.dart';
 import 'package:tootaloo/ui/screens/terms_of_service.dart';
+import 'package:tootaloo/ui/screens/user_registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +11,34 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+  var username;
+  var password;
+
+  @override
+  void initState() {
+    super.initState();
+    usernameController.addListener((refreshEmail));
+    passwordController.addListener((refreshPassword));
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void refreshEmail() {
+    username = usernameController.text;
+  }
+
+  void refreshPassword() {
+    password = passwordController.text;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,54 +51,59 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 60.0, bottom: 20),
+            //   child: Center(
+            //     child: SizedBox(
+            //         width: 200,
+            //         height: 150,
+            //         /*decoration: BoxDecoration(
+            //             color: Colors.red,
+            //             borderRadius: BorderRadius.circular(50.0)),*/
+            //         child: Image.asset('assets/images/tootaloo_logo.png')),
+            //   ),
+            // ),
             Padding(
-              padding: const EdgeInsets.only(top: 60.0, bottom: 20),
-              child: Center(
-                child: SizedBox(
-                    width: 200,
-                    height: 150,
-                    /*decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('assets/images/tootaloo_logo.png')),
-              ),
-            ),
-            const Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Email',
-                  hintText: 'Enter valid email id as abc@gmail.com',
+                  labelText: 'Username',
+                  hintText: 'Enter your username',
                   filled: true,
                   fillColor: Colors.white,
                 ),
+                controller: usernameController,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
             ),
-            const Padding(
-              padding:
-                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Password',
                   hintText: 'Enter secure password',
                   filled: true,
                   fillColor: Colors.white,
                 ),
+                controller: passwordController,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
             ),
-            // FlatButton(
-            //   onPressed: (){
-            //     //TODO FORGOT PASSWORD SCREEN GOES HERE
-            //   },
-            //   child: Text(
-            //     'Forgot Password',
-            //     style: TextStyle(color: Colors.blue, fontSize: 15),
-            //   ),
+            // const Padding(
+            //   padding:
+            //       EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 15),
+            //   child: Text("Forgot Password" //TODO FORGOT PASSWORD SCREEN,
+            //       ),
             // ),
             const Padding(
               padding:
@@ -91,22 +124,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                     color: const Color.fromRGBO(181, 211, 235, 1),
                     borderRadius: BorderRadius.circular(20)),
-                child: const LoginButton()
-                // child: FlatButton(
-                //   onPressed: () {
-                //     Navigator.push(
-                //         context, MaterialPageRoute(builder: (_) => HomePage()));
-                //   },
-                //   child: Text(
-                //     'Login',
-                //     style: TextStyle(color: Colors.white, fontSize: 25),
-                //   ),
-                // ),
-                ),
+                child: LoginButton(
+                  username: usernameController.text,
+                  password: passwordController.text,
+                )),
             const SizedBox(
-              height: 130,
+              height: 100,
             ),
-            const Text('New User? Create Account') //TODO CREATE ACCOUNT PAGE
+            TextButton(
+                onPressed: () => {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const RegistrationScreen();
+                      }))
+                    },
+                child: const Text(
+                    'New User? Create Account')), //TODO CREATE ACCOUNT PAGE
           ],
         ),
       ),

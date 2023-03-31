@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserTileItem extends StatefulWidget {
   final String username;
@@ -79,7 +80,7 @@ Future<bool> followUser(String followerUsername, String targetUsername) async {
     "targetUsername": targetUsername
   };
   Uri uri = Uri.https(
-      "3091-128-210-106-49.ngrok.io", "/follow-user-by-username/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/follow-user-by-username/", queryParams);
   final response = await http.post(uri);
   dynamic responseData = json.decode(response.body);
 
@@ -94,7 +95,7 @@ Future<bool> unfollowUser(
     "followerUsername": followerUsername,
     "targetUsername": targetUsername
   };
-  Uri uri = Uri.https("3091-128-210-106-49.ngrok.io",
+  Uri uri = Uri.https(dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
       "/unfollow-user-by-username/", queryParams);
   final response = await http.post(uri);
   dynamic responseData = json.decode(response.body);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/ui/models/restroom.dart';
@@ -141,7 +142,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"ids[]": ids};
   Uri uri = Uri.https(
-      "3091-128-210-106-49.ngrok.io", "/ratings-by-ids/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/ratings-by-ids/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 

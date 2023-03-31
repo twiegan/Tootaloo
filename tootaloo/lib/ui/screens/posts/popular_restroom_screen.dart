@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 double roundDouble(double value, int places){ 
    num mod = pow(10.0, places); 
@@ -31,6 +36,22 @@ class PopularRestroomScreen extends StatefulWidget {
 class _PopularRestroomScreenState extends State<PopularRestroomScreen> {
   final int index = 0;
 
+  late List<Restroom> _restrooms;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _restrooms = [];
+    _getRestrooms().then((restrooms) => {
+          setState(() {
+            for (var restroom in restrooms) {
+              _restrooms.add(restroom);
+            }
+          })
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,18 +61,7 @@ class _PopularRestroomScreenState extends State<PopularRestroomScreen> {
         body: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
-            children: List.generate(
-                20,
-                (index) => ListTileItem(
-                      title:
-                          '${faker.randomGenerator.fromCharSet('ABCDEFGHIJKLMONPESTUVWY', 3)}${faker.randomGenerator.integer(999)}',
-                      subtitle:
-                          '${faker.lorem.sentence()} ${faker.lorem.sentence()}',
-                      cleanliness: roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                      internet: roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                      vibe: roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                      rating: roundDouble(faker.randomGenerator.decimal() * 5, 1),
-                    )),
+            children: _restrooms.map((restroom) => ListTileItem(restroom: restroom)).toList(),
           ),
         ),
       ),
@@ -60,21 +70,52 @@ class _PopularRestroomScreenState extends State<PopularRestroomScreen> {
   }
 }
 
+class Restroom {
+  final String building;
+  final String room;
+  final int floor;
+  final num rating;
+  final num cleanliness;
+  final num internet;
+  final num vibe;
+
+  Restroom({
+    required this.building,
+    required this.room,
+    required this.floor,
+    required this.rating,
+    required this.internet,
+    required this.cleanliness,
+    required this.vibe,
+  });
+}
+
+Future<List<Restroom>> _getRestrooms() async {
+  // get the building markers from the database/backend
+  // TODO: change this url later
+  String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restrooms/";
+  final response = await http.get(Uri.parse(url));
+  var responseData = json.decode(response.body);
+
+  List<Restroom> restrooms = [];
+  for (var restroom in responseData) {
+    Restroom restroomData = Restroom(
+        building: restroom["building"],
+        room: restroom["room"],
+        floor: restroom["floor"],
+        rating: restroom["rating"],
+        internet: restroom["internet"],
+        cleanliness: restroom["cleanliness"],
+        vibe: restroom["vibe"]);
+    restrooms.add(restroomData);
+  }
+
+  return restrooms;
+}
+
 class ListTileItem extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  final double cleanliness;
-  final double internet;
-  final double vibe;
-  final double rating;
-  const ListTileItem(
-      {super.key,
-      required this.title,
-      required this.subtitle,
-      required this.cleanliness,
-      required this.internet,
-      required this.vibe,
-      required this.rating});
+  final Restroom restroom;
+  const ListTileItem({super.key, required this.restroom});
   @override
   _ListTileItemState createState() => _ListTileItemState();
 }
@@ -103,7 +144,7 @@ class _ListTileItemState extends State<ListTileItem> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Icon(Icons.airline_seat_legroom_extra, size: 40,),
-                    Text(widget.title, style: const TextStyle(fontSize: 40),),
+                    Text(widget.restroom.building + widget.restroom.room, style: const TextStyle(fontSize: 40),),
                   ],
                 ),
                 Column(
@@ -112,17 +153,17 @@ class _ListTileItemState extends State<ListTileItem> {
                   children: [
                     Row(
                       children: [
-                        Text('Cleanliness: ${widget.cleanliness}', style: const TextStyle(fontSize: 15)),
+                        Text('Cleanliness: ${widget.restroom.cleanliness}', style: const TextStyle(fontSize: 15)),
                       ],
                     ),
                     Row(
                       children: [
-                        Text('Internet: ${widget.internet}', style: const TextStyle(fontSize: 15)),
+                        Text('Internet: ${widget.restroom.internet}', style: const TextStyle(fontSize: 15)),
                       ],
                     ),
                     Row(
                       children: [
-                        Text('Vibe: ${widget.vibe}', style: const TextStyle(fontSize: 15)),
+                        Text('Vibe: ${widget.restroom.vibe}', style: const TextStyle(fontSize: 15)),
                       ],
                     ),
                   ],
@@ -139,7 +180,7 @@ class _ListTileItemState extends State<ListTileItem> {
                   
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text('${widget.rating}', style: const TextStyle(fontSize: 30)),
+                    Text('${widget.restroom.rating}', style: const TextStyle(fontSize: 30)),
                     const Icon(Icons.star, color: Color.fromARGB(255, 224, 202, 0), size: 30),
                   ],
                 ),
