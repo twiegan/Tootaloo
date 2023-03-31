@@ -10,6 +10,7 @@ void main() async {
   await dotenv.load();
   UserPreferences.setId('null');
   UserPreferences.setUsername('null');
+  UserPreferences.setPreference('null');
   runApp(const MyApp());
 }
 

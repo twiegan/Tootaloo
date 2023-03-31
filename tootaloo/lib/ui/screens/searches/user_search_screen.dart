@@ -88,7 +88,9 @@ Future<User> getSearchedUser(String username) async {
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"username": username};
   Uri uri = Uri.https(
-      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/user-by-username/", queryParams);
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/user-by-username/",
+      queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 
@@ -96,7 +98,8 @@ Future<User> getSearchedUser(String username) async {
   User userData = User(
       username: responseData["username"],
       posts_ids: responseData["posts"],
-      following_ids: responseData["following"]);
+      following_ids: responseData["following"],
+      preference: responseData["preference"]);
 
   return userData;
 }
