@@ -77,6 +77,7 @@ flutter:
     - assets/images/floor_maps/HAAS/
     - assets/images/floor_maps/LWSN/
     - assets/images/floor_maps/PMU/
+    - assets/images/tootaloo_logo.png
 
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg

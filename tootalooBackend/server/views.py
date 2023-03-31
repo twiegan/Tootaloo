@@ -8,6 +8,7 @@ import json
 from bson import ObjectId, json_util
 from bson.json_util import dumps
 from django.views.decorators.csrf import csrf_exempt
+from bson.objectid import ObjectId
 from datetime import datetime
 
 # Initialize environment variables .env inside of tootalooBackend/
@@ -16,7 +17,7 @@ environ.Env.read_env()
 
 # Create your views here.
 # def index(request):
-#     return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
+#     return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
 
 
 
@@ -26,6 +27,53 @@ environ.Env.read_env()
 client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
 @csrf_exempt 
+def update_votes(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+	id_query = { '_id':  rating_id}
+	new_upvotes = { '$set': { body['type']: int(body['votes']) } }
+	print(body['id'], body['votes'])
+	
+	db = client['tootaloo']
+	ratings_collection = db['ratings']
+	ratings_collection.update_one(id_query, new_upvotes)
+
+	print(ratings_collection.find_one({'_id': rating_id}))
+        
+	return HttpResponse()
+        
+
+@csrf_exempt
+def check_votes(request):
+    print("running check votes")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    print(rating_id)
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('true')
+    user_id = ObjectId(user_id)
+    print(user_id)
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
+    print(rating['voted_users'])
+    
+    if rating != None and rating['voted_users'] != None and user_id in rating['voted_users']:
+        print('true')
+        return HttpResponse('true')
+    
+    if rating != None and rating['voted_users'] != None and user_id not in rating['voted_users']:
+        print('updating votes')
+        id_query = { '_id':  rating_id}
+        new_voted = { '$push': { 'voted_users': user_id } }
+        ratings_collection.update_one(id_query, new_voted)
+
+    return HttpResponse('false')
+
+	
 def submit_rating(request):
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
@@ -60,7 +108,7 @@ def restrooms(request):
 
 
 def ratings(request):
-	print("got GET request for ratings")
+	print('got GET request for ratings')
 	
 	db = client['tootaloo']
 
@@ -75,7 +123,7 @@ def ratings(request):
 
 
 def following_ratings(request):
-	print("got GET request for ratings")
+	print('got GET request for ratings')
 	
 	db = client['tootaloo']
 
@@ -97,7 +145,8 @@ def following_ratings(request):
 
 
 def buildings(request):
-	print("got GET request for buildings")
+
+	print('got GET request for buildings')
 
 	db = client['tootaloo']
 	buildings_collection = db['buildings']
@@ -345,7 +394,7 @@ def save_user_settings(request):
 
 def index(request):
 		#return HttpResponse(review_details)
-    return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
+    return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
 
 
 

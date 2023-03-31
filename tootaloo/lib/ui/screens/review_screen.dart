@@ -71,7 +71,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   void submit(
       restroom, cleanliness, internet, vibe, overallRating, review) async {
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/submit_rating/"),
+      Uri.parse("http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/submit_rating/"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

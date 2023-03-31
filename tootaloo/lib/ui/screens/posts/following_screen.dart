@@ -8,7 +8,8 @@ import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/AppUser.dart';
 
 class FollowingScreen extends StatefulWidget {
   const FollowingScreen({super.key, required this.title});
@@ -56,7 +57,8 @@ class _FollowingScreenState extends State<FollowingScreen> {
         body: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
-            children: _ratings.map((rating) => ListTileItem(rating: rating)).toList(),
+            children:
+                _ratings.map((rating) => ListTileItem(rating: rating)).toList(),
           ),
         ),
       ),
@@ -65,7 +67,43 @@ class _FollowingScreenState extends State<FollowingScreen> {
   }
 }
 
+void _updateVotes(id, int votes, String type) async {
+  final response = await http.post(
+    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update_votes/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'type': type,
+      'id': id.toString(),
+      'votes': votes.toString(),
+    }),
+  );
+}
+
+Future<bool> _checkVoted(ratingId) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return true;
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check_votes/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body:
+        jsonEncode(<String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
+  );
+  if (response.body.toString() == 'false') {
+    return false;
+  }
+  return true;
+}
+
 class Rating {
+  final id;
   final String building;
   final String by;
   final String room;
@@ -78,6 +116,7 @@ class Rating {
   final int downvotes;
 
   Rating({
+    required this.id,
     required this.building,
     required this.by,
     required this.room,
@@ -101,6 +140,7 @@ Future<List<Rating>> _getRatings() async {
   List<Rating> ratings = [];
   for (var rating in responseData) {
     Rating ratingData = Rating(
+        id: rating["_id"],
         building: rating["building"],
         by: rating["by"],
         room: rating["room"],
@@ -113,7 +153,6 @@ Future<List<Rating>> _getRatings() async {
         downvotes: rating["downvotes"]);
     ratings.add(ratingData);
   }
-
   return ratings;
 }
 
@@ -185,9 +224,16 @@ class _ListTileItemState extends State<ListTileItem> {
                       constraints: const BoxConstraints(),
                       icon: const Icon(Icons.arrow_upward, color: Colors.green),
                       onPressed: () {
-                        setState(() {
-                          _upvotes += 1;
-                        });
+                        if (_upvotes < 1) {
+                          _checkVoted(widget.rating.id).then((value) {
+                            if (!value) {
+                              setState(() {
+                                _upvotes += 1;
+                              });
+                              _updateVotes(widget.rating.id, widget.rating.upvotes + _upvotes, "upvotes");
+                            }
+                          });
+                        }
                       },
                     ),
                     Text(
@@ -205,9 +251,16 @@ class _ListTileItemState extends State<ListTileItem> {
                       constraints: const BoxConstraints(),
                       icon: const Icon(Icons.arrow_downward, color: Colors.red),
                       onPressed: () {
-                        setState(() {
-                          _downvotes += 1;
-                        });
+                        if (_downvotes < 1) {
+                          _checkVoted(widget.rating.id).then((value) {
+                            if (!value) {
+                              setState(() {
+                                _downvotes += 1;
+                              });
+                              _updateVotes(widget.rating.id, widget.rating.downvotes + _downvotes, "downvotes");
+                            }
+                          });
+                        }
                       },
                     ),
                     Text(
