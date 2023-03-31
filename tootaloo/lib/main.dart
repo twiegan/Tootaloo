@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'ui/screens/posts/trending_screen.dart';
 import 'package:flutter_config/flutter_config.dart';
+import 'package:tootaloo/SharedPref.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterConfig.loadEnvVariables();
+  UserPreferences.setId('null');
+  UserPreferences.setUsername('null');
   runApp(const MyApp());
 }
 
