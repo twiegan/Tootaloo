@@ -93,7 +93,7 @@ class Rating {
 Future<List<Rating>> _getRatings() async {
   // get the building markers from the database/backend
   // TODO: change this url later
-  const String url = "http://127.0.0.1:8000/following_ratings/";
+  const String url = "http://10.44.57.40:8000/following_ratings/";
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
 
