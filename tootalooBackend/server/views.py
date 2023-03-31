@@ -168,6 +168,29 @@ def login(request):
   response = "bad_password " + userID
   return HttpResponse(response)
 
+@csrf_exempt
+def user_register(request):
+  body_unicode = request.body.decode('utf-8')
+  body = json.loads(body_unicode)
+
+  username = body['username']
+  passHash = body['passHash']
+  bathroom_preference = body['bathroom_preference']
+  print("BATHROOM RESPONSE: " + bathroom_preference)
+
+  db = client['tootaloo']
+  user_collection = db['users']
+  pre_existing_user = user_collection.find_one({'username': username})
+
+  if pre_existing_user == None:
+    new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash, 'bathroom_preference': bathroom_preference}
+    user_collection.insert_one(new_user)
+    return HttpResponse("register_success")
+  else:
+    return HttpResponse("username_taken")
+
+
+
 def index(request):
 		#return HttpResponse(review_details)
     return HttpResponse("<h1>Hello and welcome to <u>Tootaloo</u></h1>")
