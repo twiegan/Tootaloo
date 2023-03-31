@@ -1,12 +1,10 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:faker/faker.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
@@ -111,6 +109,7 @@ Future<List<Rating>> _getRatings() async {
   // get the building markers from the database/backend
   // TODO: change this url later
   const String url = "http://127.0.0.1:8000/ratings/";
+
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
 
@@ -167,23 +166,19 @@ class _ListTileItemState extends State<ListTileItem> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.account_circle, size: 40),
+                const Icon(Icons.account_circle, size: 30),
                 Text(widget.rating.by)
               ],
             ),
-            Flexible(
-              flex: 5,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star, color: Color.fromARGB(255, 218, 196, 0)),
-                  Icon(Icons.star),
-                  Icon(Icons.star),
-                ],
-              ),
-            ),
+            Expanded(child: RatingBarIndicator(
+              rating: widget.rating.overallRating.toDouble(),
+              itemCount: 5,
+              itemSize: 20.0,
+              itemBuilder: (context, _) => const Icon(
+                Icons.star,
+                color: Color.fromARGB(255, 218, 196, 0),
+              )
+            ))
           ]),
           title: Text(
             widget.rating.building + widget.rating.room,

@@ -1,13 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/screens/login_screen.dart';
+import 'package:tootaloo/SharedPref.dart';
 
 class LogoutButton extends StatelessWidget {
-  final FirebaseAuth firebaseAuth;
-  const LogoutButton({super.key, required this.firebaseAuth});
+  const LogoutButton({super.key});
 
   Future<void> signOut() async {
-    await firebaseAuth.signOut();
+    print("singout");
+    UserPreferences.setUsername('null');
+    UserPreferences.setId('null');
   }
 
   @override

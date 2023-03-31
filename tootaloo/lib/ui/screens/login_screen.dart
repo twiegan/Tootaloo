@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/components/login_button.dart';
 import 'package:tootaloo/ui/screens/terms_of_service.dart';
@@ -12,29 +11,28 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  var email;
+  var username;
   var password;
 
   @override
   void initState() {
     super.initState();
-    emailController.addListener((refreshEmail));
+    usernameController.addListener((refreshEmail));
     passwordController.addListener((refreshPassword));
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    emailController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
   void refreshEmail() {
-    email = emailController.text;
+    username = usernameController.text;
   }
 
   void refreshPassword() {
@@ -53,30 +51,30 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 60.0, bottom: 20),
-              child: Center(
-                child: SizedBox(
-                    width: 200,
-                    height: 150,
-                    /*decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('assets/images/tootaloo_logo.png')),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 60.0, bottom: 20),
+            //   child: Center(
+            //     child: SizedBox(
+            //         width: 200,
+            //         height: 150,
+            //         /*decoration: BoxDecoration(
+            //             color: Colors.red,
+            //             borderRadius: BorderRadius.circular(50.0)),*/
+            //         child: Image.asset('assets/images/tootaloo_logo.png')),
+            //   ),
+            // ),
             Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Email',
-                  hintText: 'Enter valid email id as abc@gmail.com',
+                  labelText: 'Username',
+                  hintText: 'Enter your username',
                   filled: true,
                   fillColor: Colors.white,
                 ),
-                controller: emailController,
+                controller: usernameController,
                 onChanged: (value) {
                   setState(() {});
                 },
@@ -127,9 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: const Color.fromRGBO(181, 211, 235, 1),
                     borderRadius: BorderRadius.circular(20)),
                 child: LoginButton(
-                  email: emailController.text,
+                  username: usernameController.text,
                   password: passwordController.text,
-                  firebase_auth: firebaseAuth,
                 )),
             const SizedBox(
               height: 100,

@@ -1,4 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/screens/login_screen.dart';
 
@@ -10,58 +13,69 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordController2 = TextEditingController();
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  var email;
-  var password;
-  var password2;
+  var _username;
+  var _password;
+  var _password2;
+  String _bathroom_preference = "";
 
   @override
   void initState() {
     super.initState();
-    emailController.addListener((refreshEmail));
+    usernameController.addListener((refreshEmail));
     passwordController.addListener((refreshPassword));
     passwordController2.addListener((refreshPassword2));
   }
 
-  bool validateEmail(String value) {
-    Pattern pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex = RegExp(pattern as String);
-    return (!regex.hasMatch(value)) ? false : true;
-  }
+  // bool validateEmail(String value) {
+  //   Pattern pattern =
+  //       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+  //   RegExp regex = RegExp(pattern as String);
+  //   return (!regex.hasMatch(value)) ? false : true;
+  // }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    emailController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
   void refreshEmail() {
-    email = emailController.text;
+    _username = usernameController.text;
   }
 
   void refreshPassword() {
-    password = passwordController.text;
+    _password = passwordController.text;
   }
 
   void refreshPassword2() {
-    password2 = passwordController2.text;
+    _password2 = passwordController2.text;
   }
 
   Future<String?> signUp(
-      {required String email, required String password}) async {
-    try {
-      await firebaseAuth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      return "Signed up";
-    } on FirebaseAuthException catch (e) {
-      return e.message;
-    }
+      {required String username, required String password, required String bathroom_preference}) async {
+    final bytes = utf8.encode(password);
+    final passHash = sha256.convert(bytes);
+    print("PASSHASH: $passHash");
+    const String url = "http://153.33.43.118:8000/user_register/";
+    final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': username,
+          'passHash': passHash.toString(),
+          'bathroom_preference': bathroom_preference,
+        })
+    );
+    final tester = response.body.toString();
+    print("RESPONSE BODY: $tester");
+    return response.body.toString();
   }
 
   @override
@@ -94,12 +108,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               child: TextField(
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Email',
-                  hintText: 'Enter valid email id as abc@gmail.com',
+                  labelText: 'Username',
+                  hintText: 'Enter your new username!',
                   filled: true,
                   fillColor: Colors.white,
                 ),
-                controller: emailController,
+                controller: usernameController,
                 onChanged: (value) {
                   setState(() {});
                 },
@@ -144,31 +158,70 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
             ),
             Container(
+                height: 100,
+                width: 420,
+                padding: const EdgeInsets.only(
+                    left: 15.0, right: 15.0, top: 15, bottom: 15
+                ),
+                //padding: EdgeInsets.symmetric(horizontal: 15),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSelectedItems: true,
+                    showSearchBox: true,
+                  ),
+                  items: const ['male', 'female', 'unisex'],
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Bathroom Preference",
+                        hintText: "Select Your Bathroom Preference",
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      )
+                  ),
+                  onChanged: (value) {
+                    _bathroom_preference = (value != null) ? value : '';
+                  },
+                  selectedItem: "",
+                ),
+              ),
+            Container(
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
                     color: const Color.fromRGBO(181, 211, 235, 1),
-                    borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                ),
                 child: TextButton(
                     onPressed: () async {
-                      if (!validateEmail(email)) {
-                        print("BAD EMAIL");
-                        return; //TODO add bad email popup window
-                      }
-                      if (password != password2) {
+                      // if (!validateEmail(_username)) {
+                      //   print("BAD EMAIL");
+                      //   return; //TODO add bad email popup window
+                      // }
+                      if (_password != _password2) {
                         print("MISMATCHED PASSWORDS");
                         return; //TODO add mismatched passwords popup window
                       }
+                      if (_bathroom_preference == "") {
+                        print("NO PREFERENCE SELECTED");
+                        return; //TODO add popup for no preference selected
+                      }
                       String? response =
-                          await signUp(email: email, password: password);
+                          await signUp(username: _username, password: _password, bathroom_preference: _bathroom_preference);
                       if (response != null) print("Response: $response");
+
                       switch (response) {
-                        case "Signed up":
+                        case "register_success":
                           // ignore: use_build_context_synchronously
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
                             return const LoginScreen();
                           }));
+                          break;
+                        case "username_taken":
+                          print("USERNAME TAKEN ERROR");
+                          //TODO IMPLEMENT ERROR POPUP
+                          break;
                       }
                     },
                     child: const Text(
