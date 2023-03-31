@@ -157,34 +157,41 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
-              //padding: EdgeInsets.symmetric(horizontal: 15),
-              child: DropdownSearch<String>(
-                popupProps: const PopupProps.menu(
-                  showSelectedItems: true,
-                  showSearchBox: true,
+            Container(
+                height: 100,
+                width: 420,
+                padding: const EdgeInsets.only(
+                    left: 15.0, right: 15.0, top: 15, bottom: 15
                 ),
-                items: const ['male', 'female', 'unisex'],
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: "Bathroom Preference",
-                    hintText: "Select Your Bathroom Preference"
-                  )
+                //padding: EdgeInsets.symmetric(horizontal: 15),
+                child: DropdownSearch<String>(
+                  popupProps: const PopupProps.menu(
+                    showSelectedItems: true,
+                    showSearchBox: true,
+                  ),
+                  items: const ['male', 'female', 'unisex'],
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Bathroom Preference",
+                        hintText: "Select Your Bathroom Preference",
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      )
+                  ),
+                  onChanged: (value) {
+                    _bathroom_preference = (value != null) ? value : '';
+                  },
+                  selectedItem: "",
                 ),
-                onChanged: (value) {
-                  _bathroom_preference = (value != null) ? value : '';
-                },
-                selectedItem: "",
               ),
-            ),
             Container(
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
                     color: const Color.fromRGBO(181, 211, 235, 1),
-                    borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                ),
                 child: TextButton(
                     onPressed: () async {
                       // if (!validateEmail(_username)) {
