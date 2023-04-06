@@ -89,7 +89,7 @@ Future<User> getSearchedUser(String username) async {
   // Send request to backend and parse response
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"username": username};
-  Uri uri = Uri.https(
+  Uri uri = Uri.http(
       dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
       "/user-by-username/",
       queryParams);
@@ -114,7 +114,7 @@ Future<bool> checkFollowed(String? follower, String target) async {
     "followerUsername": follower,
     "targetUsername": target
   };
-  Uri uri = Uri.https(
+  Uri uri = Uri.http(
       dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
       "/check-following-by-username/",
       queryParams);

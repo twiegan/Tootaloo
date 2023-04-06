@@ -114,7 +114,7 @@ Future<List<Restroom>> getSearchedRestrooms(
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"building": building, "floor": floor};
   Uri uri =
-      Uri.https(dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/restrooms-by-building-and-floor/", queryParams);
+      Uri.http(dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/restrooms-by-building-and-floor/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 

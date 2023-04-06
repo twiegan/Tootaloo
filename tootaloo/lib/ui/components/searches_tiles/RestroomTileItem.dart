@@ -141,7 +141,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
   // Send request to backend and parse response
   // TODO: change this url later
   Map<String, dynamic> queryParams = {"ids[]": ids};
-  Uri uri = Uri.https(
+  Uri uri = Uri.http(
       dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/ratings-by-ids/", queryParams);
   final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);

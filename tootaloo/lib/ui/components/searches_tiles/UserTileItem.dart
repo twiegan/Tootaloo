@@ -109,7 +109,7 @@ Future<bool> unfollowUser(
     "followerUsername": followerUsername,
     "targetUsername": targetUsername
   };
-  Uri uri = Uri.https(
+  Uri uri = Uri.http(
       dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
       "/unfollow-user-by-username/",
       queryParams);
