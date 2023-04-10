@@ -39,7 +39,7 @@ dependencies:
   location: ^4.2.0
   custom_map_markers: ^0.0.2+1
   material: ^1.0.0+2
-  faker: ^2.1.0  
+  faker: ^2.1.0
   http: ^0.13.5
   marquee: ^2.2.3
   dropdown_search: ^5.0.6
@@ -47,7 +47,6 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   shared_preferences: ^2.0.20
   flutter_dotenv: ^5.0.2
-  
 
 dev_dependencies:
   flutter_test:

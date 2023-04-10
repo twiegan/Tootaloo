@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -17,35 +20,179 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordController2 = TextEditingController();
+  final emailController = TextEditingController();
+  final verificationCodeController = TextEditingController();
+
   var _username;
   var _password;
   var _password2;
+  var _email;
+  var _verificationCode;
+  bool _loadingForVerification = false;
   String _bathroom_preference = "";
+  String _correctVerificationCode = "";
 
   @override
   void initState() {
     super.initState();
-    usernameController.addListener((refreshEmail));
+    usernameController.addListener((refreshUsername));
     passwordController.addListener((refreshPassword));
     passwordController2.addListener((refreshPassword2));
+    emailController.addListener((refreshEmail));
+    verificationCodeController.addListener((refreshVerificationCode));
+    _loadingForVerification = false;
   }
 
-  // bool validateEmail(String value) {
-  //   Pattern pattern =
-  //       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-  //   RegExp regex = RegExp(pattern as String);
-  //   return (!regex.hasMatch(value)) ? false : true;
-  // }
+  bool validateEmail() {
+    if (_email != null) {
+      return RegExp(
+              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+          .hasMatch(_email);
+    }
+    return true;
+  }
+
+  bool validateVerificationCode() {
+    if (_verificationCode == null) {
+      // no error message initially shown
+      return true;
+    }
+    if (_verificationCode.toString().length != 4) {
+      return false;
+    }
+    return true;
+  }
+
+  String? getErrorMessageForVerificationCode() {
+    if (_verificationCode == null || _verificationCode.toString().length != 4) {
+      return "Code is not valid";
+    }
+    if (_verificationCode != _correctVerificationCode) {
+      return "Entered code is wrong";
+    }
+    return null;
+  }
+
+  Future<String?> insertUser() async {
+    final bytes = utf8.encode(_password!);
+    final passHash = sha256.convert(bytes);
+    String url =
+        "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/insert_user/";
+    final response = await http.post(Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': _username,
+          'passHash': passHash.toString(),
+          'bathroom_preference': _bathroom_preference,
+          'email': _email,
+        }));
+    return response.body.toString();
+  }
+
+  void showPopupMessage(
+      BuildContext context, Icon icon, String title, String text) {
+    showDialog(
+        context: context,
+        barrierDismissible:
+            false, // disables popup to close if tapped outside popup (need a button to close)
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                icon,
+                Text(
+                  title,
+                ),
+              ],
+            ),
+            content: Text(text),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }, //closes popup
+              ),
+            ],
+          );
+        });
+  }
+
+  _displayVerificationDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Check your email'),
+              content: TextField(
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Code',
+                  hintText: "Enter verification code",
+                  errorText:
+                      !validateVerificationCode() ? "Code is not valid" : null,
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                controller: verificationCodeController,
+                onChanged: (value) {
+                  setState(() {});
+                },
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  onPressed: !validateVerificationCode()
+                      ? null
+                      : () async {
+                          if (_verificationCode == _correctVerificationCode) {
+                            await insertUser();
+
+                            Navigator.of(context).pop();
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return const LoginScreen();
+                            }));
+                            showPopupMessage(context, const Icon(Icons.check),
+                                " Success", "Registered successfully");
+                          } else {
+                            showPopupMessage(context, const Icon(Icons.error),
+                                " Error", "Entered verification code is wrong");
+                          }
+                        },
+                  child: const Text('Verify'),
+                )
+              ],
+            );
+          });
+        });
+  }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
     usernameController.dispose();
     passwordController.dispose();
+    emailController.dispose();
+    verificationCodeController.dispose();
     super.dispose();
   }
 
-  void refreshEmail() {
+  void refreshUsername() {
     _username = usernameController.text;
   }
 
@@ -57,13 +204,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _password2 = passwordController2.text;
   }
 
+  void refreshEmail() {
+    _email = emailController.text;
+  }
+
+  void refreshVerificationCode() {
+    _verificationCode = verificationCodeController.text;
+  }
+
   Future<String?> signUp(
-      {required String username,
-      required String password,
-      required String bathroom_preference}) async {
-    final bytes = utf8.encode(password);
-    final passHash = sha256.convert(bytes);
-    print("PASSHASH: $passHash");
+      {required String username, required String email}) async {
     String url =
         "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/user_register/";
     final response = await http.post(Uri.parse(url),
@@ -72,10 +222,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         },
         body: jsonEncode(<String, String>{
           'username': username,
-          'passHash': passHash.toString(),
-          'bathroom_preference': bathroom_preference,
+          'email': email,
         }));
-    final tester = response.body.toString();
+
     return response.body.toString();
   }
 
@@ -92,16 +241,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 60.0, bottom: 20),
-              child: Center(
-                child: SizedBox(
-                    width: 200,
-                    height: 150,
-                    /*decoration: BoxDecoration(
+              padding: const EdgeInsets.only(top: 0.0, bottom: 0),
+              child: SizedBox(
+                  width: 240,
+                  height: 150,
+                  /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('assets/images/tootaloo_logo.png')),
-              ),
+                  child: Image.asset('assets/images/tootaloo_logo.png',
+                      fit: BoxFit.fill)),
             ),
             Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
@@ -141,7 +289,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             Padding(
               padding: const EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
+                  left: 15.0, right: 15.0, top: 0, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 obscureText: true,
@@ -158,11 +306,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 0, bottom: 15),
+              child: TextField(
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Email',
+                  hintText: 'Enter your email address',
+                  errorText:
+                      !validateEmail() ? 'Email address is not valid' : null,
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                controller: emailController,
+                onChanged: (value) {
+                  setState(() {});
+                },
+              ),
+            ),
             Container(
               height: 100,
               width: 420,
               padding: const EdgeInsets.only(
-                  left: 15.0, right: 15.0, top: 15, bottom: 15),
+                  left: 15.0, right: 15.0, top: 0, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: DropdownSearch<String>(
                 popupProps: const PopupProps.menu(
@@ -193,39 +360,61 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 child: TextButton(
                     onPressed: () async {
-                      // if (!validateEmail(_username)) {
-                      //   print("BAD EMAIL");
-                      //   return; //TODO add bad email popup window
-                      // }
+                      if (_email == null || !validateEmail()) {
+                        print("BAD EMAIL");
+                        showPopupMessage(context, const Icon(Icons.error),
+                            " Error", "Email is invalid");
+                        return;
+                      }
                       if (_password != _password2) {
                         print("MISMATCHED PASSWORDS");
-                        return; //TODO add mismatched passwords popup window
+                        showPopupMessage(context, const Icon(Icons.error),
+                            " Error", "Passwords are not matching");
+                        return;
                       }
                       if (_bathroom_preference == "") {
                         print("NO PREFERENCE SELECTED");
-                        return; //TODO add popup for no preference selected
+                        showPopupMessage(context, const Icon(Icons.error),
+                            " Error", "Preference is not selected");
+                        return;
                       }
+
+                      setState(() {
+                        _loadingForVerification = true;
+                      });
                       String? response = await signUp(
                           username: _username,
-                          password: _password,
-                          bathroom_preference: _bathroom_preference);
-                      if (response != null) print("Response: $response");
+                          // password: _password,
+                          // bathroom_preference: _bathroom_preference,
+                          email: _email);
+                      var responseData = json.decode(response!);
 
-                      switch (response) {
+                      switch (responseData['status']) {
                         case "register_success":
-                          // ignore: use_build_context_synchronously
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return const LoginScreen();
-                          }));
+                          setState(() {
+                            _correctVerificationCode =
+                                responseData['verification_code'].toString();
+                          });
+                          _displayVerificationDialog(context);
+
                           break;
                         case "username_taken":
                           print("USERNAME TAKEN ERROR");
-                          //TODO IMPLEMENT ERROR POPUP
+                          showPopupMessage(context, const Icon(Icons.error),
+                              " Error", "Entered username is taken");
+                          break;
+                        case "email_taken":
+                          print("EMAIL TAKEN ERROR");
+                          showPopupMessage(context, const Icon(Icons.error),
+                              " Error", "Entered email is taken");
                           break;
                       }
+
+                      setState(() {
+                        _loadingForVerification = false;
+                      });
                     },
-                    child: const Text(
+                    child: _loadingForVerification ? const CircularProgressIndicator() :  const Text(
                       "Signup",
                       style: TextStyle(color: Colors.black),
                     )))
