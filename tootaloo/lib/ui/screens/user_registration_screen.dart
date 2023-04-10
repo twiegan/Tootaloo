@@ -63,16 +63,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return true;
   }
 
-  String? getErrorMessageForVerificationCode() {
-    if (_verificationCode == null || _verificationCode.toString().length != 4) {
-      return "Code is not valid";
-    }
-    if (_verificationCode != _correctVerificationCode) {
-      return "Entered code is wrong";
-    }
-    return null;
-  }
-
   Future<String?> insertUser() async {
     final bytes = utf8.encode(_password!);
     final passHash = sha256.convert(bytes);
