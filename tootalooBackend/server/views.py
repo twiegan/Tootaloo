@@ -69,7 +69,8 @@ def check_votes(request):
 
     return HttpResponse('false')
 
-	
+
+@csrf_exempt
 def submit_rating(request):
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
@@ -79,7 +80,6 @@ def submit_rating(request):
 		building, room = body['restroom'].split()
 	
 	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': ObjectId('507f191e810c19729de860ea')}
-
 
 	db = client['tootaloo']
 	restroom_collection = db['restrooms']
@@ -251,7 +251,7 @@ def save_user_settings(request):
 
   if pre_existing_user != None:
     user_collection.update_one({
-      'username': pre_existing_user['username']
+      '_id': pre_existing_user['_id']
     },{
       '$set': {
         'bathroom_preference': body['bathroom_preference']

@@ -57,13 +57,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<String?> signUp(
-      {required String username, required String password, required String bathroom_preference}) async {
+      {required String username,
+      required String password,
+      required String bathroom_preference}) async {
     final bytes = utf8.encode(password);
     final passHash = sha256.convert(bytes);
     print("PASSHASH: $passHash");
-    const String url = "http://153.33.43.118:8000/user_register/";
-    final response = await http.post(
-        Uri.parse(url),
+    const String url = "http://127.0.0.1:8000/user_register/";
+    final response = await http.post(Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -71,8 +72,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'username': username,
           'passHash': passHash.toString(),
           'bathroom_preference': bathroom_preference,
-        })
-    );
+        }));
     final tester = response.body.toString();
     print("RESPONSE BODY: $tester");
     return response.body.toString();
@@ -158,39 +158,37 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
             ),
             Container(
-                height: 100,
-                width: 420,
-                padding: const EdgeInsets.only(
-                    left: 15.0, right: 15.0, top: 15, bottom: 15
+              height: 100,
+              width: 420,
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 15, bottom: 15),
+              //padding: EdgeInsets.symmetric(horizontal: 15),
+              child: DropdownSearch<String>(
+                popupProps: const PopupProps.menu(
+                  showSelectedItems: true,
+                  showSearchBox: true,
                 ),
-                //padding: EdgeInsets.symmetric(horizontal: 15),
-                child: DropdownSearch<String>(
-                  popupProps: const PopupProps.menu(
-                    showSelectedItems: true,
-                    showSearchBox: true,
-                  ),
-                  items: const ['male', 'female', 'unisex'],
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText: "Bathroom Preference",
-                        hintText: "Select Your Bathroom Preference",
-                        border: OutlineInputBorder(),
-                        filled: true,
-                        fillColor: Colors.white,
-                      )
-                  ),
-                  onChanged: (value) {
-                    _bathroom_preference = (value != null) ? value : '';
-                  },
-                  selectedItem: "",
-                ),
+                items: const ['male', 'female', 'unisex'],
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                  labelText: "Bathroom Preference",
+                  hintText: "Select Your Bathroom Preference",
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                )),
+                onChanged: (value) {
+                  _bathroom_preference = (value != null) ? value : '';
+                },
+                selectedItem: "",
               ),
+            ),
             Container(
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
-                    color: const Color.fromRGBO(181, 211, 235, 1),
-                    borderRadius: BorderRadius.circular(20),
+                  color: const Color.fromRGBO(181, 211, 235, 1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: TextButton(
                     onPressed: () async {
@@ -206,8 +204,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         print("NO PREFERENCE SELECTED");
                         return; //TODO add popup for no preference selected
                       }
-                      String? response =
-                          await signUp(username: _username, password: _password, bathroom_preference: _bathroom_preference);
+                      String? response = await signUp(
+                          username: _username,
+                          password: _password,
+                          bathroom_preference: _bathroom_preference);
                       if (response != null) print("Response: $response");
 
                       switch (response) {
