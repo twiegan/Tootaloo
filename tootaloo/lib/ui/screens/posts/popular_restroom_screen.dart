@@ -7,6 +7,7 @@ import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 double roundDouble(double value, int places){ 
@@ -92,7 +93,7 @@ class Restroom {
 Future<List<Restroom>> _getRestrooms() async {
   // get the building markers from the database/backend
   // TODO: change this url later
-  const String url = "http://127.0.0.1:8000/restrooms/";
+  String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restrooms/";
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
 

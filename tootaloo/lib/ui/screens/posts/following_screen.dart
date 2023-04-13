@@ -7,6 +7,7 @@ import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 
@@ -68,7 +69,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
 
 void _updateVotes(id, int votes, String type) async {
   final response = await http.post(
-    Uri.parse('http://127.0.0.1:8000/update_votes/'),
+    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update_votes/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -88,7 +89,7 @@ Future<bool> _checkVoted(ratingId) async {
   }
   userId = user.id!;
   final response = await http.post(
-    Uri.parse('http://127.0.0.1:8000/check_votes/'),
+    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check_votes/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -132,7 +133,7 @@ class Rating {
 Future<List<Rating>> _getRatings() async {
   // get the building markers from the database/backend
   // TODO: change this url later
-  const String url = "http://127.0.0.1:8000/following_ratings/";
+  String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/following_ratings/";
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
 

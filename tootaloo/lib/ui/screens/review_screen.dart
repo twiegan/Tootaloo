@@ -6,6 +6,7 @@ import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import '../components/bottom_nav_bar.dart';
 import '../components/top_nav_bar.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 double roundDouble(double value, int places) {
   num mod = pow(10.0, places);
@@ -56,7 +57,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<List<String>> _getRestrooms() async {
     // get the building markers from the database/backend
     // TODO: change this url later
-    const String url = "http://127.0.0.1:8000/restrooms/";
+    String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restrooms/";
     final response = await http.get(Uri.parse(url));
     var responseData = json.decode(response.body);
     List<String> tempList = [];
@@ -70,7 +71,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   void submit(
       restroom, cleanliness, internet, vibe, overallRating, review) async {
     final response = await http.post(
-      Uri.parse("http://127.0.0.1:8000/submit_rating/"),
+      Uri.parse("http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/submit_rating/"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

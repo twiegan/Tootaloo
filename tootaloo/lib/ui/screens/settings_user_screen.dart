@@ -7,6 +7,8 @@ import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/logout_button.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tootaloo/SharedPref.dart' as sharedPref;
 
 class SettingsUserScreen extends StatefulWidget {
   const SettingsUserScreen({super.key, required this.title});
@@ -23,7 +25,8 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
   Future<String?> saveSettings({required String bathroom_preference}) async {
     AppUser _user = await UserPreferences.getUser();
     String? _username = _user.username;
-    const String url = "http://127.0.0.1:8000/save_user_settings/";
+    String url =
+        "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/save_user_settings/";
     final response = await http.post(Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -33,7 +36,6 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
           'bathroom_preference': bathroom_preference,
         }));
     final tester = response.body.toString();
-    print("RESPONSE BODY: $tester");
     return response.body.toString();
   }
 
@@ -104,6 +106,8 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
                   switch (response) {
                     case "save_success":
                       // ignore: use_build_context_synchronously
+                      sharedPref.UserPreferences.setPreference(
+                          _bathroom_preference);
                       _showAlertDialog(
                           "Your Settings Were Saved Successfully!");
                       break;

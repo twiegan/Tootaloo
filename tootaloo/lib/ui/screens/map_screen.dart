@@ -8,13 +8,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:marquee/marquee.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+import 'package:tootaloo/SharedPref.dart' as sharedPref;
 
 import 'floor_map_screen.dart';
 
-const String URL = 'http://127.0.0.1:8000'; //TODO: change this url later
+String URL =
+    "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}"; //TODO: change this url later
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -174,7 +177,7 @@ class _MapScreenState extends State<MapScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
           // hide all currently open snackbar
           ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -198,7 +201,8 @@ class _MapScreenState extends State<MapScreen> {
           List<Building> matchingPrefBuildings = _buildings;
 
           // TODO: get actual user preference
-          String userPreference = "male";
+          String? userPreference =
+              await sharedPref.UserPreferences.getPreference();
 
           // Sort the matching buildings by manhattan distance
           matchingPrefBuildings.sort((a, b) => a
@@ -218,7 +222,7 @@ class _MapScreenState extends State<MapScreen> {
               } else if (userPreference == "unisex") {
                 preferredRestroomCount = building.unisexCount;
               } else {
-                preferredRestroomCount = 0;
+                preferredRestroomCount = building.restroomCount;
               }
 
               if (preferredRestroomCount == 0) {
@@ -301,7 +305,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<List<Building>> _getBuildingMarkers() async {
     // get the building markers from the database/backend
-    const String url = "$URL/buildings/";
+    String url = "$URL/buildings/";
     final response = await http.get(Uri.parse(url));
     var responseData = json.decode(response.body);
 

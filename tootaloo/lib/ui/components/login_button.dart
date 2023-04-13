@@ -5,6 +5,7 @@ import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:tootaloo/AppUser.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginButton extends StatelessWidget {
   String username;
@@ -15,26 +16,25 @@ class LoginButton extends StatelessWidget {
       required String this.username,
       required String this.password});
 
-  Future<String?> signIn(
+  Future<Map<String, dynamic>?> signIn(
       {required String username, required String password}) async {
-
     final bytes = utf8.encode(password);
     final passHash = sha256.convert(bytes);
     print("PASSHASH: $passHash");
-    const String url = "http://127.0.0.1:8000/login/";
-    final response = await http.post(
-        Uri.parse(url),
+    String url =
+        "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/login/";
+    final response = await http.post(Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'username': username,
           'passHash': passHash.toString(),
-        })
-    );
-    final tester = response.body.toString();
-    print("RESPONSE BODY: $tester");
-    return response.body.toString();
+        }));
+
+    print(jsonDecode(response.body));
+    final string_response = jsonDecode(response.body);
+    return string_response;
   }
 
   @override
@@ -43,39 +43,39 @@ class LoginButton extends StatelessWidget {
         onPressed: () async {
           print("EMAIL: $username  PASSWORD:  $password");
 
-          String? response = await signIn(username: username, password: password);
-          String responseVal = '';
+          var response = await signIn(username: username, password: password);
+          String status = '';
           String userID = '';
+          String bathroom_preference = '';
           if (response != null) {
-            List<String> resSplit = response.split(' ');
-            responseVal = resSplit[0];
-            userID = resSplit[1];
-            print("ResponseVal: $responseVal, userID: $userID");
-            
+            status = response!["status"].toString();
+            userID = response!["user_id"].toString();
+            bathroom_preference = response!["bathroom_preference"].toString();
           }
-            switch (responseVal) {
-              case "good_login":
-                print("Signed in!");
-                UserPreferences.setUsername(username);
-                UserPreferences.setId(userID);
-                // AppUser currUser = await UserPreferences.getUser();
-                // if(currUser.id != null) {
-                //   print(currUser.id);
-                // }
-                // ignore: use_build_context_synchronously
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const TrendingScreen(
-                    title: "Trending",
-                  );
-                }));
-                break;
-              case "bad_password":
-                print("wrong password");
-                break;
-              case "user_dne":
-                print("user does not exist");
-                break;
-            }
+          switch (status) {
+            case "good_login":
+              print("Signed in!");
+              UserPreferences.setUsername(username);
+              UserPreferences.setId(userID);
+              UserPreferences.setPreference(bathroom_preference);
+              // AppUser currUser = await UserPreferences.getUser();
+              // if(currUser.id != null) {
+              //   print(currUser.id);
+              // }
+              // ignore: use_build_context_synchronously
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const TrendingScreen(
+                  title: "Trending",
+                );
+              }));
+              break;
+            case "bad_password":
+              print("wrong password");
+              break;
+            case "user_dne":
+              print("user does not exist");
+              break;
+          }
         },
         child: const Text(
           "Login",
