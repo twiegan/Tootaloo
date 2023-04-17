@@ -19,6 +19,9 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # Initialize environment variables .env inside of tootalooBackend/
 env = environ.Env()
 environ.Env.read_env()
