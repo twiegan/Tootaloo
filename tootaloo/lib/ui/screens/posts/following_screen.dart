@@ -246,7 +246,7 @@ class _ListTileItemState extends State<ListTileItem> {
                         widget.rating.building + widget.rating.room,
                         style: const TextStyle(fontSize: 20),
                       ),
-                      SizedBox(width: 230, child: Text(widget.rating.review))
+                      SizedBox(width: 175, child: Text(widget.rating.review))
                     ],
                   )),
               Padding(
