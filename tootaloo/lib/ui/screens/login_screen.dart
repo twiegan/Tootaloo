@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/components/login_button.dart';
+import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:tootaloo/ui/screens/terms_of_service.dart';
 import 'package:tootaloo/ui/screens/user_registration_screen.dart';
 
@@ -139,7 +140,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       }))
                     },
                 child: const Text(
-                    'New User? Create Account')), //TODO CREATE ACCOUNT PAGE
+                    'New User? Create Account')),
+            TextButton(
+                onPressed: () => {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) {
+                        return const TrendingScreen(title: 'Trending');
+                      }))
+                },
+                child: const Text(
+                    'Continue as Guest')),
           ],
         ),
       ),
