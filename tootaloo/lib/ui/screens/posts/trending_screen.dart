@@ -8,6 +8,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
+import 'package:tootaloo/ui/components/report_button.dart';
 
 class TrendingScreen extends StatefulWidget {
   const TrendingScreen({super.key, required this.title});
@@ -68,7 +69,8 @@ class _TrendingScreenState extends State<TrendingScreen> {
 
 void _updateVotes(id, int votes, String type) async {
   final response = await http.post(
-    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update_votes/'),
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update_votes/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -88,12 +90,13 @@ Future<bool> _checkVoted(ratingId) async {
   }
   userId = user.id!;
   final response = await http.post(
-    Uri.parse('http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check_votes/'),
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check_votes/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body:
-        jsonEncode(<String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
+    body: jsonEncode(
+        <String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
   );
   if (response.body.toString() == 'false') {
     return false;
@@ -101,38 +104,11 @@ Future<bool> _checkVoted(ratingId) async {
   return true;
 }
 
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-  });
-}
-
 Future<List<Rating>> _getRatings() async {
   // get the building markers from the database/backend
   // TODO: change this url later
-  String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings/";
+  String url =
+      "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings/";
 
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
@@ -191,7 +167,7 @@ class _ListTileItemState extends State<ListTileItem> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.account_circle, size: 30),
-                Text(widget.rating.by)
+                Text(widget.rating.by),
               ],
             ),
             Expanded(
@@ -209,7 +185,8 @@ class _ListTileItemState extends State<ListTileItem> {
             style: const TextStyle(fontSize: 20),
           ),
           subtitle: Text(widget.rating.review),
-          trailing: Column(
+          trailing: SingleChildScrollView(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -225,7 +202,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       icon: const Icon(Icons.arrow_upward, color: Colors.green),
                       onPressed: () {
                         // setState(() {
-                          
+
                         // });
                         if (_upvotes < 1) {
                           _checkVoted(widget.rating.id).then((value) {
@@ -233,7 +210,8 @@ class _ListTileItemState extends State<ListTileItem> {
                               setState(() {
                                 _upvotes += 1;
                               });
-                              _updateVotes(widget.rating.id, widget.rating.upvotes + _upvotes, "upvotes");
+                              _updateVotes(widget.rating.id,
+                                  widget.rating.upvotes + _upvotes, "upvotes");
                             }
                           });
                         }
@@ -260,7 +238,10 @@ class _ListTileItemState extends State<ListTileItem> {
                               setState(() {
                                 _downvotes += 1;
                               });
-                              _updateVotes(widget.rating.id, widget.rating.downvotes + _downvotes, "downvotes");
+                              _updateVotes(
+                                  widget.rating.id,
+                                  widget.rating.downvotes + _downvotes,
+                                  "downvotes");
                             }
                           });
                         }
@@ -271,8 +252,9 @@ class _ListTileItemState extends State<ListTileItem> {
                       style: const TextStyle(color: Colors.red),
                     )
                   ]),
+                  ReportButton(type: "post", rating: widget.rating)
             ],
-          ),
+          ),)
         ),
       ),
     );
