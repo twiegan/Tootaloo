@@ -91,8 +91,6 @@ class Restroom {
 }
 
 Future<List<Restroom>> _getRestrooms() async {
-  // get the building markers from the database/backend
-  // TODO: change this url later
   String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restrooms/";
   final response = await http.get(Uri.parse(url));
   var responseData = json.decode(response.body);
