@@ -102,7 +102,7 @@ Future<User> getSearchedUser(String username) async {
       username: responseData["username"],
       posts_ids: responseData["posts"],
       following_ids: responseData["following"],
-      preference: responseData["preference"]);
+      preference: responseData["bathroom_preference"]);
 
   return userData;
 }

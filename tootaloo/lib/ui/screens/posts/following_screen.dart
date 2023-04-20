@@ -254,7 +254,7 @@ class _ListTileItemState extends State<ListTileItem> {
                     ],
                   )),
               Padding(
-                  padding: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
