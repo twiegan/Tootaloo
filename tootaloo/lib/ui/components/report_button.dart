@@ -19,6 +19,7 @@ class Rating {
   final num vibe;
   final int upvotes;
   final int downvotes;
+  bool owned;
 
   Rating({
     required this.id,
@@ -32,6 +33,7 @@ class Rating {
     required this.vibe,
     required this.upvotes,
     required this.downvotes,
+    required this.owned,
   });
 }
 
@@ -88,11 +90,11 @@ class _ReportButtonState extends State<ReportButton> {
         constraints: const BoxConstraints(),
         icon: const Icon(Icons.flag_outlined, color: Colors.orange),
         onPressed: () {
-          //_checkReported(widget.rating.id).then((value) {
-            //if (!value) {
+          _checkReported(widget.rating.id).then((value) {
+            if (!value) {
               _report(widget.rating.id, widget.type);
-            //}
-          //});
+            }
+          });
         });
   }
 }

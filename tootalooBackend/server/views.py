@@ -19,6 +19,9 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # Initialize environment variables .env inside of tootalooBackend/
 env = environ.Env()
 environ.Env.read_env()
@@ -79,17 +82,48 @@ def check_votes(request):
 
     return HttpResponse('false')
 
-	
+
+@csrf_exempt
+def post_owned(request):
+	print('start')
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+	user_id = body['user_id']
+	if user_id == 'null':
+		return HttpResponse('false')
+	user_id = ObjectId(user_id)
+	print('what')
+
+	db = client['tootaloo']
+	ratings_collection = db['ratings']
+	print('here')
+	rating = ratings_collection.find_one({'_id': rating_id})
+
+	users_collection = db['users']
+	user = users_collection.find_one({'username': rating['by']})
+	print(user_id, user['_id'])
+
+	if user and user['_id'] == user_id:
+		print('true')
+		return HttpResponse('true')
+	print('false')
+	return HttpResponse('false')
+
+
+@csrf_exempt
 def submit_rating(request):
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
 	building = ''
 	room = ''
+	if body['user_id'] == 'null':
+		return HttpResponse('false')
+	user_id = ObjectId(user_id)
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	
-	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': ObjectId('507f191e810c19729de860ea')}
-
+	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id }
 
 	db = client['tootaloo']
 	restroom_collection = db['restrooms']
@@ -98,6 +132,37 @@ def submit_rating(request):
 		print('restroom exits')
 		ratings_collection = db['ratings']
 		ratings_collection.insert_one(new_rating)
+
+	return HttpResponse()
+
+
+@csrf_exempt
+def edit_rating(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+	building = ''
+	room = ''
+	if ' ' in body['restroom']:
+		building, room = body['restroom'].split()
+
+	db = client['tootaloo']
+	restroom_collection = db['restrooms']
+	restroom = restroom_collection.find_one({'building': building, 'room': room})
+	if restroom:
+		print('restroom exits')
+		ratings_collection = db['ratings']
+		ratings_collection.update_one({'_id': rating_id}, {
+			'$set': {
+				'building': building, 
+				'room': room, 
+				'overall_rating': float(body['overall_rating']), 
+				'cleanliness': float(body['cleanliness']), 
+				'internet': float(body['internet']), 
+				'vibe': float(body['vibe']), 
+				'review': body['review'],
+			}
+		})
 
 	return HttpResponse()
 
@@ -113,14 +178,30 @@ def restrooms(request):
 	return resp
 
 
+@csrf_exempt
+def rating_by_id(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+	print(rating_id)
+
+	db = client['tootaloo']
+	rating_collection = db['ratings']
+	rating = rating_collection.find_one({'_id' : rating_id})
+	resp = HttpResponse(dumps(rating, sort_keys=True, indent=4, default=json_util.default))	
+	resp['Content-Type'] = 'application/json'
+
+	return resp
+	
+
 def ratings(request):
 	print('got GET request for ratings')
 	
 	db = client['tootaloo']
 
-	ratings_collection = db['ratings']	
+	ratings_collection = db['ratings']
 
-	ratings = ratings_collection.find().sort("upvotes", -1).limit(40)
+	ratings = ratings_collection.find().sort('upvotes', -1).limit(40)
 
 	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
@@ -142,7 +223,7 @@ def following_ratings(request):
 	print(following)
 	ratings_collection = db['ratings']	
 
-	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort("createdAt", -1).limit(40)
+	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort('createdAt', -1).limit(40)
 
 	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
@@ -445,7 +526,7 @@ def save_user_settings(request):
 
   if pre_existing_user != None:
     user_collection.update_one({
-      'username': pre_existing_user['username']
+      '_id': pre_existing_user['_id']
     },{
       '$set': {
         'bathroom_preference': body['bathroom_preference']

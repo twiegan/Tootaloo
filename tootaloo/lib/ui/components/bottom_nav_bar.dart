@@ -16,7 +16,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   // fields
   static const List<Widget> _navBarPages = <Widget>[
     TrendingScreen(title: "Trending"),
-    ReviewScreen(title: "Review"),
+    ReviewScreen(id: ""),
     RestroomSearchScreen(title: "Search"),
     MapScreen(title: "Map"),
   ];

@@ -350,18 +350,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 child: TextButton(
                     onPressed: () async {
-                      if (_email == null || !validateEmail()) {
-                        print("BAD EMAIL");
+                      if (_username == null || _username == "") {
+                        print("EMPTY USERNAME");
                         showPopupMessage(context, const Icon(Icons.error),
-                            " Error", "Email is invalid");
+                            " Error", "User name is empty");
                         return;
                       }
+
                       if (_password != _password2) {
                         print("MISMATCHED PASSWORDS");
                         showPopupMessage(context, const Icon(Icons.error),
                             " Error", "Passwords are not matching");
                         return;
                       }
+
+                      if (_email == null || !validateEmail()) {
+                        print("BAD EMAIL");
+                        showPopupMessage(context, const Icon(Icons.error),
+                            " Error", "Email is invalid");
+                        return;
+                      }
+
                       if (_bathroom_preference == "") {
                         print("NO PREFERENCE SELECTED");
                         showPopupMessage(context, const Icon(Icons.error),
@@ -404,10 +413,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         _loadingForVerification = false;
                       });
                     },
-                    child: _loadingForVerification ? const CircularProgressIndicator() :  const Text(
-                      "Signup",
-                      style: TextStyle(color: Colors.black),
-                    )))
+                    child: _loadingForVerification
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            "Signup",
+                            style: TextStyle(color: Colors.black),
+                          )))
           ],
         ),
       ),
