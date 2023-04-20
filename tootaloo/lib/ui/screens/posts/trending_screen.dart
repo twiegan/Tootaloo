@@ -329,33 +329,53 @@ class _ListTileItemState extends State<ListTileItem> {
                   //   height: 30,
                   //   width: 50,
                   if (widget.rating.owned)
-                    TextButton(
-                        onPressed: () {
-                          String id = "";
-                          if (widget.rating.id != null) {
-                            id = widget.rating.id.toString();
-                          }
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (BuildContext context,
-                                  Animation<double> animation1,
-                                  Animation<double> animation2) {
-                                return ReviewScreen(id: id);
-                              },
-                              transitionDuration: Duration.zero,
-                              reverseTransitionDuration: Duration.zero,
-                            ),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(
-                                MediaQuery.of(context).size.width * 0.05,
-                                MediaQuery.of(context).size.width * 0.03),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            alignment: Alignment.centerLeft),
-                        child: const Text("Edit"))
+                    Row(
+                      children: [
+                         SizedBox( width: MediaQuery.of(context).size.width * 0.05, child: IconButton(
+                          onPressed: () {
+                            String id = "";
+                            if (widget.rating.id != null) {
+                              id = widget.rating.id.toString();
+                            }
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation1,
+                                    Animation<double> animation2) {
+                                  return ReviewScreen(id: id);
+                                },
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size(
+                                  MediaQuery.of(context).size.width * 0.05,
+                                  MediaQuery.of(context).size.width * 0.03),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              alignment: Alignment.centerLeft),
+                          icon: const Icon(Icons.edit, color: Colors.blue))),
+                        SizedBox( width: MediaQuery.of(context).size.width * 0.05, child: IconButton(
+                          onPressed: () {
+                            String id = "";
+                            if (widget.rating.id != null) {
+                              id = widget.rating.id.toString();
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size(
+                                  MediaQuery.of(context).size.width * 0.05,
+                                  MediaQuery.of(context).size.width * 0.03),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              alignment: Alignment.centerLeft),
+                          icon: const Icon(Icons.delete, color: Colors.red)))
+                    ],
+                    )
+                    
                   // )
                 ],
               )
