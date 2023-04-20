@@ -223,7 +223,9 @@ class _ListTileItemState extends State<ListTileItem> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.account_circle, size: 30),
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.08,
+                                child: const Icon(Icons.account_circle)),
                             Text(widget.rating.by)
                           ],
                         ),
@@ -246,7 +248,9 @@ class _ListTileItemState extends State<ListTileItem> {
                         widget.rating.building + widget.rating.room,
                         style: const TextStyle(fontSize: 20),
                       ),
-                      SizedBox(width: 175, child: Text(widget.rating.review))
+                      SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.55,
+                          child: Text(widget.rating.review))
                     ],
                   )),
               Padding(

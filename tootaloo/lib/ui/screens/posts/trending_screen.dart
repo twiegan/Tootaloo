@@ -211,19 +211,21 @@ class _ListTileItemState extends State<ListTileItem> {
           color: Colors.white10,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(0),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.account_circle, size: 30),
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.08,
+                                child: const Icon(Icons.account_circle)),
                             Text(widget.rating.by)
                           ],
                         ),
@@ -238,7 +240,8 @@ class _ListTileItemState extends State<ListTileItem> {
                       ])),
               Padding(
                   padding: EdgeInsets.all(5),
-                  child: Column(
+                  child: Expanded(
+                      child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -246,113 +249,117 @@ class _ListTileItemState extends State<ListTileItem> {
                         widget.rating.building + widget.rating.room,
                         style: const TextStyle(fontSize: 20),
                       ),
-                      SizedBox(width: 175, child: Text(widget.rating.review))
+                      SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.55,
+                          child: Text(widget.rating.review))
                     ],
-                  )),
-              Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: 10),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.arrow_upward,
-                                  color: Colors.green),
-                              onPressed: () {
-                                if (_upvotes < 1) {
-                                  _checkVoted(widget.rating.id).then((value) {
-                                    if (!value) {
-                                      setState(() {
-                                        _upvotes += 1;
-                                      });
-                                      _updateVotes(
-                                          widget.rating.id,
-                                          widget.rating.upvotes + _upvotes,
-                                          "upvotes");
-                                    }
+                  ))),
+              // Padding(
+              //     padding: EdgeInsets.all(5),
+              // child:
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.arrow_upward,
+                              color: Colors.green),
+                          onPressed: () {
+                            if (_upvotes < 1) {
+                              _checkVoted(widget.rating.id).then((value) {
+                                if (!value) {
+                                  setState(() {
+                                    _upvotes += 1;
                                   });
+                                  _updateVotes(
+                                      widget.rating.id,
+                                      widget.rating.upvotes + _upvotes,
+                                      "upvotes");
                                 }
-                              },
-                            ),
-                            Text(
-                              '${widget.rating.upvotes + _upvotes}',
-                              style: const TextStyle(color: Colors.green),
-                            )
-                          ]),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.arrow_downward,
-                                  color: Colors.red),
-                              onPressed: () {
-                                if (_downvotes < 1) {
-                                  _checkVoted(widget.rating.id).then((value) {
-                                    if (!value) {
-                                      setState(() {
-                                        _downvotes += 1;
-                                      });
-                                      _updateVotes(
-                                          widget.rating.id,
-                                          widget.rating.downvotes + _downvotes,
-                                          "downvotes");
-                                    }
+                              });
+                            }
+                          },
+                        ),
+                        Text(
+                          '${widget.rating.upvotes + _upvotes}',
+                          style: const TextStyle(color: Colors.green),
+                        )
+                      ]),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.arrow_downward,
+                              color: Colors.red),
+                          onPressed: () {
+                            if (_downvotes < 1) {
+                              _checkVoted(widget.rating.id).then((value) {
+                                if (!value) {
+                                  setState(() {
+                                    _downvotes += 1;
                                   });
+                                  _updateVotes(
+                                      widget.rating.id,
+                                      widget.rating.downvotes + _downvotes,
+                                      "downvotes");
                                 }
-                              },
-                            ),
-                            Text(
-                              '${widget.rating.downvotes + _downvotes}',
-                              style: const TextStyle(color: Colors.red),
-                            )
-                          ]),
+                              });
+                            }
+                          },
+                        ),
+                        Text(
+                          '${widget.rating.downvotes + _downvotes}',
+                          style: const TextStyle(color: Colors.red),
+                        )
+                      ]),
 
-                      // SizedBox(
-                      //   height: 30,
-                      //   width: 50,
-                      if (widget.rating.owned)
-                        TextButton(
-                            onPressed: () {
-                              String id = "";
-                              if (widget.rating.id != null) {
-                                id = widget.rating.id.toString();
-                              }
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (BuildContext context,
-                                      Animation<double> animation1,
-                                      Animation<double> animation2) {
-                                        return ReviewScreen(
-                                            id: id);
-                                      },
-                                  transitionDuration: Duration.zero,
-                                  reverseTransitionDuration: Duration.zero,
-                                ),
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size(45, 30),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                alignment: Alignment.centerLeft),
-                            child: const Text("Edit"))
-                      // )
-                    ],
-                  ))
+                  // SizedBox(
+                  //   height: 30,
+                  //   width: 50,
+                  if (widget.rating.owned)
+                    TextButton(
+                        onPressed: () {
+                          String id = "";
+                          if (widget.rating.id != null) {
+                            id = widget.rating.id.toString();
+                          }
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation1,
+                                  Animation<double> animation2) {
+                                return ReviewScreen(id: id);
+                              },
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size(
+                                MediaQuery.of(context).size.width * 0.05,
+                                MediaQuery.of(context).size.width * 0.03),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.centerLeft),
+                        child: const Text("Edit"))
+                  // )
+                ],
+              )
+              // )
             ],
           )),
     );
