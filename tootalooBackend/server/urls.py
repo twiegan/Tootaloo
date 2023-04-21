@@ -25,4 +25,6 @@ urlpatterns = [
   path('check_votes/', views.check_votes, name='check_votes'),
   path('post_owned/', views.post_owned, name='post_owned'),
   path('insert_user/', views.insert_user, name='insert_user'),
+  path('check-reported/', views.checkReported, name='check-reported'),
+  path('update-reports/', views.updateReports, name='update-reports'),
 ]

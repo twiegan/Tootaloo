@@ -123,7 +123,7 @@ def submit_rating(request):
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	
-	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id }
+	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
 
 	db = client['tootaloo']
 	restroom_collection = db['restrooms']
@@ -634,5 +634,48 @@ def index(request):
 		#return HttpResponse(review_details)
     return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
 
+@csrf_exempt 
+def updateReports(request):
+	print("POST request: updateReports")
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	type = body['type']
+	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+	query = {'_id':  rating_id}
+	update_expression = {'$inc': {"reports" : 1}}
+	
+	db = client['tootaloo']
+	collection = db[type]
+	collection.update_one(query, update_expression)
+        
+	return HttpResponse()
+        
 
+@csrf_exempt
+def checkReported(request):
+	print("POST request: checkReported")
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	type = body['type']
+	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+	user_id = body['user_id']
+	if user_id == 'null':
+		return HttpResponse('true')
+	
+	user_id = ObjectId(user_id)
+	db = client['tootaloo']
+
+	if type == 'ratings':
+		ratings_collection = db[type]
+		rating = ratings_collection.find_one({'_id': rating_id})
+
+		if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
+			return HttpResponse('true')
+
+		if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
+			id_query = { '_id':  rating_id}
+			new_voted = { '$push': { 'reported_users': user_id } }
+			ratings_collection.update_one(id_query, new_voted)
+
+	return HttpResponse('false')
 

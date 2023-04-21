@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
+import 'package:tootaloo/ui/components/report_button.dart';
 
 class FollowingScreen extends StatefulWidget {
   const FollowingScreen({super.key, required this.title});
@@ -132,37 +133,6 @@ Future<bool> _userOwned(ratingId) async {
   }
   print("true");
   return true;
-}
-
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-  bool owned;
-
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-    required this.owned,
-  });
 }
 
 Future<List<Rating>> _getRatings() async {

@@ -8,6 +8,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
+import 'package:tootaloo/ui/components/report_button.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 
 class TrendingScreen extends StatefulWidget {
@@ -136,36 +137,6 @@ Future<bool> _userOwned(ratingId) async {
   return true;
 }
 
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-  bool owned;
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-    required this.owned,
-  });
-}
-
 Future<List<Rating>> _getRatings() async {
   String url =
       "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings/";
@@ -254,9 +225,6 @@ class _ListTileItemState extends State<ListTileItem> {
                           child: Text(widget.rating.review))
                     ],
                   ))),
-              // Padding(
-              //     padding: EdgeInsets.all(5),
-              // child:
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -324,10 +292,6 @@ class _ListTileItemState extends State<ListTileItem> {
                           style: const TextStyle(color: Colors.red),
                         )
                       ]),
-
-                  // SizedBox(
-                  //   height: 30,
-                  //   width: 50,
                   if (widget.rating.owned)
                     TextButton(
                         onPressed: () {
@@ -355,11 +319,10 @@ class _ListTileItemState extends State<ListTileItem> {
                                 MediaQuery.of(context).size.width * 0.03),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             alignment: Alignment.centerLeft),
-                        child: const Text("Edit"))
-                  // )
+                        child: const Text("Edit")),
+                        ReportButton(type: "ratings", rating: widget.rating)
                 ],
               )
-              // )
             ],
           )),
     );

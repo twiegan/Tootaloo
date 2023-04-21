@@ -9,6 +9,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/ui/components/report_button.dart';
 
 double roundDouble(double value, int places) {
   num mod = pow(10.0, places);
@@ -31,34 +32,6 @@ class ReviewScreen extends StatefulWidget {
 
   @override
   State<ReviewScreen> createState() => _ReviewScreenState();
-}
-
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-  });
 }
 
 Future<Rating> _getRating(String id) async {
@@ -84,6 +57,7 @@ Future<Rating> _getRating(String id) async {
     vibe: responseRating["vibe"],
     upvotes: responseRating["upvotes"],
     downvotes: responseRating["downvotes"],
+    owned: false
   );
   return rating;
 }
@@ -342,15 +316,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       onPressed: () {
                         if (widget.id != "") {
                           edit(
-                            widget.id,
-                            _restroom,
-                            _cleanliness,
-                            _internet,
-                            _vibe,
-                            roundDouble(
-                                (_vibe + _internet + _cleanliness) / 3.0, 1),
-                            _review
-                          );
+                              widget.id,
+                              _restroom,
+                              _cleanliness,
+                              _internet,
+                              _vibe,
+                              roundDouble(
+                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
+                              _review);
                         } else {
                           submit(
                               _restroom,
