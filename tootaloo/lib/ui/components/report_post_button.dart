@@ -37,17 +37,17 @@ class Rating {
   });
 }
 
-class ReportButton extends StatefulWidget {
+class ReportPostButton extends StatefulWidget {
   String type;
   Rating rating;
-  ReportButton(
+  ReportPostButton(
       {super.key, required String this.type, required Rating this.rating});
 
   @override
-  _ReportButtonState createState() => _ReportButtonState();
+  _ReportPostButtonState createState() => _ReportPostButtonState();
 }
 
-class _ReportButtonState extends State<ReportButton> {
+class _ReportPostButtonState extends State<ReportPostButton> {
   Future<bool> _checkReported(ratingId, String type) async {
     AppUser user = await UserPreferences.getUser();
     String userId = "";
@@ -57,7 +57,7 @@ class _ReportButtonState extends State<ReportButton> {
     userId = user.id!;
     final response = await http.post(
       Uri.parse(
-          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check-reported/'),
+          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check-rating-reported/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -76,7 +76,7 @@ class _ReportButtonState extends State<ReportButton> {
   void _updateReports(id, String type) async {
     final response = await http.post(
       Uri.parse(
-          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-reports/'),
+          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-rating-reports/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -91,7 +91,6 @@ class _ReportButtonState extends State<ReportButton> {
         constraints: const BoxConstraints(),
         icon: const Icon(Icons.flag_outlined, color: Colors.orange),
         onPressed: () {
-          print("hello");
           _checkReported(widget.rating.id, widget.type).then((value) {
             if (!value) {
               _updateReports(widget.rating.id, widget.type);

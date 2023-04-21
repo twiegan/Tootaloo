@@ -9,7 +9,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
-import 'package:tootaloo/ui/components/report_button.dart';
+import 'package:tootaloo/ui/components/report_post_button.dart';
 
 double roundDouble(double value, int places) {
   num mod = pow(10.0, places);

@@ -8,7 +8,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
-import 'package:tootaloo/ui/components/report_button.dart';
+import 'package:tootaloo/ui/components/report_post_button.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 
 class TrendingScreen extends StatefulWidget {
@@ -320,7 +320,7 @@ class _ListTileItemState extends State<ListTileItem> {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             alignment: Alignment.centerLeft),
                         child: const Text("Edit")),
-                        ReportButton(type: "ratings", rating: widget.rating)
+                        ReportPostButton(type: "ratings", rating: widget.rating)
                 ],
               )
             ],

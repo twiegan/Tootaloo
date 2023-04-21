@@ -10,7 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
-import 'package:tootaloo/ui/components/report_button.dart';
+import 'package:tootaloo/ui/components/report_post_button.dart';
 
 class FollowingScreen extends StatefulWidget {
   const FollowingScreen({super.key, required this.title});

@@ -635,8 +635,8 @@ def index(request):
     return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
 
 @csrf_exempt 
-def updateReports(request):
-	print("POST request: updateReports")
+def updateRatingReports(request):
+	print("POST request: updateRatingReports")
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
 	type = body['type']
@@ -652,11 +652,10 @@ def updateReports(request):
         
 
 @csrf_exempt
-def checkReported(request):
-	print("POST request: checkReported")
+def checkRatingReported(request):
+	print("POST request: checkRatingReported")
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
-	type = body['type']
 	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
 	user_id = body['user_id']
 	if user_id == 'null':
@@ -665,17 +664,70 @@ def checkReported(request):
 	user_id = ObjectId(user_id)
 	db = client['tootaloo']
 
-	if type == 'ratings':
-		ratings_collection = db[type]
-		rating = ratings_collection.find_one({'_id': rating_id})
+	ratings_collection = db['ratings']
+	rating = ratings_collection.find_one({'_id': rating_id})
 
-		if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
-			return HttpResponse('true')
+	if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
+		return HttpResponse('true')
 
-		if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
-			id_query = { '_id':  rating_id}
-			new_voted = { '$push': { 'reported_users': user_id } }
-			ratings_collection.update_one(id_query, new_voted)
+	if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
+		id_query = { '_id':  rating_id}
+		new_voted = { '$push': { 'reported_users': user_id } }
+		ratings_collection.update_one(id_query, new_voted)
+
+	return HttpResponse('false')
+
+@csrf_exempt 
+def updateUserReports(request):
+	print("POST request: updateUserReports")
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	reported_username = body['reported_username']
+	print('reported_username: ', reported_username)
+	
+	db = client['tootaloo']
+	users_collection = db['users']
+	reported_user = users_collection.find_one({'username': reported_username})
+	reported_id = reported_user['_id']
+	print('reported_user: ', reported_user)
+	print('reported_id: ', reported_id)
+
+	query = {'_id':  reported_id}
+	update_expression = {'$inc': {"reports" : 1}}
+	print('query & update_expression: ', query, update_expression)
+	users_collection.update_one(query, update_expression)
+        
+	return HttpResponse()
+        
+
+@csrf_exempt
+def checkUserReported(request):
+	print("POST request: checkUserReported")
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	reported_username = body['reported_username']
+	print("reported_username: ", reported_username)
+	user_id = body['user_id']
+	print("user_id: ", user_id)
+	if user_id == 'null':
+		return HttpResponse('true')
+	
+	user_id = ObjectId(user_id)
+	db = client['tootaloo']
+
+	users_collection = db['users']
+	reported_user = users_collection.find_one({'username': reported_username})
+	reported_id = reported_user['_id']
+	print('reported_user: ', reported_user)
+	print('reported_id: ', reported_id)
+
+	if reported_user != None and reported_user['reported_users'] != None and user_id in reported_user['reported_users']:
+		return HttpResponse('true')
+
+	if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user['reported_users']:
+		id_query = { '_id': reported_id }
+		new_voted = { '$push': { 'reported_users': user_id } }
+		users_collection.update_one(id_query, new_voted)
 
 	return HttpResponse('false')
 
