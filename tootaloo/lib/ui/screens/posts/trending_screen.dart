@@ -317,7 +317,7 @@ class _ListTileItemState extends State<ListTileItem> {
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   alignment: Alignment.centerLeft),
                               child: const Text("Edit")),
-                        ReportButton(type: "post", rating: widget.rating)
+                        ReportButton(type: "ratings", rating: widget.rating)
                       ]
                     ))
             ],

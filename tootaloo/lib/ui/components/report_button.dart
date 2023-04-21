@@ -48,7 +48,7 @@ class ReportButton extends StatefulWidget {
 }
 
 class _ReportButtonState extends State<ReportButton> {
-  Future<bool> _checkReported(ratingId) async {
+  Future<bool> _checkReported(ratingId, String type) async {
     AppUser user = await UserPreferences.getUser();
     String userId = "";
     if (user.id == null) {
@@ -57,13 +57,14 @@ class _ReportButtonState extends State<ReportButton> {
     userId = user.id!;
     final response = await http.post(
       Uri.parse(
-          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check_votes/'),
+          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/check-reported/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
         'rating_id': ratingId.toString(),
-        'user_id': userId
+        'user_id': userId,
+        'type': type
       }),
     );
     if (response.body.toString() == 'false') {
@@ -72,10 +73,10 @@ class _ReportButtonState extends State<ReportButton> {
     return true;
   }
 
-  void _report(id, String type) async {
+  void _updateReports(id, String type) async {
     final response = await http.post(
       Uri.parse(
-          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/report/'),
+          'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-reports/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -90,9 +91,10 @@ class _ReportButtonState extends State<ReportButton> {
         constraints: const BoxConstraints(),
         icon: const Icon(Icons.flag_outlined, color: Colors.orange),
         onPressed: () {
-          _checkReported(widget.rating.id).then((value) {
+          print("hello");
+          _checkReported(widget.rating.id, widget.type).then((value) {
             if (!value) {
-              _report(widget.rating.id, widget.type);
+              _updateReports(widget.rating.id, widget.type);
             }
           });
         });
