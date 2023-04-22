@@ -71,7 +71,8 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                   var key = _restroomNames.keys.firstWhere(
                       (k) => _restroomNames[k] == _selectedRestroom,
                       orElse: () => '');
-                  getSearchedRestrooms(key).then((restrooms) => {
+                  if (key != '') {
+                    getSearchedRestrooms(key).then((restrooms) => {
                         for (var restroom in restrooms)
                           {
                             setState(() {
@@ -81,6 +82,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                             })
                           }
                       });
+                  }
                 },
                 icon: const Icon(Icons.search),
                 label: const Text('Search'),
