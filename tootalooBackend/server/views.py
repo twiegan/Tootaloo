@@ -731,3 +731,18 @@ def checkUserReported(request):
 
 	return HttpResponse('false')
 
+@csrf_exempt
+def restroomById(request):
+	print("GET request: restroomsByName")
+	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+	print("restroom_id: ", restroom_id)
+
+	db = client['tootaloo']
+	restrooms_collection = db['restrooms']
+	restroom = restrooms_collection.find_one({'_id': restroom_id})
+	print("restroom: ", restroom)
+
+	response = {'status': "success", 'restroom': restroom}
+	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	return resp

@@ -29,4 +29,5 @@ urlpatterns = [
   path('update-rating-reports/', views.updateRatingReports, name='update-rating-reports'),
   path('check-user-reported/', views.checkUserReported, name='check-user-reported'),
   path('update-user-reports/', views.updateUserReports, name='update-user-reports'),
+  path('restroom-by-id/', views.restroomById, name='restroom-by-id'),
 ]
