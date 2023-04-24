@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class Restroom {
   final String id;
   final String building;
@@ -7,6 +9,7 @@ class Restroom {
   final double cleanliness;
   final double internet;
   final double vibe;
+  final double privacy;
   List<dynamic> ratings_ids;
 
   Restroom(
@@ -18,5 +21,6 @@ class Restroom {
       required this.cleanliness,
       required this.internet,
       required this.vibe,
-      required this.ratings_ids});
+      required this.privacy,
+      this.ratings_ids = const []});
 }

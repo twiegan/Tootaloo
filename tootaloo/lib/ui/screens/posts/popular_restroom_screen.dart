@@ -8,6 +8,7 @@ import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/post_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tootaloo/ui/models/restroom.dart';
 
 
 double roundDouble(double value, int places){ 
@@ -70,26 +71,6 @@ class _PopularRestroomScreenState extends State<PopularRestroomScreen> {
   }
 }
 
-class Restroom {
-  final String building;
-  final String room;
-  final int floor;
-  final num rating;
-  final num cleanliness;
-  final num internet;
-  final num vibe;
-
-  Restroom({
-    required this.building,
-    required this.room,
-    required this.floor,
-    required this.rating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-  });
-}
-
 Future<List<Restroom>> _getRestrooms() async {
   String url = "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restrooms/";
   final response = await http.get(Uri.parse(url));
@@ -98,13 +79,15 @@ Future<List<Restroom>> _getRestrooms() async {
   List<Restroom> restrooms = [];
   for (var restroom in responseData) {
     Restroom restroomData = Restroom(
+        id: "",
         building: restroom["building"],
         room: restroom["room"],
         floor: restroom["floor"],
         rating: restroom["rating"],
         internet: restroom["internet"],
         cleanliness: restroom["cleanliness"],
-        vibe: restroom["vibe"]);
+        vibe: restroom["vibe"],
+        privacy: restroom["privacy"]);
     restrooms.add(restroomData);
   }
 
@@ -145,27 +128,45 @@ class _ListTileItemState extends State<ListTileItem> {
                     Text(widget.restroom.building + widget.restroom.room, style: const TextStyle(fontSize: 40),),
                   ],
                 ),
-                Column(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Cleanliness: ${widget.restroom.cleanliness}', style: const TextStyle(fontSize: 15)),
+                        Row(
+                          children: [
+                            Text('Cleanliness: ${widget.restroom.cleanliness}', style: const TextStyle(fontSize: 15)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text('Internet: ${widget.restroom.internet}', style: const TextStyle(fontSize: 15)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text('Vibe: ${widget.restroom.vibe}', style: const TextStyle(fontSize: 15)),
+                          ],
+                        ),
                       ],
                     ),
-                    Row(
+                    Padding(padding: const EdgeInsets.only(left: 15), child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Internet: ${widget.restroom.internet}', style: const TextStyle(fontSize: 15)),
+                        Row(
+                          children: [
+                            Text('Privacy: ${widget.restroom.privacy}', style: const TextStyle(fontSize: 15)),
+                          ],
+                        ),
                       ],
-                    ),
-                    Row(
-                      children: [
-                        Text('Vibe: ${widget.restroom.vibe}', style: const TextStyle(fontSize: 15)),
-                      ],
-                    ),
+                    )),
                   ],
-                ),
+                )
+                
               ]
             ),
             IntrinsicHeight(child: Column(

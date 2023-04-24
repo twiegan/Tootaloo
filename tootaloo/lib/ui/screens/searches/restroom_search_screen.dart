@@ -139,6 +139,7 @@ Future<List<Restroom>> getSearchedRestrooms(String restroomId) async {
       cleanliness: responseData["restroom"]["cleanliness"],
       internet: responseData["restroom"]["internet"],
       vibe: responseData["restroom"]["vibe"],
+      privacy: responseData["restroom"]["privacy"],
       ratings_ids: responseData["restroom"]["ratings"]);
 
   restrooms.add(restroomData);
