@@ -9,7 +9,8 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
-import 'package:tootaloo/ui/components/report_post_button.dart';
+import 'package:tootaloo/ui/models/rating.dart';
+import 'package:tootaloo/ui/screens/login_screen.dart';
 
 double roundDouble(double value, int places) {
   num mod = pow(10.0, places);
@@ -57,18 +58,20 @@ Future<Rating> _getRating(String id) async {
     vibe: responseRating["vibe"],
     upvotes: responseRating["upvotes"],
     downvotes: responseRating["downvotes"],
-    owned: false
+    owned: false,
   );
   return rating;
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
   final _textEditingController = TextEditingController();
-  late double _cleanliness = 5;
-  late double _internet = 5;
-  late double _vibe = 5;
-  late String _review;
-  late String _restroom = "";
+  double _cleanliness = 5;
+  double _internet = 5;
+  double _vibe = 5;
+  String _review = "";
+  String _restroom = "";
+  AppUser _user = AppUser(username: 'null', id: 'null');
+  bool _loaded = false;
 
   final int index = 1;
 
@@ -76,7 +79,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   @override
   void initState() {
-    super.initState();
     if (widget.id != "") {
       _getRating(widget.id).then((rating) => {
             setState(() {
@@ -88,14 +90,29 @@ class _ReviewScreenState extends State<ReviewScreen> {
               _restroom = "${rating.building} ${rating.room}";
             })
           });
-      _getRestrooms().then((restrooms) => {
-            setState(() {
-              for (var restroom in restrooms) {
-                _restrooms.add(restroom);
-              }
-            })
-          });
     }
+    _getRestrooms().then((restrooms) => {
+          setState(() {
+            for (var restroom in restrooms) {
+              _restrooms.add(restroom);
+            }
+          })
+        });
+    _getUser().then((user) => {
+          setState(() {
+            _user = user;
+            _loaded = true;
+          })
+        });
+
+    super.initState();
+  }
+
+  Future pause(Duration d) => Future.delayed(d);
+
+  Future<AppUser> _getUser() async {
+    await pause(const Duration(milliseconds: 300));
+    return await UserPreferences.getUser();
   }
 
   Future<List<String>> _getRestrooms() async {
@@ -193,154 +210,210 @@ class _ReviewScreenState extends State<ReviewScreen> {
     // than having to individually change instances of widgets.
 
     // controls the text label we use as a search bar
-
-    return Scaffold(
-      appBar: const TopNavBar(title: "Review"),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: DropdownSearch<String>(
-              popupProps: PopupProps.menu(
-                showSelectedItems: true,
-                showSearchBox: true,
-                disabledItemFn: (String s) => s.startsWith('I'),
-              ),
-              items: _restrooms,
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: "Menu mode",
-                  hintText: "country in menu mode",
+    if (!_loaded) {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
+        appBar: const TopNavBar(title: "Review"),
+        body: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 250),
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  child: const CircularProgressIndicator(
+                    color: Color.fromRGBO(181, 211, 235, 1),
+                    backgroundColor: Color.fromRGBO(223, 241, 255, 1),
+                  ),
                 ),
               ),
-              onChanged: (value) {
-                _restroom = (value != null) ? value : '';
-              },
-              selectedItem: _restroom,
-            ),
-          ),
-          Padding(
+            ]),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: index,
+        ),
+      );
+    } else if (_user.username == 'null' && _user.id == 'null') {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
+        appBar: const TopNavBar(title: "Review"),
+        body: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 250),
+                child: Container(
+                  height: 75,
+                  width: 350,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(181, 211, 235, 1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const LoginScreen();
+                        }));
+                      },
+                      child: const Text(
+                        "Log-In to Write a Review!",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 23,
+                        ),
+                      )),
+                ),
+              ),
+            ]),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: index,
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: const TopNavBar(title: "Review"),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Row(
-                children: [
-                  const Text('Cleanliness: ', style: TextStyle(fontSize: 20)),
-                  Flexible(
-                      child: Slider(
-                    min: 0.0,
-                    max: 5.0,
-                    divisions: 50,
-                    value: _cleanliness,
-                    label: '${roundDouble(_cleanliness, 1)}',
-                    onChanged: (value) {
-                      setState(() {
-                        _cleanliness = value;
-                      });
-                    },
-                  )),
-                ],
-              )),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Row(
-                children: [
-                  const Text('   Internet   : ',
-                      style: TextStyle(fontSize: 20)),
-                  Flexible(
-                      child: Slider(
-                    min: 0.0,
-                    max: 5.0,
-                    divisions: 50,
-                    value: _internet,
-                    label: '${roundDouble(_internet, 1)}',
-                    onChanged: (value) {
-                      setState(() {
-                        _internet = value;
-                      });
-                    },
-                  )),
-                ],
-              )),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Row(
-                children: [
-                  const Text('      Vibe      : ',
-                      style: TextStyle(fontSize: 20)),
-                  Flexible(
-                      child: Slider(
-                    min: 0.0,
-                    max: 5.0,
-                    divisions: 50,
-                    value: _vibe,
-                    label: '${roundDouble(_vibe, 1)}',
-                    onChanged: (value) {
-                      setState(() {
-                        _vibe = value;
-                      });
-                    },
-                  )),
-                ],
-              )),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Row(
-                children: [
-                  Text(
-                      'Overall Rating: ${roundDouble((_vibe + _internet + _cleanliness) / 3.0, 1)}',
-                      style: const TextStyle(fontSize: 20)),
-                ],
-              )),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: _textEditingController,
-                keyboardType: TextInputType.multiline,
-                maxLines: 10,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Write a Review',
+              child: DropdownSearch<String>(
+                popupProps: PopupProps.menu(
+                  showSelectedItems: true,
+                  showSearchBox: true,
+                  disabledItemFn: (String s) => s.startsWith('I'),
+                ),
+                items: _restrooms,
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: "Menu mode",
+                    hintText: "country in menu mode",
+                  ),
                 ),
                 onChanged: (value) {
-                  setState(() {
-                    _review = value;
-                  });
+                  _restroom = (value != null) ? value : '';
                 },
-              )),
-          Expanded(
-              child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        if (widget.id != "") {
-                          edit(
-                              widget.id,
-                              _restroom,
-                              _cleanliness,
-                              _internet,
-                              _vibe,
-                              roundDouble(
-                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
-                              _review);
-                        } else {
+                selectedItem: "",
+              ),
+            ),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(
+                  children: [
+                    const Text('Cleanliness: ', style: TextStyle(fontSize: 20)),
+                    Flexible(
+                        child: Slider(
+                      min: 0.0,
+                      max: 5.0,
+                      divisions: 50,
+                      value: _cleanliness,
+                      label: '${roundDouble(_cleanliness, 1)}',
+                      onChanged: (value) {
+                        setState(() {
+                          _cleanliness = value;
+                        });
+                      },
+                    )),
+                  ],
+                )),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(
+                  children: [
+                    const Text('   Internet   : ',
+                        style: TextStyle(fontSize: 20)),
+                    Flexible(
+                        child: Slider(
+                      min: 0.0,
+                      max: 5.0,
+                      divisions: 50,
+                      value: _internet,
+                      label: '${roundDouble(_internet, 1)}',
+                      onChanged: (value) {
+                        setState(() {
+                          _internet = value;
+                        });
+                      },
+                    )),
+                  ],
+                )),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(
+                  children: [
+                    const Text('      Vibe      : ',
+                        style: TextStyle(fontSize: 20)),
+                    Flexible(
+                        child: Slider(
+                      min: 0.0,
+                      max: 5.0,
+                      divisions: 50,
+                      value: _vibe,
+                      label: '${roundDouble(_vibe, 1)}',
+                      onChanged: (value) {
+                        setState(() {
+                          _vibe = value;
+                        });
+                      },
+                    )),
+                  ],
+                )),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(
+                  children: [
+                    Text(
+                        'Overall Rating: ${roundDouble((_vibe + _internet + _cleanliness) / 3.0, 1)}',
+                        style: const TextStyle(fontSize: 20)),
+                  ],
+                )),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 10,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Write a Review',
+                  ),
+                  onChanged: (value) {
+                    _review = value;
+                  },
+                )),
+            Expanded(
+                child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ElevatedButton(
+                        onPressed: () {
                           submit(
                               _restroom,
+                              roundDouble(
+                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
                               _cleanliness,
                               _internet,
                               _vibe,
-                              roundDouble(
-                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
                               _review);
-                        }
-                      },
-                      child: const Text('     Submit     '))))
-        ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        selectedIndex: index,
-      ),
-    );
+                        },
+                        child: const Text('     Submit     '))))
+          ],
+        ),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: index,
+        ),
+      );
+    }
   }
 }

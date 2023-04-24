@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tootaloo/ui/screens/login_screen.dart';
 import 'ui/screens/posts/trending_screen.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:tootaloo/SharedPref.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
-      home: const TrendingScreen(title: 'Trending'),
+      home: const LoginScreen(),
     );
   }
 }

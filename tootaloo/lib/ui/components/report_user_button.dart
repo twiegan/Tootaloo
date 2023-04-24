@@ -59,7 +59,7 @@ class _ReportUserButtonState extends State<ReportUserButton> {
     return IconButton(
         padding: const EdgeInsets.all(0),
         constraints: const BoxConstraints(),
-        icon: const Icon(Icons.flag_outlined, color: Colors.orange),
+        icon: const Icon(Icons.flag_outlined, color: Colors.orange, size: 16),
         onPressed: () {
           _checkReported(widget.reportedUsername, widget.type).then((value) {
             if (!value) {

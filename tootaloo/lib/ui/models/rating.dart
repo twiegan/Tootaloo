@@ -1,20 +1,29 @@
 class Rating {
+  final id;
   final String building;
-  final String room;
-  final double overall_rating;
-  final double cleanliness;
-  final double internet;
-  final double vibe;
-  final String review;
   final String by;
+  final String room;
+  final String review;
+  final num overallRating;
+  final num internet;
+  final num cleanliness;
+  final num vibe;
+  final int upvotes;
+  final int downvotes;
+  bool owned;
 
-  Rating(
-      {required this.building,
-      required this.room,
-      required this.overall_rating,
-      required this.cleanliness,
-      required this.internet,
-      required this.vibe,
-      required this.review,
-      required this.by});
+  Rating({
+    required this.id,
+    required this.building,
+    required this.by,
+    required this.room,
+    required this.review,
+    required this.overallRating,
+    required this.internet,
+    required this.cleanliness,
+    required this.vibe,
+    required this.upvotes,
+    required this.downvotes,
+    required this.owned,
+  });
 }

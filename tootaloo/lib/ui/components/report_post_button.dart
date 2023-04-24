@@ -6,36 +6,7 @@ import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import 'package:tootaloo/ui/screens/trending_screen.dart';
-
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-  bool owned;
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-    required this.owned,
-  });
-}
+import 'package:tootaloo/ui/models/rating.dart';
 
 class ReportPostButton extends StatefulWidget {
   String type;
@@ -89,7 +60,7 @@ class _ReportPostButtonState extends State<ReportPostButton> {
     return IconButton(
         padding: const EdgeInsets.all(0),
         constraints: const BoxConstraints(),
-        icon: const Icon(Icons.flag_outlined, color: Colors.orange),
+        icon: const Icon(Icons.flag_outlined, color: Colors.orange, size: 16,),
         onPressed: () {
           _checkReported(widget.rating.id, widget.type).then((value) {
             if (!value) {
