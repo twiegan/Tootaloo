@@ -9,6 +9,7 @@ import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart' as sharedPref;
+import 'package:tootaloo/ui/screens/login_screen.dart';
 
 class SettingsUserScreen extends StatefulWidget {
   const SettingsUserScreen({super.key, required this.title});
@@ -21,6 +22,8 @@ class SettingsUserScreen extends StatefulWidget {
 class _SettingsUserScreenState extends State<SettingsUserScreen> {
   final int index = -1;
   String _bathroom_preference = '';
+  AppUser _user = AppUser(username: 'null', id: 'null');
+  bool _loaded = false;
 
   Future<String?> saveSettings({required String bathroom_preference}) async {
     AppUser _user = await UserPreferences.getUser();
@@ -67,8 +70,88 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
     );
   }
 
+  Future pause(Duration d) => Future.delayed(d);
+
+  Future<AppUser> _getUser() async {
+    await pause(const Duration(milliseconds: 700));
+    return await UserPreferences.getUser();
+  }
+
+  @override
+  void initState() {
+    _getUser().then((user) =>
+    {
+      setState(() {
+        _user = user;
+        _loaded = true;
+      })
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if(!_loaded) {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
+        appBar: const TopNavBar(title: "User Settings"),
+        body: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 100, vertical:250),
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  child: const CircularProgressIndicator(
+                    color: Color.fromRGBO(181, 211, 235, 1),
+                    backgroundColor: Color.fromRGBO(223, 241, 255, 1),
+                  ),
+                ),
+              ),
+            ]),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: index,
+        ),
+      );
+    }
+    if(_user.username == 'null' && _user.id == 'null') {
+      return Scaffold(
+        backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
+        appBar: const TopNavBar(title: "User Settings"),
+        body: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical:250),
+                child: Container(
+                  height: 75,
+                  width: 350,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(181, 211, 235, 1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                          return const LoginScreen();
+                        }));
+                      },
+                      child: const Text(
+                        "Log-In to Save Your Settings!",
+                        style: TextStyle(color:Colors.black, fontSize: 22,),
+                      )),
+                ),
+              ),
+            ]),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: index,
+        ),
+      );
+    }
     return Scaffold(
       appBar: const TopNavBar(title: "User Settings"),
       body: Center(
