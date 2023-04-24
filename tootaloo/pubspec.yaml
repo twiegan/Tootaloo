@@ -47,6 +47,7 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   shared_preferences: ^2.0.20
   flutter_dotenv: ^5.0.2
+  flutter_speed_dial: ^6.2.0
 
 dev_dependencies:
   flutter_test:
