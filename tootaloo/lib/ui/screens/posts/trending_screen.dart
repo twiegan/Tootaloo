@@ -175,6 +175,7 @@ Future<List<Rating>> _getRatings() async {
         internet: rating["internet"],
         cleanliness: rating["cleanliness"],
         vibe: rating["vibe"],
+        privacy: rating["privacy"],
         upvotes: rating["upvotes"],
         downvotes: rating["downvotes"],
         owned: false);
@@ -399,7 +400,8 @@ class _ListTileItemState extends State<ListTileItem> {
                                     alignment: Alignment.centerLeft),
                                 icon: const Icon(Icons.delete,
                                     color: Colors.red, size: 16))),
-                        ReportPostButton(type: "rating", rating: widget.rating)
+                        if (!widget.rating.owned)
+                          ReportPostButton(type: "rating", rating: widget.rating)
                       ],
                     )
                 ],
