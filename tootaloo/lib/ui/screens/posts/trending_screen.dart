@@ -261,24 +261,20 @@ class _ListTileItemState extends State<ListTileItem> {
                                 )),
                       ]))),
               Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Expanded(
-                      child: Container(
-                          alignment: Alignment.topLeft,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.rating.building + widget.rating.room,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.55,
-                                  child: Text(widget.rating.review))
-                            ],
-                          )))),
+                  padding: EdgeInsets.all(5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.rating.building + widget.rating.room,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.55,
+                          child: Text(widget.rating.review))
+                    ],
+                  )),
               Expanded(
                   child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,

@@ -134,6 +134,25 @@ Future<bool> _userOwned(ratingId) async {
   return true;
 }
 
+Future<bool> deletePost(ratingId) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return false;
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/delete_post/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(
+        <String, String>{'id': ratingId.toString(), 'user_id': userId}),
+  );
+  return true;
+}
+
 class Rating {
   final id;
   final String building;
@@ -206,9 +225,13 @@ class _ListTileItemState extends State<ListTileItem> {
   Widget build(BuildContext context) {
     print("builtTile");
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(0),
       child: Container(
-          color: Colors.white10,
+          // color: Colors.white10,
+          decoration: BoxDecoration(
+              // color: const Color.fromARGB(255, 151, 187, 250),
+              border:
+                  Border.all(color: const Color.fromARGB(255, 227, 227, 227))),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,10 +239,11 @@ class _ListTileItemState extends State<ListTileItem> {
             children: [
               Padding(
                   padding: const EdgeInsets.all(5),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+                  child: Expanded(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -236,8 +260,8 @@ class _ListTileItemState extends State<ListTileItem> {
                             itemBuilder: (context, _) => const Icon(
                                   Icons.star,
                                   color: Color.fromARGB(255, 218, 196, 0),
-                                ))
-                      ])),
+                                )),
+                      ]))),
               Padding(
                   padding: EdgeInsets.all(5),
                   child: Column(
@@ -253,110 +277,156 @@ class _ListTileItemState extends State<ListTileItem> {
                           child: Text(widget.rating.review))
                     ],
                   )),
-              Padding(
-                  padding: EdgeInsets.all(0),
+              Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: 10),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.arrow_upward,
-                                  color: Colors.green),
-                              onPressed: () {
-                                if (_upvotes < 1) {
-                                  _checkVoted(widget.rating.id).then((value) {
-                                    if (!value) {
-                                      setState(() {
-                                        _upvotes += 1;
-                                      });
-                                      _updateVotes(
-                                          widget.rating.id,
-                                          widget.rating.upvotes + _upvotes,
-                                          "upvotes");
-                                    }
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.arrow_upward,
+                              color: Colors.green),
+                          onPressed: () {
+                            if (_upvotes < 1) {
+                              _checkVoted(widget.rating.id).then((value) {
+                                if (!value) {
+                                  setState(() {
+                                    _upvotes += 1;
                                   });
+                                  _updateVotes(
+                                      widget.rating.id,
+                                      widget.rating.upvotes + _upvotes,
+                                      "upvotes");
                                 }
-                              },
-                            ),
-                            Text(
-                              '${widget.rating.upvotes + _upvotes}',
-                              style: const TextStyle(color: Colors.green),
-                            )
-                          ]),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              padding: const EdgeInsets.all(0),
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.arrow_downward,
-                                  color: Colors.red),
-                              onPressed: () {
-                                if (_downvotes < 1) {
-                                  _checkVoted(widget.rating.id).then((value) {
-                                    if (!value) {
-                                      setState(() {
-                                        _downvotes += 1;
-                                      });
-                                      _updateVotes(
-                                          widget.rating.id,
-                                          widget.rating.downvotes + _downvotes,
-                                          "downvotes");
-                                    }
+                              });
+                            }
+                          },
+                        ),
+                        Text(
+                          '${widget.rating.upvotes + _upvotes}',
+                          style: const TextStyle(color: Colors.green),
+                        )
+                      ]),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.arrow_downward,
+                              color: Colors.red),
+                          onPressed: () {
+                            if (_downvotes < 1) {
+                              _checkVoted(widget.rating.id).then((value) {
+                                if (!value) {
+                                  setState(() {
+                                    _downvotes += 1;
                                   });
+                                  _updateVotes(
+                                      widget.rating.id,
+                                      widget.rating.downvotes + _downvotes,
+                                      "downvotes");
                                 }
-                              },
-                            ),
-                            Text(
-                              '${widget.rating.downvotes + _downvotes}',
-                              style: const TextStyle(color: Colors.red),
-                            )
-                          ]),
-
-                      // SizedBox(
-                      //   height: 30,
-                      //   width: 50,
-                      if (widget.rating.owned)
-                        TextButton(
-                            onPressed: () {
-                              String id = "";
-                              if (widget.rating.id != null) {
-                                id = widget.rating.id.toString();
-                              }
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (BuildContext context,
-                                      Animation<double> animation1,
-                                      Animation<double> animation2) {
-                                        return ReviewScreen(
-                                            id: id);
+                              });
+                            }
+                          },
+                        ),
+                        Text(
+                          '${widget.rating.downvotes + _downvotes}',
+                          style: const TextStyle(color: Colors.red),
+                        )
+                      ]),
+                  if (widget.rating.owned)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Expanded(
+                            child: IconButton(
+                                // constraints: BoxConstraints(
+                                //   maxWidth: MediaQuery.of(context).size.width * 0.03,
+                                // ),
+                                onPressed: () {
+                                  String id = "";
+                                  if (widget.rating.id != null) {
+                                    id = widget.rating.id.toString();
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (BuildContext context,
+                                          Animation<double> animation1,
+                                          Animation<double> animation2) {
+                                        return ReviewScreen(id: id);
                                       },
-                                  transitionDuration: Duration.zero,
-                                  reverseTransitionDuration: Duration.zero,
+                                      transitionDuration: Duration.zero,
+                                      reverseTransitionDuration: Duration.zero,
+                                    ),
+                                  );
+                                },
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  // minimumSize: Size(
+                                  //     MediaQuery.of(context).size.width *
+                                  //         0.04,
+                                  //     MediaQuery.of(context).size.width *
+                                  //         0.03),
+                                  // tapTargetSize:
+                                  //     MaterialTapTargetSize.shrinkWrap,
+                                  // alignment: Alignment.centerLeft),
                                 ),
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size(45, 30),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                alignment: Alignment.centerLeft),
-                            child: const Text("Edit"))
-                      // )
-                    ],
-                  ))
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.blue, size: 15))),
+                        Expanded(
+                            child: IconButton(
+                                // constraints: BoxConstraints(
+                                //   maxWidth: MediaQuery.of(context).size.width * 0.03,
+                                // ),
+                                onPressed: () {
+                                  String id = "";
+                                  if (widget.rating.id != null) {
+                                    id = widget.rating.id.toString();
+                                  }
+                                  deletePost(id).then((ret) => {
+                                    Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder: (BuildContext context, Animation<double> animation1,
+                                            Animation<double> animation2) {
+                                          return const FollowingScreen(title: "Trending");
+                                        },
+                                        transitionDuration: Duration.zero,
+                                        reverseTransitionDuration: Duration.zero,
+                                      ),
+                                    ),
+                                  });
+                                },
+                                style: IconButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+
+                                    // minimumSize: Size(
+                                    //     MediaQuery.of(context).size.width *
+                                    //         0.04,
+                                    //     MediaQuery.of(context).size.width *
+                                    //         0.03),
+                                    // tapTargetSize:
+                                    //     MaterialTapTargetSize.shrinkWrap,
+                                    alignment: Alignment.centerLeft),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.red, size: 15)))
+                      ],
+                    )
+                ],
+              ))
             ],
           )),
     );
