@@ -56,6 +56,7 @@ Future<Rating> _getRating(String id) async {
     internet: responseRating["internet"],
     cleanliness: responseRating["cleanliness"],
     vibe: responseRating["vibe"],
+    privacy: responseRating["privacy"],
     upvotes: responseRating["upvotes"],
     downvotes: responseRating["downvotes"],
     owned: false,
@@ -68,6 +69,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   double _cleanliness = 5;
   double _internet = 5;
   double _vibe = 5;
+  double _privacy = 5;
   String _review = "";
   String _restroom = "";
   AppUser _user = AppUser(username: 'null', id: 'null');
@@ -170,7 +172,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   void edit(
-      id, restroom, cleanliness, internet, vibe, overallRating, review) async {
+      id, restroom, cleanliness, internet, vibe, privacy, overallRating, review) async {
     final response = await http.post(
       Uri.parse(
           "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/edit_rating/"),
@@ -183,6 +185,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         'cleanliness': cleanliness.toString(),
         'internet': internet.toString(),
         'vibe': vibe.toString(),
+        'privacy': privacy.toString(),
         'overall_rating': overallRating.toString(),
         'review': review
       }),
@@ -285,7 +288,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: DropdownSearch<String>(
                 popupProps: PopupProps.menu(
                   showSelectedItems: true,
@@ -307,7 +310,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             ),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('Cleanliness: ', style: TextStyle(fontSize: 20)),
@@ -328,7 +331,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 )),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('   Internet   : ',
@@ -350,7 +353,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 )),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('      Vibe      : ',
@@ -372,7 +375,29 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 )),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  children: [
+                    const Text('    Privacy   : ',
+                        style: TextStyle(fontSize: 20)),
+                    Flexible(
+                        child: Slider(
+                      min: 0.0,
+                      max: 5.0,
+                      divisions: 50,
+                      value: _vibe,
+                      label: '${roundDouble(_vibe, 1)}',
+                      onChanged: (value) {
+                        setState(() {
+                          _privacy = value;
+                        });
+                      },
+                    )),
+                  ],
+                )),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     Text(
@@ -381,7 +406,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 )),
             Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: TextField(
                   keyboardType: TextInputType.multiline,
                   maxLines: 10,
