@@ -64,6 +64,7 @@ Future<Rating> _getRating(String id) async {
 }
 
 class _ReviewScreenState extends State<ReviewScreen> {
+  final _textEditingController = TextEditingController();
   double _cleanliness = 5;
   double _internet = 5;
   double _vibe = 5;
