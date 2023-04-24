@@ -34,7 +34,7 @@ class ReviewScreen extends StatefulWidget {
   State<ReviewScreen> createState() => _ReviewScreenState();
 }
 
-class _ReviewScreenState extends State<ReviewScreen> with TickerProviderStateMixin {
+class _ReviewScreenState extends State<ReviewScreen> {
   double _cleanliness = 5;
   double _internet = 5;
   double _vibe = 5;
@@ -71,7 +71,7 @@ class _ReviewScreenState extends State<ReviewScreen> with TickerProviderStateMix
   Future pause(Duration d) => Future.delayed(d);
 
   Future<AppUser> _getUser() async {
-    await pause(const Duration(milliseconds: 1200));
+    await pause(const Duration(milliseconds: 700));
     return await UserPreferences.getUser();
   }
 

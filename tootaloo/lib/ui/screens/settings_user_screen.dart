@@ -73,7 +73,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
   Future pause(Duration d) => Future.delayed(d);
 
   Future<AppUser> _getUser() async {
-    await pause(const Duration(milliseconds: 1200));
+    await pause(const Duration(milliseconds: 700));
     return await UserPreferences.getUser();
   }
 
@@ -93,7 +93,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
     if(!_loaded) {
       return Scaffold(
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
-        appBar: const TopNavBar(title: "Review"),
+        appBar: const TopNavBar(title: "User Settings"),
         body: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -119,7 +119,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
     if(_user.username == 'null' && _user.id == 'null') {
       return Scaffold(
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
-        appBar: const TopNavBar(title: "Review"),
+        appBar: const TopNavBar(title: "User Settings"),
         body: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
