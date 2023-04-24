@@ -13,6 +13,7 @@ urlpatterns = [
   path('unfollow-user-by-username/', views.unfollowUserByUsername, name='unfollow-user-by-username'),
   path('check-following-by-username/', views.checkFollowingByUsername, name='check-following-by-username'),
   path('restrooms/', views.restrooms, name='restrooms'),
+  path('users/', views.users, name='users'),
   path('ratings/', views.ratings, name='ratings'),
   path('following_ratings/', views.following_ratings, name='following_ratings'),
   path('update_votes/', views.update_votes, name='update_votes'),
@@ -31,4 +32,5 @@ urlpatterns = [
   path('check-user-reported/', views.checkUserReported, name='check-user-reported'),
   path('update-user-reports/', views.updateUserReports, name='update-user-reports'),
   path('restroom-by-id/', views.restroomById, name='restroom-by-id'),
+  path('user-by-id/', views.userById, name='user-by-id'),
 ]

@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/ui/components/report_user_button.dart';
+import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/AppUser.dart';
 
 class UserTileItem extends StatefulWidget {
   final String username;
@@ -16,6 +18,11 @@ class UserTileItem extends StatefulWidget {
 
 class _UserTileItemState extends State<UserTileItem> {
   bool _followed = false;
+  late Future<AppUser> _appUser;
+
+  Future<AppUser> getUser() async {
+    return await UserPreferences.getUser();
+  }
 
   @override
   void initState() {
@@ -46,23 +53,23 @@ class _UserTileItemState extends State<UserTileItem> {
                                 width: MediaQuery.of(context).size.width * 0.08,
                                 child: const Icon(Icons.account_circle))
                           ],
-                        )])),
+                        )
+                      ])),
               Padding(
                   padding: EdgeInsets.all(5),
                   child: Expanded(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.username,
-                            style: const TextStyle(fontSize: 20))
-                        ],
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.username,
+                          style: const TextStyle(fontSize: 20))
+                    ],
                   ))),
               Padding(
-                padding: EdgeInsets.all(5),
-                child: ReportUserButton(type: "users", reportedUsername: widget.username)
-              ),
+                  padding: EdgeInsets.all(5),
+                  child: ReportUserButton(
+                      type: "users", reportedUsername: widget.username)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -74,35 +81,37 @@ class _UserTileItemState extends State<UserTileItem> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         OutlinedButton.icon(
-                          onPressed: () {
-                            // TODO: define currently logged in user here
-                            const String loggedInUsername = "ThomasTest";
-                            _followed
-                                ? unfollowUser(loggedInUsername, widget.username)
-                                    .then((unfollowed) => {
-                                          setState(() {
-                                            unfollowed
-                                                ? _followed = false
-                                                : _followed = true;
+                            onPressed: () {
+                              getUser().then((appUser) => {
+                                _followed
+                                  ? unfollowUser(
+                                          appUser.username, widget.username)
+                                      .then((unfollowed) => {
+                                            setState(() {
+                                              unfollowed
+                                                  ? _followed = false
+                                                  : _followed = true;
+                                            })
                                           })
-                                        })
-                                : followUser(loggedInUsername, widget.username)
-                                    .then((followed) => {
-                                          setState(() {
-                                            followed
-                                                ? _followed = true
-                                                : _followed = false;
+                                  : followUser(
+                                          appUser.username, widget.username)
+                                      .then((followed) => {
+                                            setState(() {
+                                              followed
+                                                  ? _followed = true
+                                                  : _followed = false;
+                                            })
                                           })
-                                        });
-                          },
-                          icon: _followed
-                              ? const Icon(Icons.favorite_rounded)
-                              : const Icon(Icons.favorite_outline_rounded),
-                          label: _followed
-                              ? const Text('Followed')
-                              : const Text('Not Followed'),
-                          style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.lightBlue))
+                              });
+                            },
+                            icon: _followed
+                                ? const Icon(Icons.favorite_rounded)
+                                : const Icon(Icons.favorite_outline_rounded),
+                            label: _followed
+                                ? const Text('Followed')
+                                : const Text('Not Followed'),
+                            style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.lightBlue))
                       ])
                 ],
               )
@@ -112,7 +121,7 @@ class _UserTileItemState extends State<UserTileItem> {
   }
 }
 
-Future<bool> followUser(String followerUsername, String targetUsername) async {
+Future<bool> followUser(String? followerUsername, String targetUsername) async {
   // Send request to backend and parse response
   // TODO: change this url later
   Map<String, dynamic> queryParams = {
@@ -130,7 +139,7 @@ Future<bool> followUser(String followerUsername, String targetUsername) async {
 }
 
 Future<bool> unfollowUser(
-    String followerUsername, String targetUsername) async {
+    String? followerUsername, String targetUsername) async {
   // Send request to backend and parse response
   // TODO: change this url later
   Map<String, dynamic> queryParams = {

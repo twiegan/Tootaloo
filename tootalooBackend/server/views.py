@@ -200,6 +200,15 @@ def restrooms(request):
 	
 	return resp
 
+def users(request):
+	db = client['tootaloo']
+	users_collection = db['users']
+	users = users_collection.find().sort("username", -1)
+	print(users)
+	resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	
+	return resp
 
 @csrf_exempt
 def rating_by_id(request):
@@ -756,16 +765,27 @@ def checkUserReported(request):
 
 @csrf_exempt
 def restroomById(request):
-	print("GET request: restroomsByName")
 	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
-	print("restroom_id: ", restroom_id)
 
 	db = client['tootaloo']
 	restrooms_collection = db['restrooms']
 	restroom = restrooms_collection.find_one({'_id': restroom_id})
-	print("restroom: ", restroom)
 
 	response = {'status': "success", 'restroom': restroom}
+	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	return resp
+
+@csrf_exempt
+def userById(request):
+	user_id = ObjectId(request.GET.get('user_id', ''))
+
+	db = client['tootaloo']
+	users_collection = db['users']
+	user = users_collection.find_one({'_id': user_id})
+	print(user)
+
+	response = {'status': "success", 'user': user}
 	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
 	return resp
