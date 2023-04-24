@@ -10,6 +10,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
+import 'package:tootaloo/ui/components/report_post_button.dart';
+import 'package:tootaloo/ui/models/rating.dart';
+
 
 class FollowingScreen extends StatefulWidget {
   const FollowingScreen({super.key, required this.title});
@@ -151,37 +154,6 @@ Future<bool> deletePost(ratingId) async {
         <String, String>{'id': ratingId.toString(), 'user_id': userId}),
   );
   return true;
-}
-
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-  bool owned;
-
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-    required this.owned,
-  });
 }
 
 Future<List<Rating>> _getRatings() async {
@@ -345,11 +317,11 @@ class _ListTileItemState extends State<ListTileItem> {
                           style: const TextStyle(color: Colors.red),
                         )
                       ]),
-                  if (widget.rating.owned)
-                    Row(
+                  Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (widget.rating.owned) 
                         Expanded(
                             child: IconButton(
                                 // constraints: BoxConstraints(
@@ -385,7 +357,8 @@ class _ListTileItemState extends State<ListTileItem> {
                                   // alignment: Alignment.centerLeft),
                                 ),
                                 icon: const Icon(Icons.edit,
-                                    color: Colors.blue, size: 15))),
+                                    color: Colors.blue, size: 16))),
+                        if (widget.rating.owned) 
                         Expanded(
                             child: IconButton(
                                 // constraints: BoxConstraints(
@@ -397,18 +370,21 @@ class _ListTileItemState extends State<ListTileItem> {
                                     id = widget.rating.id.toString();
                                   }
                                   deletePost(id).then((ret) => {
-                                    Navigator.push(
-                                      context,
-                                      PageRouteBuilder(
-                                        pageBuilder: (BuildContext context, Animation<double> animation1,
-                                            Animation<double> animation2) {
-                                          return const FollowingScreen(title: "Trending");
-                                        },
-                                        transitionDuration: Duration.zero,
-                                        reverseTransitionDuration: Duration.zero,
-                                      ),
-                                    ),
-                                  });
+                                        Navigator.push(
+                                          context,
+                                          PageRouteBuilder(
+                                            pageBuilder: (BuildContext context,
+                                                Animation<double> animation1,
+                                                Animation<double> animation2) {
+                                              return const FollowingScreen(
+                                                  title: "Trending");
+                                            },
+                                            transitionDuration: Duration.zero,
+                                            reverseTransitionDuration:
+                                                Duration.zero,
+                                          ),
+                                        ),
+                                      });
                                 },
                                 style: IconButton.styleFrom(
                                     padding: EdgeInsets.zero,
@@ -422,7 +398,8 @@ class _ListTileItemState extends State<ListTileItem> {
                                     //     MaterialTapTargetSize.shrinkWrap,
                                     alignment: Alignment.centerLeft),
                                 icon: const Icon(Icons.delete,
-                                    color: Colors.red, size: 15)))
+                                    color: Colors.red, size: 16))),
+                        ReportPostButton(type: "rating", rating: widget.rating)
                       ],
                     )
                 ],

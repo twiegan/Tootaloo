@@ -9,6 +9,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/ui/models/rating.dart';
 
 double roundDouble(double value, int places) {
   num mod = pow(10.0, places);
@@ -33,33 +34,6 @@ class ReviewScreen extends StatefulWidget {
   State<ReviewScreen> createState() => _ReviewScreenState();
 }
 
-class Rating {
-  final id;
-  final String building;
-  final String by;
-  final String room;
-  final String review;
-  final num overallRating;
-  final num internet;
-  final num cleanliness;
-  final num vibe;
-  final int upvotes;
-  final int downvotes;
-
-  Rating({
-    required this.id,
-    required this.building,
-    required this.by,
-    required this.room,
-    required this.review,
-    required this.overallRating,
-    required this.internet,
-    required this.cleanliness,
-    required this.vibe,
-    required this.upvotes,
-    required this.downvotes,
-  });
-}
 
 Future<Rating> _getRating(String id) async {
   final response = await http.post(
@@ -84,6 +58,7 @@ Future<Rating> _getRating(String id) async {
     vibe: responseRating["vibe"],
     upvotes: responseRating["upvotes"],
     downvotes: responseRating["downvotes"],
+    owned: false,
   );
   return rating;
 }

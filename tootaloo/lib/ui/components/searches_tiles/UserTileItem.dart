@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tootaloo/ui/components/report_user_button.dart';
 
 class UserTileItem extends StatefulWidget {
   final String username;
@@ -26,60 +27,87 @@ class _UserTileItemState extends State<UserTileItem> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
-        color: Colors.white10,
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(5),
-          dense: true,
-          leading:
-              Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [Icon(Icons.account_circle, size: 40)],
-            )
-          ]),
-          title: Text(
-            widget.username,
-            style: const TextStyle(fontSize: 20),
-          ),
-          trailing: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          color: Colors.white10,
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: define currently logged in user here
-                    const String loggedInUsername = "ThomasTest";
-                    _followed
-                        ? unfollowUser(loggedInUsername, widget.username)
-                            .then((unfollowed) => {
-                                  setState(() {
-                                    unfollowed
-                                        ? _followed = false
-                                        : _followed = true;
-                                  })
-                                })
-                        : followUser(loggedInUsername, widget.username)
-                            .then((followed) => {
-                                  setState(() {
-                                    followed
-                                        ? _followed = true
-                                        : _followed = false;
-                                  })
-                                });
-                  },
-                  icon: _followed
-                      ? const Icon(Icons.favorite_rounded)
-                      : const Icon(Icons.favorite_outline_rounded),
-                  label: _followed
-                      ? const Text('Followed')
-                      : const Text('Not Followed'),
-                  style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.lightBlue))
+              Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.08,
+                                child: const Icon(Icons.account_circle))
+                          ],
+                        )])),
+              Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.username,
+                            style: const TextStyle(fontSize: 20))
+                        ],
+                  ))),
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: ReportUserButton(type: "users", reportedUsername: widget.username)
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            // TODO: define currently logged in user here
+                            const String loggedInUsername = "ThomasTest";
+                            _followed
+                                ? unfollowUser(loggedInUsername, widget.username)
+                                    .then((unfollowed) => {
+                                          setState(() {
+                                            unfollowed
+                                                ? _followed = false
+                                                : _followed = true;
+                                          })
+                                        })
+                                : followUser(loggedInUsername, widget.username)
+                                    .then((followed) => {
+                                          setState(() {
+                                            followed
+                                                ? _followed = true
+                                                : _followed = false;
+                                          })
+                                        });
+                          },
+                          icon: _followed
+                              ? const Icon(Icons.favorite_rounded)
+                              : const Icon(Icons.favorite_outline_rounded),
+                          label: _followed
+                              ? const Text('Followed')
+                              : const Text('Not Followed'),
+                          style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.lightBlue))
+                      ])
+                ],
+              )
             ],
-          ),
-        ),
-      ),
+          )),
     );
   }
 }
@@ -91,7 +119,7 @@ Future<bool> followUser(String followerUsername, String targetUsername) async {
     "followerUsername": followerUsername,
     "targetUsername": targetUsername
   };
-  Uri uri = Uri.https(
+  Uri uri = Uri.http(
       dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
       "/follow-user-by-username/",
       queryParams);
