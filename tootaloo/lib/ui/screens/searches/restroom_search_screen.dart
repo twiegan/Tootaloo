@@ -38,6 +38,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
       cleanliness: 0.0,
       internet: 0.0,
       vibe: 0.0,
+      privacy: 0.0,
       ratings_ids: []);
   // late List<RestroomTileItem> _restroomTiles = [];
 
@@ -276,6 +277,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
         cleanliness: rating["cleanliness"],
         internet: rating["internet"],
         vibe: rating["vibe"],
+        privacy: rating["privacy"],
         upvotes: rating["upvotes"],
         downvotes: rating["downvotes"],
         review: rating["review"],
