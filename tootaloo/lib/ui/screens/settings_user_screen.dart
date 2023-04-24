@@ -73,7 +73,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
   Future pause(Duration d) => Future.delayed(d);
 
   Future<AppUser> _getUser() async {
-    await pause(const Duration(milliseconds: 700));
+    await pause(const Duration(milliseconds: 300));
     return await UserPreferences.getUser();
   }
 
