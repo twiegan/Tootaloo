@@ -114,14 +114,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
               _restroom = "${rating.building} ${rating.room}";
             })
           });
-      _getRestrooms().then((restrooms) => {
+    }
+    _getRestrooms().then((restrooms) => {
             setState(() {
               for (var restroom in restrooms) {
                 _restrooms.add(restroom);
               }
             })
           });
-    }
   }
 
   Future<List<String>> _getRestrooms() async {

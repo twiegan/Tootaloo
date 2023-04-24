@@ -27,11 +27,11 @@ class TrendingScreen extends StatefulWidget {
   @override
   State<TrendingScreen> createState() => _TrendingScreenState();
 }
+late List<Rating> _ratings;
 
 class _TrendingScreenState extends State<TrendingScreen> {
   final int index = 0;
 
-  late List<Rating> _ratings;
 
   @override
   void initState() {
@@ -129,10 +129,27 @@ Future<bool> _userOwned(ratingId) async {
         <String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
   );
   if (response.body.toString() == 'false') {
-    print("false");
     return false;
   }
-  print("true");
+  return true;
+}
+
+Future<bool> deletePost(ratingId) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return false;
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/delete_post/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(
+        <String, String>{'id': ratingId.toString(), 'user_id': userId}),
+  );
   return true;
 }
 
@@ -206,20 +223,25 @@ class _ListTileItemState extends State<ListTileItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(0),
       child: Container(
-          color: Colors.white10,
+          // color: Colors.white10,
+          decoration: BoxDecoration(
+              // color: const Color.fromARGB(255, 151, 187, 250),
+              border:
+                  Border.all(color: const Color.fromARGB(255, 227, 227, 227))),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  padding: const EdgeInsets.all(5),
+                  child: Expanded(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -236,29 +258,30 @@ class _ListTileItemState extends State<ListTileItem> {
                             itemBuilder: (context, _) => const Icon(
                                   Icons.star,
                                   color: Color.fromARGB(255, 218, 196, 0),
-                                ))
-                      ])),
+                                )),
+                      ]))),
               Padding(
-                  padding: EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(5),
                   child: Expanded(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.rating.building + widget.rating.room,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.55,
-                          child: Text(widget.rating.review))
-                    ],
-                  ))),
-              // Padding(
-              //     padding: EdgeInsets.all(5),
-              // child:
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                      child: Container(
+                          alignment: Alignment.topLeft,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.rating.building + widget.rating.room,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.55,
+                                  child: Text(widget.rating.review))
+                            ],
+                          )))),
+              Expanded(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -294,7 +317,7 @@ class _ListTileItemState extends State<ListTileItem> {
                         )
                       ]),
                   Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -324,62 +347,88 @@ class _ListTileItemState extends State<ListTileItem> {
                           style: const TextStyle(color: Colors.red),
                         )
                       ]),
-
-                  // SizedBox(
-                  //   height: 30,
-                  //   width: 50,
                   if (widget.rating.owned)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                         SizedBox( width: MediaQuery.of(context).size.width * 0.05, child: IconButton(
-                          onPressed: () {
-                            String id = "";
-                            if (widget.rating.id != null) {
-                              id = widget.rating.id.toString();
-                            }
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation1,
-                                    Animation<double> animation2) {
-                                  return ReviewScreen(id: id);
+                        Expanded(
+                            child: IconButton(
+                                // constraints: BoxConstraints(
+                                //   maxWidth: MediaQuery.of(context).size.width * 0.03,
+                                // ),
+                                onPressed: () {
+                                  String id = "";
+                                  if (widget.rating.id != null) {
+                                    id = widget.rating.id.toString();
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (BuildContext context,
+                                          Animation<double> animation1,
+                                          Animation<double> animation2) {
+                                        return ReviewScreen(id: id);
+                                      },
+                                      transitionDuration: Duration.zero,
+                                      reverseTransitionDuration: Duration.zero,
+                                    ),
+                                  );
                                 },
-                                transitionDuration: Duration.zero,
-                                reverseTransitionDuration: Duration.zero,
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size(
-                                  MediaQuery.of(context).size.width * 0.05,
-                                  MediaQuery.of(context).size.width * 0.03),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              alignment: Alignment.centerLeft),
-                          icon: const Icon(Icons.edit, color: Colors.blue))),
-                        SizedBox( width: MediaQuery.of(context).size.width * 0.05, child: IconButton(
-                          onPressed: () {
-                            String id = "";
-                            if (widget.rating.id != null) {
-                              id = widget.rating.id.toString();
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size(
-                                  MediaQuery.of(context).size.width * 0.05,
-                                  MediaQuery.of(context).size.width * 0.03),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              alignment: Alignment.centerLeft),
-                          icon: const Icon(Icons.delete, color: Colors.red)))
-                    ],
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  // minimumSize: Size(
+                                  //     MediaQuery.of(context).size.width *
+                                  //         0.04,
+                                  //     MediaQuery.of(context).size.width *
+                                  //         0.03),
+                                  // tapTargetSize:
+                                  //     MaterialTapTargetSize.shrinkWrap,
+                                  // alignment: Alignment.centerLeft),
+                                ),
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.blue, size: 15))),
+                        Expanded(
+                            child: IconButton(
+                                // constraints: BoxConstraints(
+                                //   maxWidth: MediaQuery.of(context).size.width * 0.03,
+                                // ),
+                                onPressed: () {
+                                  String id = "";
+                                  if (widget.rating.id != null) {
+                                    id = widget.rating.id.toString();
+                                  }
+                                  deletePost(id).then((ret) => {
+                                    Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder: (BuildContext context, Animation<double> animation1,
+                                            Animation<double> animation2) {
+                                          return const TrendingScreen(title: "Trending");
+                                        },
+                                        transitionDuration: Duration.zero,
+                                        reverseTransitionDuration: Duration.zero,
+                                      ),
+                                    ),
+                                  });
+                                },
+                                style: IconButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+
+                                    // minimumSize: Size(
+                                    //     MediaQuery.of(context).size.width *
+                                    //         0.04,
+                                    //     MediaQuery.of(context).size.width *
+                                    //         0.03),
+                                    // tapTargetSize:
+                                    //     MaterialTapTargetSize.shrinkWrap,
+                                    alignment: Alignment.centerLeft),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.red, size: 15)))
+                      ],
                     )
-                    
-                  // )
                 ],
-              )
-              // )
+              ))
             ],
           )),
     );

@@ -117,6 +117,7 @@ def submit_rating(request):
 	body = json.loads(body_unicode)
 	building = ''
 	room = ''
+	user_id = body['user_id']
 	if body['user_id'] == 'null':
 		return HttpResponse('false')
 	user_id = ObjectId(user_id)
@@ -163,6 +164,28 @@ def edit_rating(request):
 				'review': body['review'],
 			}
 		})
+
+	return HttpResponse()
+
+@csrf_exempt
+def delete_post(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+
+	user_id = body['user_id']
+	if user_id == 'null':
+		return HttpResponse('true')
+	user_id = ObjectId(user_id)
+
+	db = client['tootaloo']
+	rating_collection = db['ratings']
+	user_collection = db['users']
+	rating_collection.delete_one({'_id' : rating_id})
+	user_collection.update_one(
+  		{ '_id': user_id },
+  		{ '$pull': { 'posts': rating_id } }
+	)
 
 	return HttpResponse()
 
@@ -223,7 +246,7 @@ def following_ratings(request):
 	print(following)
 	ratings_collection = db['ratings']	
 
-	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort('createdAt', -1).limit(40)
+	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort('createdAt', 1).limit(40)
 
 	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
