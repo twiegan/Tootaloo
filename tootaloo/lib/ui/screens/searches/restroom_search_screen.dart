@@ -270,7 +270,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
 
   for (var rating in responseData) {
     Rating ratingData = Rating(
-        id: rating["_id"].value.first(),
+        id: rating["_id"].values.first,
         building: rating["building"],
         room: rating["room"],
         overallRating: rating["overall_rating"],

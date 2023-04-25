@@ -17,20 +17,18 @@ class UserTileItem extends StatefulWidget {
 }
 
 class _UserTileItemState extends State<UserTileItem> {
-  bool _followed = false;
   late Future<AppUser> _appUser;
+  bool _followed = false;
+  bool initialized = false;
 
   Future<AppUser> getUser() async {
     return await UserPreferences.getUser();
   }
 
   @override
-  void initState() {
-    _followed = widget.followed;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (!initialized) _followed = widget.followed;
+
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -83,26 +81,28 @@ class _UserTileItemState extends State<UserTileItem> {
                         OutlinedButton.icon(
                             onPressed: () {
                               getUser().then((appUser) => {
-                                _followed
-                                  ? unfollowUser(
-                                          appUser.username, widget.username)
-                                      .then((unfollowed) => {
-                                            setState(() {
-                                              unfollowed
-                                                  ? _followed = false
-                                                  : _followed = true;
-                                            })
-                                          })
-                                  : followUser(
-                                          appUser.username, widget.username)
-                                      .then((followed) => {
-                                            setState(() {
-                                              followed
-                                                  ? _followed = true
-                                                  : _followed = false;
-                                            })
-                                          })
-                              });
+                                    _followed
+                                        ? unfollowUser(appUser.username,
+                                                widget.username)
+                                            .then((unfollowed) => {
+                                                  setState(() {
+                                                    initialized = true;
+                                                    unfollowed
+                                                        ? _followed = false
+                                                        : _followed = true;
+                                                  })
+                                                })
+                                        : followUser(appUser.username,
+                                                widget.username)
+                                            .then((followed) => {
+                                                  setState(() {
+                                                    initialized = true;
+                                                    followed
+                                                        ? _followed = true
+                                                        : _followed = false;
+                                                  })
+                                                })
+                                  });
                             },
                             icon: _followed
                                 ? const Icon(Icons.favorite_rounded)

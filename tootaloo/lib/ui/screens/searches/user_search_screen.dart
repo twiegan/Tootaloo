@@ -79,13 +79,16 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                       orElse: () => '');
                   if (key != '') {
                     getSearchedUser(key).then((user) => {
-                          setState(() {
-                            UserTileItem userTileItem = UserTileItem(
-                              username: user.username,
-                              followed: checkFollowed(appUser.id, user),
-                            );
-                            _userTile = [userTileItem];
-                          })
+                          checkFollowed(appUser.id, user.id)
+                              .then((followed) => {
+                                    setState(() {
+                                      UserTileItem userTileItem = UserTileItem(
+                                        username: user.username,
+                                        followed: followed,
+                                      );
+                                      _userTile = [userTileItem];
+                                    })
+                                  })
                         });
                   }
                 },
@@ -145,31 +148,17 @@ Future<User> getSearchedUser(String userId) async {
   return userData;
 }
 
-bool checkFollowed(String? followerId, User user) {
+Future<bool> checkFollowed(String? followerId, String targetId) async {
   if (followerId == null || followerId == "null") return false; // Sanity check
 
-  for (var following_id_map in user.following_ids) {
-    if (following_id_map.containsValue(followerId)) {
+  // Send request to backend and parse response
+  User follower = await getSearchedUser(followerId);
+
+  for (var following_id_map in follower.following_ids) {
+    if (following_id_map.values.first == targetId) {
       return true;
     }
   }
 
   return false;
-
-  // Map<String, dynamic> queryParams = {
-  //   "followerUsername": follower,
-  //   "targetUsername": target
-  // };
-  // Uri uri = Uri.http(
-  //     dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
-  //     "/check-following-by-username/",
-  //     queryParams);
-  // final response = await http.get(uri);
-  // dynamic responseData = json.decode(response.body);
-
-  // if (responseData["response"] == "Success") {
-  //   return true;
-  // } else {
-  //   return false;
-  // }
 }
