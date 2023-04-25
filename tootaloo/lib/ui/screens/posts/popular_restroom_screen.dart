@@ -138,17 +138,17 @@ class _ListTileItemState extends State<ListTileItem> {
                       children: [
                         Row(
                           children: [
-                            Text('Cleanliness: ${widget.restroom.cleanliness}', style: const TextStyle(fontSize: 15)),
+                            Text('Cleanliness: ${roundDouble(widget.restroom.cleanliness, 2)}', style: const TextStyle(fontSize: 15)),
                           ],
                         ),
                         Row(
                           children: [
-                            Text('Internet: ${widget.restroom.internet}', style: const TextStyle(fontSize: 15)),
+                            Text('Internet: ${roundDouble(widget.restroom.internet, 2)}', style: const TextStyle(fontSize: 15)),
                           ],
                         ),
                         Row(
                           children: [
-                            Text('Vibe: ${widget.restroom.vibe}', style: const TextStyle(fontSize: 15)),
+                            Text('Vibe: ${roundDouble(widget.restroom.vibe, 2)}', style: const TextStyle(fontSize: 15)),
                           ],
                         ),
                       ],
@@ -159,7 +159,7 @@ class _ListTileItemState extends State<ListTileItem> {
                       children: [
                         Row(
                           children: [
-                            Text('Privacy: ${widget.restroom.privacy}', style: const TextStyle(fontSize: 15)),
+                            Text('Privacy: ${roundDouble(widget.restroom.privacy, 2)}', style: const TextStyle(fontSize: 15)),
                           ],
                         ),
                       ],
@@ -179,7 +179,7 @@ class _ListTileItemState extends State<ListTileItem> {
                   
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text('${widget.restroom.rating}', style: const TextStyle(fontSize: 30)),
+                    Text('${roundDouble(widget.restroom.rating, 2)}', style: const TextStyle(fontSize: 30)),
                     const Icon(Icons.star, color: Color.fromARGB(255, 224, 202, 0), size: 30),
                   ],
                 ),
