@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -18,6 +20,7 @@ class FilterWidget extends StatefulWidget {
 
 class _FilterWidgetState extends State<FilterWidget> {
   bool isUserLoggedIn = false;
+  String userId = "";
 
   bool isHygiene = false;
   bool isChangingStation = false;
@@ -28,9 +31,10 @@ class _FilterWidgetState extends State<FilterWidget> {
   void initState() {
     super.initState();
     _getUser().then((user) {
-      if (user.id != 'null') {
+      if (user.id != null && user.id != 'null') {
         setState(() {
           isUserLoggedIn = true;
+          userId = user.id!;
         });
       }
     });
@@ -49,7 +53,7 @@ class _FilterWidgetState extends State<FilterWidget> {
   @override
   build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Filter by'),
+      title: const Text('Filter restrooms by'),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -96,16 +100,16 @@ class _FilterWidgetState extends State<FilterWidget> {
                       }),
           ),
           Transform.translate(
-              offset: const Offset(13.0, 10.0),
+              offset: const Offset(11.0, 15.0),
               child: Transform.scale(
                   scale: 1.13,
                   child: const Text(
-                    "Average rating greater than:",
+                    "Rating greater than:",
                     style: TextStyle(fontSize: 13),
                     textAlign: TextAlign.center,
                   ))),
           Transform.translate(
-              offset: const Offset(0, 15.0),
+              offset: const Offset(0, 19.0),
               child: Slider(
                 activeColor: Colors.blue,
                 min: 0.0,
@@ -143,17 +147,68 @@ class _FilterWidgetState extends State<FilterWidget> {
       bool isFavorited, double ratingValue) async {
     print("$isChangingStation, $isHygiene, $isFavorited, $ratingValue");
 
+    List<dynamic> restroomsToFilter = [];
     if (isFavorited) {
-      // get the restrooms that are favorited by the user
-      Uri uri = Uri.parse("$URL/user-by-id/");
+      // get the restrooms that are favorited by the user to filter
+
+      // get the IDs of favorited restrooms for the current user
+      Map<String, dynamic> queryParams = {"user_id": userId};
+      Uri uri = Uri.http(
+          dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+          "/user-by-id/",
+          queryParams);
       final response = await http.get(uri);
-      print(response.body);
+      dynamic responseData = json.decode(response.body);
+
+      // with the IDs, get the data for each restroom
+      dynamic favoriteRestroomIds = responseData['user']['favorite_bathrooms'];
+      for (dynamic restroomId in favoriteRestroomIds) {
+        Map<String, dynamic> queryParams = {"restroom_id": restroomId['\$oid']};
+        Uri uri = Uri.http(
+            dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+            "/restroom-by-id/",
+            queryParams);
+        final response = await http.get(uri);
+
+        // convert json to contain only the "restroom" objects without the "status" string
+        restroomsToFilter.add(json.decode(response.body)['restroom']);
+      }
     } else {
-      // get all restrooms and filter them
+      // get all restrooms to filter
       Uri uri = Uri.parse("$URL/restrooms/");
       final response = await http.get(uri);
-      print(response.body);
+      restroomsToFilter = json.decode(response.body);
     }
+
+    // now filter based on hygiene products, changing station and rating
+    List<dynamic> filteredRestrooms = restroomsToFilter;
+
+    if (isChangingStation) {
+      // by changing station
+      filteredRestrooms = filteredRestrooms
+          .where((restroom) => restroom['changing-station'] == true)
+          .toList();
+    }
+
+    if (isHygiene) {
+      //by hygiene products
+      filteredRestrooms = filteredRestrooms
+          .where((restroom) => restroom['hygiene-products'] == true)
+          .toList();
+    }
+
+    // by rating
+    filteredRestrooms = filteredRestrooms
+        .where((restroom) => restroom['rating'] > ratingValue)
+        .toList();
+
+    //print(filteredRestrooms);
+
+    List<dynamic> rooms =
+        filteredRestrooms.map((restroom) => restroom["room"]).toList();
+
+    print(rooms);
+    print("================================================");
 
     //TODO: update custom markers from map screen
   }

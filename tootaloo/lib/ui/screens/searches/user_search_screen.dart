@@ -24,7 +24,7 @@ class UserSearchScreen extends StatefulWidget {
 
 /* Define screen state */
 class _UserSearchScreenState extends State<UserSearchScreen> {
-  final int index = 0;
+  final int index = 2;
 
   late String _selectedUser = "";
   // names map of restrooms we get from API (id: restroom_name)

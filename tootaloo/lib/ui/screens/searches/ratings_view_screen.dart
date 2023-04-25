@@ -17,7 +17,7 @@ class RatingsViewScreen extends StatefulWidget {
 }
 
 class _RatingsViewScreenState extends State<RatingsViewScreen> {
-  final int index = 0;
+  final int index = 2;
 
   @override
   Widget build(BuildContext context) {

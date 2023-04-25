@@ -174,7 +174,7 @@ class _MapScreenState extends State<MapScreen> {
                   SnackBar(
                     content: _customSnackBarInfoContent(),
                     backgroundColor: Colors.black87,
-                    duration: const Duration(milliseconds: 2000),
+                    duration: const Duration(milliseconds: 2500),
                     width: 320.0, // Width of the SnackBar.
                     padding: const EdgeInsets.symmetric(
                         horizontal: 15.0, // Inner padding for SnackBar content.
@@ -326,7 +326,6 @@ class _MapScreenState extends State<MapScreen> {
         buildings.add(buildingData);
       } catch (e) {
         print(e);
-        print("here");
       }
     }
 
@@ -405,7 +404,8 @@ class _MapScreenState extends State<MapScreen> {
                   ))
             ]),
             Text(
-              '# of Restrooms: ${building.restroomCount}',
+              //'Total # of Restrooms: ${building.restroomCount}',
+              'Click right to see the floor maps',
               style: const TextStyle(color: Colors.white, fontSize: 11.0),
             )
           ],
