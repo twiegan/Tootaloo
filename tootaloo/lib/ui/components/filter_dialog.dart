@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 import '../screens/review_screen.dart';
+
+String URL =
+    "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}";
 
 class FilterWidget extends StatefulWidget {
   const FilterWidget({super.key});
@@ -36,6 +41,7 @@ class _FilterWidgetState extends State<FilterWidget> {
           Transform.scale(
             scale: 1.13,
             child: CheckboxListTile(
+                activeColor: Colors.blue,
                 title: const Text(
                   "Hygiene products",
                   style: TextStyle(fontSize: 13),
@@ -48,6 +54,7 @@ class _FilterWidgetState extends State<FilterWidget> {
           Transform.scale(
             scale: 1.13,
             child: CheckboxListTile(
+                activeColor: Colors.blue,
                 title: const Text(
                   "Changing stations",
                   style: TextStyle(fontSize: 13),
@@ -60,6 +67,7 @@ class _FilterWidgetState extends State<FilterWidget> {
           Transform.scale(
             scale: 1.13,
             child: CheckboxListTile(
+                activeColor: Colors.blue,
                 title: const Text(
                   "Favorited",
                   style: TextStyle(fontSize: 13),
@@ -81,6 +89,7 @@ class _FilterWidgetState extends State<FilterWidget> {
           Transform.translate(
               offset: const Offset(0, 15.0),
               child: Slider(
+                activeColor: Colors.blue,
                 min: 0.0,
                 max: 5.0,
                 divisions: 50,
@@ -102,10 +111,28 @@ class _FilterWidgetState extends State<FilterWidget> {
           },
         ),
         TextButton(
-          onPressed: () async {},
+          onPressed: () async {
+            _filterRestrooms(
+                isChangingStation, isHygiene, isFavorited, ratingValue);
+          },
           child: const Text('Submit'),
         )
       ],
     );
+  }
+
+  void _filterRestrooms(bool isChangingStation, bool isHygiene,
+      bool isFavorited, double ratingValue) async {
+    print("$isChangingStation, $isHygiene, $isFavorited, $ratingValue");
+
+    Uri uri = Uri.parse("$URL/filterRestrooms");
+    uri = uri.replace(
+        query:
+            "isChangingStation=$isChangingStation&isHygiene=$isHygiene&isFavorited=$isFavorited&ratingValue=${roundDouble(ratingValue, 1)}");
+
+    final response = await http.get(uri);
+    print(response.body);
+
+    //TODO: update custom markers from map screen
   }
 }
