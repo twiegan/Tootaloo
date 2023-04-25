@@ -579,7 +579,7 @@ def insert_user(request):
 
   db = client['tootaloo']
   user_collection = db['users']
-  new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash, 'bathroom_preference': bathroom_preference, 'email': email}
+  new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash, 'bathroom_preference': bathroom_preference, 'email': email, "favorite_bathrooms": []}
   _id = user_collection.insert_one(new_user)
   print("inserted user with id: ", _id.inserted_id)
   
@@ -829,3 +829,38 @@ def userById(request):
 	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
 	return resp
+
+@csrf_exempt
+def favoriteRestroom(request):
+	user_id = ObjectId(request.GET.get('user_id', ''))
+	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+
+	db = client['tootaloo']
+	users_collection = db['users']
+	id_query = { '_id':  user_id}
+	new_restrooms = { '$push': { 'favorite_restrooms': restroom_id } }
+	users_collection.update_one(id_query, new_restrooms)
+
+	user = users_collection.find_one({'_id': user_id})
+	response = {'response': "success", "user": user}
+	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+	return resp
+
+@csrf_exempt
+def unfavoriteRestroom(request):
+	user_id = ObjectId(request.GET.get('user_id', ''))
+	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+
+	db = client['tootaloo']
+	users_collection = db['users']
+
+	try:
+		result = users_collection.update_one({'_id': user_id}, {'$pull':{'favorite_restrooms': restroom_id}})
+		resp = HttpResponse(dumps({"response": "success"}, sort_keys=True, indent=4, default=json_util.default))
+		resp['Content-Type'] = 'application/json'
+		return resp
+	except pymongo.errors.PyMongoError as e:
+		resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+		resp['Content-Type'] = 'application/json'
+		return resp

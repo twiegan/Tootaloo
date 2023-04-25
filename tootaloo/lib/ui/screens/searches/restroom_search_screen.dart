@@ -5,10 +5,12 @@ import 'dart:convert';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
-import 'package:tootaloo/ui/components/searches_tiles/RestroomTileItem.dart';
 import 'package:tootaloo/ui/screens/searches/ratings_view_screen.dart';
 import 'package:tootaloo/ui/models/restroom.dart';
 import 'package:tootaloo/ui/models/rating.dart';
+import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/AppUser.dart';
+import 'package:tootaloo/ui/models/user.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -24,11 +26,13 @@ class RestroomSearchScreen extends StatefulWidget {
 
 /* Define screen state */
 class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
+  late Future<AppUser> _appUser;
+  bool _favorited = false;
   final int index = 2;
   late String _selectedRestroom = "";
   // names map of restrooms we get from API (id: restroom_name)
   late Map<String, String> _restroomNames = {};
-  // restroom tiles built from names
+  // restroom to display built from names map
   Restroom _restroom = Restroom(
       id: "",
       building: "n/a",
@@ -40,7 +44,10 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
       vibe: 0.0,
       privacy: 0.0,
       ratings_ids: []);
-  // late List<RestroomTileItem> _restroomTiles = [];
+
+  Future<AppUser> getUser() async {
+    return await UserPreferences.getUser();
+  }
 
   @override
   void initState() {
@@ -82,16 +89,28 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
             Padding(
               padding: EdgeInsets.all(10),
               child: OutlinedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
                     //_restroomTiles = [];
                     var key = _restroomNames.keys.firstWhere(
                         (k) => _restroomNames[k] == _selectedRestroom,
                         orElse: () => '');
                     if (key != '') {
-                      getSearchedRestrooms(key).then((restrooms) => {
-                            setState(() {
-                              _restroom = restrooms.first;
-                            })
+                      getUser().then((appUser) => {
+                            if (appUser.id != "null")
+                              {
+                                getSearchedRestrooms(key).then((restrooms) => {
+                                      setState(() {
+                                        _restroom = restrooms.first;
+                                        checkFavorited(
+                                                appUser.id, restrooms.first.id)
+                                            .then((favorited) => {
+                                                  setState(() {
+                                                    _favorited = favorited;
+                                                  })
+                                                });
+                                      })
+                                    })
+                              }
                           });
                     }
                   },
@@ -103,102 +122,153 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
           ]),
           Column(
             children: [
-              Padding(padding: EdgeInsets.all(15), child: Row(children: [
-                Expanded(child: 
-                Column(children: [
-                  Text(_restroom.building,
-                            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-                ],))
-              ],),),
-              Padding(padding: EdgeInsets.all(15), child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text("Room: ${_restroom.room}",
-                            style: const TextStyle(fontSize: 22)),
-                        Text("Floor: ${_restroom.floor.toString()}",
-                            style: const TextStyle(fontSize: 22)),
-                      ],
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: Expanded(child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(_restroom.building,
+                        style: const TextStyle(
+                            fontSize: 42, fontWeight: FontWeight.bold)),
+                    IconButton(
+                        icon: _favorited
+                            ? const Icon(
+                                Icons.favorite_rounded,
+                                size: 40,
+                              )
+                            : const Icon(Icons.favorite_outline_rounded,
+                                size: 40),
+                        onPressed: () {
+                          if (_restroom.id != "") {
+                            getUser().then((appUser) => {
+                                  if (appUser.id != "null")
+                                    {
+                                      _favorited
+                                          ? unfavoriteRestroom(
+                                                  appUser.id, _restroom.id)
+                                              .then((unfavorited) => {
+                                                    setState(() {
+                                                      unfavorited
+                                                          ? _favorited =
+                                                              false
+                                                          : _favorited =
+                                                              true;
+                                                    })
+                                                  })
+                                          : favoriteRestroom(
+                                                  appUser.id, _restroom.id)
+                                              .then((favorited) => {
+                                                    setState(() {
+                                                      favorited
+                                                          ? _favorited =
+                                                              true
+                                                          : _favorited =
+                                                              false;
+                                                    })
+                                                  })
+                                    }
+                                });
+                          }
+                        }),
+                  ],
+                ))
+              ),
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text("Room: ${_restroom.room}",
+                              style: const TextStyle(fontSize: 22)),
+                          Text("Floor: ${_restroom.floor.toString()}",
+                              style: const TextStyle(fontSize: 22)),
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text("Cleanliness: ${_restroom.cleanliness.toString()}",
-                            style: const TextStyle(fontSize: 22)),
-                        Text("Internet: ${_restroom.internet.toString()}",
-                            style: const TextStyle(fontSize: 22)),
-                        Text("Vibe: ${_restroom.vibe.toString()}",
-                            style: const TextStyle(fontSize: 22)),
-                      ],
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                              "Cleanliness: ${_restroom.cleanliness.toString()}",
+                              style: const TextStyle(fontSize: 22)),
+                          Text("Internet: ${_restroom.internet.toString()}",
+                              style: const TextStyle(fontSize: 22)),
+                          Text("Vibe: ${_restroom.vibe.toString()}",
+                              style: const TextStyle(fontSize: 22)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),),
-              Padding(padding: EdgeInsets.all(15), child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                            "${_restroom.rating} with ${_restroom.ratings_ids.length} ratings",
-                            style: const TextStyle(fontSize: 22)),
-                        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          RatingBarIndicator(
-                            rating: _restroom.rating.toDouble(),
-                            itemCount: 5,
-                            itemSize: 40.0,
-                            itemBuilder: (context, _) => const Icon(
-                                  Icons.star,
-                                  color: Color.fromARGB(255, 218, 196, 0),
-                                )),
-                        IconButton(
-                            icon: const Icon(Icons.arrow_circle_right_rounded,
-                                color: Colors.blue, size: 40),
-                            onPressed: () async {
-                              if (_restroom.id != '') {
-                                getRating(_restroom.ratings_ids
-                                        .map((item) =>
-                                            item.values.single as String)
-                                        .toList())
-                                    .then((ratings) => {
-                                          Navigator.push(
-                                            context,
-                                            PageRouteBuilder(
-                                              pageBuilder: (BuildContext
-                                                      context,
-                                                  Animation<double> animation1,
-                                                  Animation<double>
-                                                      animation2) {
-                                                return RatingsViewScreen(
-                                                    title:
-                                                        "${_restroom.building}-${_restroom.room} Reviews",
-                                                    ratings: ratings);
-                                              },
-                                              transitionDuration: Duration.zero,
-                                              reverseTransitionDuration:
-                                                  Duration.zero,
-                                            ),
-                                          )
-                                        });
-                              }
-                            }),
-                        ],),
-                      ],
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                              "${_restroom.rating} with ${_restroom.ratings_ids.length} ratings",
+                              style: const TextStyle(fontSize: 22)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RatingBarIndicator(
+                                  rating: _restroom.rating.toDouble(),
+                                  itemCount: 5,
+                                  itemSize: 40.0,
+                                  itemBuilder: (context, _) => const Icon(
+                                        Icons.star,
+                                        color: Color.fromARGB(255, 218, 196, 0),
+                                      )),
+                              IconButton(
+                                  icon: const Icon(
+                                      Icons.arrow_circle_right_rounded,
+                                      color: Colors.blue,
+                                      size: 40),
+                                  onPressed: () async {
+                                    if (_restroom.id != '') {
+                                      getRating(_restroom.ratings_ids
+                                              .map((item) =>
+                                                  item.values.single as String)
+                                              .toList())
+                                          .then((ratings) => {
+                                                Navigator.push(
+                                                  context,
+                                                  PageRouteBuilder(
+                                                    pageBuilder:
+                                                        (BuildContext context,
+                                                            Animation<double>
+                                                                animation1,
+                                                            Animation<double>
+                                                                animation2) {
+                                                      return RatingsViewScreen(
+                                                          title:
+                                                              "${_restroom.building}-${_restroom.room} Reviews",
+                                                          ratings: ratings);
+                                                    },
+                                                    transitionDuration:
+                                                        Duration.zero,
+                                                    reverseTransitionDuration:
+                                                        Duration.zero,
+                                                  ),
+                                                )
+                                              });
+                                    }
+                                  }),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),),
+                  ],
+                ),
+              ),
             ],
           )
-          // Expanded(
-          //     child: Center(
-          //   child: ListView(
-          //       scrollDirection: Axis.vertical,
-          //       shrinkWrap: true,
-          //       children: _restroomTiles),
-          // ))
         ]),
       ),
       bottomNavigationBar: BottomNavBar(
@@ -206,6 +276,74 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
       ),
     );
   }
+}
+
+Future<bool> favoriteRestroom(String? userId, String restroomId) async {
+  Map<String, dynamic> queryParams = {
+    "user_id": userId,
+    "restroom_id": restroomId
+  };
+  Uri uri = Uri.http(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/favorite-restroom/",
+      queryParams);
+  final response = await http.post(uri);
+  dynamic responseData = json.decode(response.body);
+
+  if (responseData["response"] == "success") {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> unfavoriteRestroom(String? userId, String restroomId) async {
+  Map<String, dynamic> queryParams = {
+    "user_id": userId,
+    "restroom_id": restroomId
+  };
+  Uri uri = Uri.http(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/unfavorite-restroom/",
+      queryParams);
+  final response = await http.post(uri);
+  dynamic responseData = json.decode(response.body);
+
+  if (responseData["response"] == "success") {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> checkFavorited(String? userId, String restroomId) async {
+  if (userId == null || userId == "null") return false; // Sanity check
+
+  // Send request to backend and parse response
+  Map<String, dynamic> queryParams = {"user_id": userId};
+  Uri uri = Uri.http(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/user-by-id/",
+      queryParams);
+  final response = await http.get(uri);
+  dynamic responseData = json.decode(response.body);
+
+  // Build User model based on response
+  User userData = User(
+      id: responseData["user"]["_id"].values.first,
+      username: responseData["user"]["username"],
+      posts_ids: responseData["user"]["posts"],
+      following_ids: responseData["user"]["following"],
+      preference: responseData["user"]["bathroom_preference"],
+      favorite_restrooms_ids: responseData["user"]["favorite_restrooms"]);
+
+  for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {
+    if (favorite_restrooms_id_map.values.first == restroomId) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 Future<Map<String, String>> _getRestrooms() async {
