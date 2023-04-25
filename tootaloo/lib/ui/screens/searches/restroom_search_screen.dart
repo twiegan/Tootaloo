@@ -191,13 +191,6 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
               ),),
             ],
           )
-          // Expanded(
-          //     child: Center(
-          //   child: ListView(
-          //       scrollDirection: Axis.vertical,
-          //       shrinkWrap: true,
-          //       children: _restroomTiles),
-          // ))
         ]),
       ),
       bottomNavigationBar: BottomNavBar(
