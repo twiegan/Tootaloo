@@ -42,40 +42,31 @@ def update_votes(request):
 	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
 	id_query = { '_id':  rating_id}
 	new_upvotes = { '$set': { body['type']: int(body['votes']) } }
-	print(body['id'], body['votes'])
 	
 	db = client['tootaloo']
 	ratings_collection = db['ratings']
 	ratings_collection.update_one(id_query, new_upvotes)
-
-	print(ratings_collection.find_one({'_id': rating_id}))
         
 	return HttpResponse()
         
 
 @csrf_exempt
 def check_votes(request):
-    print("running check votes")
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
-    print(rating_id)
     user_id = body['user_id']
     if user_id == 'null':
         return HttpResponse('true')
     user_id = ObjectId(user_id)
-    print(user_id)
     db = client['tootaloo']
     ratings_collection = db['ratings']
     rating = ratings_collection.find_one({'_id': rating_id})
-    print(rating['voted_users'])
     
     if rating != None and rating['voted_users'] != None and user_id in rating['voted_users']:
-        print('true')
         return HttpResponse('true')
     
     if rating != None and rating['voted_users'] != None and user_id not in rating['voted_users']:
-        print('updating votes')
         id_query = { '_id':  rating_id}
         new_voted = { '$push': { 'voted_users': user_id } }
         ratings_collection.update_one(id_query, new_voted)
@@ -85,7 +76,6 @@ def check_votes(request):
 
 @csrf_exempt
 def post_owned(request):
-	print('start')
 	body_unicode = request.body.decode('utf-8')
 	body = json.loads(body_unicode)
 	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
@@ -93,21 +83,16 @@ def post_owned(request):
 	if user_id == 'null':
 		return HttpResponse('false')
 	user_id = ObjectId(user_id)
-	print('what')
 
 	db = client['tootaloo']
 	ratings_collection = db['ratings']
-	print('here')
 	rating = ratings_collection.find_one({'_id': rating_id})
 
 	users_collection = db['users']
 	user = users_collection.find_one({'username': rating['by']})
-	print(user_id, user['_id'])
 
 	if user and user['_id'] == user_id:
-		print('true')
 		return HttpResponse('true')
-	print('false')
 	return HttpResponse('false')
 
 
@@ -123,16 +108,34 @@ def submit_rating(request):
 	user_id = ObjectId(user_id)
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
-	
-	new_rating = { '_id': ObjectId(), 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
+	new_id = ObjectId()
+	new_rating = { '_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
 
 	db = client['tootaloo']
 	restroom_collection = db['restrooms']
 	restroom = restroom_collection.find_one({'building': building, 'room': room})
 	if restroom:
-		print('restroom exits')
 		ratings_collection = db['ratings']
 		ratings_collection.insert_one(new_rating)
+		new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (len(restroom['ratings']) + 1)
+		new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (len(restroom['ratings']) + 1)
+		new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (len(restroom['ratings']) + 1)
+		new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (len(restroom['ratings']) + 1)
+		new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+		restroom_collection.update_one({'_id' : restroom['_id'] }, {
+			'$set': {
+				'cleanliness' : new_cleanliness,
+				'internet' : new_internet,
+				'vibe' : new_vibe,
+				'privacy' : new_privacy,
+				'rating' : new_overall,
+			}
+		})
+		restroom_collection.update_one({'_id' : restroom['_id']}, {
+			'$push': {
+				'ratings' : new_id,
+			}
+		})
 
 	return HttpResponse()
 
@@ -151,7 +154,6 @@ def edit_rating(request):
 	restroom_collection = db['restrooms']
 	restroom = restroom_collection.find_one({'building': building, 'room': room})
 	if restroom:
-		print('restroom exits')
 		ratings_collection = db['ratings']
 		ratings_collection.update_one({'_id': rating_id}, {
 			'$set': {
@@ -162,6 +164,20 @@ def edit_rating(request):
 				'internet': float(body['internet']), 
 				'vibe': float(body['vibe']), 
 				'review': body['review'],
+			}
+		})
+		new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (len(restroom['ratings']) + 1)
+		new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (len(restroom['ratings']) + 1)
+		new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (len(restroom['ratings']) + 1)
+		new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (len(restroom['ratings']) + 1)
+		new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+		restroom_collection.update_one({'_id' : restroom['_id'] }, {
+			'$set': {
+				'cleanliness' : new_cleanliness,
+				'internet' : new_internet,
+				'vibe' : new_vibe,
+				'privacy' : new_privacy,
+				'rating' : new_overall,
 			}
 		})
 
@@ -181,11 +197,35 @@ def delete_post(request):
 	db = client['tootaloo']
 	rating_collection = db['ratings']
 	user_collection = db['users']
+	rating = rating_collection.find_one({'_id' : rating_id })
 	rating_collection.delete_one({'_id' : rating_id})
 	user_collection.update_one(
   		{ '_id': user_id },
   		{ '$pull': { 'posts': rating_id } }
 	)
+	restroom_collection = db['restrooms']
+	restroom = restroom_collection.find_one({'building': rating['building'], 'room': rating['room']})
+	
+	new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (len(restroom['ratings']) - 1)
+	new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(rating['internet'])) / (len(restroom['ratings']) - 1)
+	new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) - float(rating['vibe'])) / (len(restroom['ratings']) - 1)
+	new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(rating['privacy'])) / (len(restroom['ratings']) - 1)
+	new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+	
+	restroom_collection.update_one({'_id' : restroom['_id'] }, {
+		'$set': {
+			'cleanliness' : new_cleanliness,
+			'internet' : new_internet,
+			'vibe' : new_vibe,
+			'privacy' : new_privacy,
+			'rating' : new_overall,
+		}
+	})
+	restroom_collection.update_one({'_id' : restroom['_id']}, {
+		'$pull': {
+			'ratings' : rating['_id'],
+		}
+	})
 
 	return HttpResponse()
 

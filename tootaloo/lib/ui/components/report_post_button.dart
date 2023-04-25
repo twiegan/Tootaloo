@@ -4,8 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
-import 'package:tootaloo/ui/screens/posts/following_screen.dart';
-import 'package:tootaloo/ui/screens/trending_screen.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 
 class ReportPostButton extends StatefulWidget {

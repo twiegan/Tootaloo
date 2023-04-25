@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
-
-import 'map_screen.dart';
+import 'package:tootaloo/ui/models/building.dart';
 
 late List<String> list;
 late String imagePath;

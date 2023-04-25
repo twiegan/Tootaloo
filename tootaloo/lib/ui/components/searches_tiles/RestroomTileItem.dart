@@ -160,6 +160,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
         upvotes: 0,
         downvotes: 0,
         vibe: rating["vibe"],
+        privacy: rating["privacy"],
         review: rating["review"],
         by: rating["by"],
         owned: false);

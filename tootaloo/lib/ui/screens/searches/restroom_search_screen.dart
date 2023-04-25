@@ -24,7 +24,7 @@ class RestroomSearchScreen extends StatefulWidget {
 
 /* Define screen state */
 class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
-  final int index = 0;
+  final int index = 2;
   late String _selectedRestroom = "";
   // names map of restrooms we get from API (id: restroom_name)
   late Map<String, String> _restroomNames = {};
@@ -38,6 +38,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
       cleanliness: 0.0,
       internet: 0.0,
       vibe: 0.0,
+      privacy: 0.0,
       ratings_ids: []);
   // late List<RestroomTileItem> _restroomTiles = [];
 
@@ -238,6 +239,7 @@ Future<List<Restroom>> getSearchedRestrooms(String restroomId) async {
       cleanliness: responseData["restroom"]["cleanliness"],
       internet: responseData["restroom"]["internet"],
       vibe: responseData["restroom"]["vibe"],
+      privacy: responseData["restroom"]["privacy"],
       ratings_ids: responseData["restroom"]["ratings"]);
 
   restrooms.add(restroomData);
@@ -261,13 +263,14 @@ Future<List<Rating>> getRating(List<String> ids) async {
 
   for (var rating in responseData) {
     Rating ratingData = Rating(
-        id: rating["_id"].value.first(),
+        id: rating["_id"].values.first,
         building: rating["building"],
         room: rating["room"],
         overallRating: rating["overall_rating"],
         cleanliness: rating["cleanliness"],
         internet: rating["internet"],
         vibe: rating["vibe"],
+        privacy: rating["privacy"],
         upvotes: rating["upvotes"],
         downvotes: rating["downvotes"],
         review: rating["review"],
