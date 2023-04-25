@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:tootaloo/AppUser.dart';
+import 'package:tootaloo/SharedPref.dart';
 import '../screens/review_screen.dart';
 
 String URL =
@@ -15,10 +17,24 @@ class FilterWidget extends StatefulWidget {
 }
 
 class _FilterWidgetState extends State<FilterWidget> {
+  bool isUserLoggedIn = false;
+
   bool isHygiene = false;
   bool isChangingStation = false;
   bool isFavorited = false;
   double ratingValue = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUser().then((user) {
+      if (user.id != 'null') {
+        setState(() {
+          isUserLoggedIn = true;
+        });
+      }
+    });
+  }
 
   void isHygieneChecked(bool newValue) => setState(() {
         isHygiene = newValue;
@@ -73,9 +89,11 @@ class _FilterWidgetState extends State<FilterWidget> {
                   style: TextStyle(fontSize: 13),
                 ),
                 value: isFavorited,
-                onChanged: (bool? value) {
-                  isFavoritedChecked(value!);
-                }),
+                onChanged: !isUserLoggedIn
+                    ? null
+                    : (bool? value) {
+                        isFavoritedChecked(value!);
+                      }),
           ),
           Transform.translate(
               offset: const Offset(13.0, 10.0),
@@ -125,14 +143,23 @@ class _FilterWidgetState extends State<FilterWidget> {
       bool isFavorited, double ratingValue) async {
     print("$isChangingStation, $isHygiene, $isFavorited, $ratingValue");
 
-    Uri uri = Uri.parse("$URL/filterRestrooms");
-    uri = uri.replace(
-        query:
-            "isChangingStation=$isChangingStation&isHygiene=$isHygiene&isFavorited=$isFavorited&ratingValue=${roundDouble(ratingValue, 1)}");
-
-    final response = await http.get(uri);
-    print(response.body);
+    if (isFavorited) {
+      // get the restrooms that are favorited by the user
+      Uri uri = Uri.parse("$URL/user-by-id/");
+      final response = await http.get(uri);
+      print(response.body);
+    } else {
+      // get all restrooms and filter them
+      Uri uri = Uri.parse("$URL/restrooms/");
+      final response = await http.get(uri);
+      print(response.body);
+    }
 
     //TODO: update custom markers from map screen
+  }
+
+  Future<AppUser> _getUser() async {
+    // await pause(const Duration(milliseconds: 700));
+    return await UserPreferences.getUser();
   }
 }
