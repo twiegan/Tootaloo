@@ -87,6 +87,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
               _cleanliness = rating.cleanliness.toDouble();
               _internet = rating.internet.toDouble();
               _vibe = rating.vibe.toDouble();
+              _privacy = rating.privacy.toDouble();
               _review = rating.review;
               _textEditingController.text = rating.review;
               _restroom = "${rating.building} ${rating.room}";
@@ -133,7 +134,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   void submit(
-      restroom, cleanliness, internet, vibe, overallRating, review) async {
+      restroom, cleanliness, internet, vibe, privacy, overallRating, review) async {
     AppUser user = await UserPreferences.getUser();
     String userId = "";
     if (user.id == null) {
@@ -153,6 +154,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         'cleanliness': cleanliness.toString(),
         'internet': internet.toString(),
         'vibe': vibe.toString(),
+        'privacy': privacy.toString(),
         'overall_rating': overallRating.toString(),
         'review': review
       }),
@@ -171,8 +173,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  void edit(
-      id, restroom, cleanliness, internet, vibe, privacy, overallRating, review) async {
+  void edit(id, restroom, cleanliness, internet, vibe, privacy, overallRating,
+      review) async {
     final response = await http.post(
       Uri.parse(
           "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/edit_rating/"),
@@ -305,12 +307,11 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 onChanged: (value) {
                   _restroom = (value != null) ? value : '';
                 },
-                selectedItem: "",
+                selectedItem: _restroom,
               ),
             ),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('Cleanliness: ', style: TextStyle(fontSize: 20)),
@@ -330,8 +331,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 )),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('   Internet   : ',
@@ -352,8 +352,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 )),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('      Vibe      : ',
@@ -374,8 +373,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 )),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     const Text('    Privacy   : ',
@@ -385,8 +383,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       min: 0.0,
                       max: 5.0,
                       divisions: 50,
-                      value: _vibe,
-                      label: '${roundDouble(_vibe, 1)}',
+                      value: _privacy,
+                      label: '${roundDouble(_privacy, 1)}',
                       onChanged: (value) {
                         setState(() {
                           _privacy = value;
@@ -396,8 +394,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ],
                 )),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: Row(
                   children: [
                     Text(
@@ -407,7 +404,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 )),
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: TextField(
+                child: TextFormField(
+                  controller:_textEditingController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 10,
                   decoration: const InputDecoration(
@@ -423,14 +421,29 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     alignment: Alignment.topCenter,
                     child: ElevatedButton(
                         onPressed: () {
-                          submit(
+                          if (widget.id != "") {
+                            edit(
+                              widget.id,
                               _restroom,
                               roundDouble(
                                   (_vibe + _internet + _cleanliness) / 3.0, 1),
                               _cleanliness,
                               _internet,
                               _vibe,
+                              _privacy,
                               _review);
+                          } else {
+                            submit(
+                              _restroom,
+                              roundDouble(
+                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
+                              _cleanliness,
+                              _internet,
+                              _vibe,
+                              _privacy,
+                              _review);
+                          }
+                          
                         },
                         child: const Text('     Submit     '))))
           ],
