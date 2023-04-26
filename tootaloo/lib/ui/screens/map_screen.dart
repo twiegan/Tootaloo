@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:marquee/marquee.dart';
@@ -11,13 +12,16 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
+import 'package:tootaloo/ui/components/filter_dialog.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
+// ignore: library_prefixes
 import 'package:tootaloo/SharedPref.dart' as sharedPref;
+import 'package:tootaloo/ui/models/building.dart';
 
 import 'floor_map_screen.dart';
 
 String URL =
-    "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}"; //TODO: change this url later
+    "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}";
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -25,35 +29,6 @@ class MapScreen extends StatefulWidget {
 
   @override
   State<MapScreen> createState() => _MapScreenState();
-}
-
-class Building {
-  final String id;
-  final String name;
-  final int restroomCount;
-  final double latitude;
-  final double longitude;
-  final List<dynamic> floors;
-  final int maleCount;
-  final int femaleCount;
-  final int unisexCount;
-
-  Building({
-    required this.id,
-    required this.name,
-    required this.restroomCount,
-    required this.latitude,
-    required this.longitude,
-    required this.floors,
-    required this.maleCount,
-    required this.femaleCount,
-    required this.unisexCount,
-  });
-
-  double manhattanDistance(LocationData locationData) {
-    return (locationData.latitude! - latitude).abs() +
-        (locationData.longitude! - longitude).abs();
-  }
 }
 
 class _MapScreenState extends State<MapScreen> {
@@ -173,126 +148,151 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: _onMapCreated,
             myLocationEnabled: true,
             markers: markers,
+            padding: const EdgeInsets.only(bottom: 5),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          // hide all currently open snackbar
-          ScaffoldMessenger.of(context).clearSnackBars();
-
-          // show the snackbar for info
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: _customSnackBarInfoContent(),
-              backgroundColor: Colors.black87,
-              duration: const Duration(milliseconds: 2000),
-              width: 320.0, // Width of the SnackBar.
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0, // Inner padding for SnackBar content.
-                  vertical: 10.0),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(35.0),
-              ),
-            ),
-          );
-
-          List<Building> matchingPrefBuildings = _buildings;
-
-          // TODO: get actual user preference
-          String? userPreference =
-              await sharedPref.UserPreferences.getPreference();
-
-          // Sort the matching buildings by manhattan distance
-          matchingPrefBuildings.sort((a, b) => a
-              .manhattanDistance(_currLocation)
-              .compareTo(b.manhattanDistance(_currLocation)));
-
-          setState(() {
-            _customMarkers.clear();
-            int counter = 0;
-            for (Building building in matchingPrefBuildings) {
-              int preferredRestroomCount;
-
-              if (userPreference == "male") {
-                preferredRestroomCount = building.maleCount;
-              } else if (userPreference == "female") {
-                preferredRestroomCount = building.femaleCount;
-              } else if (userPreference == "unisex") {
-                preferredRestroomCount = building.unisexCount;
-              } else {
-                preferredRestroomCount = building.restroomCount;
-              }
-
-              if (preferredRestroomCount == 0) {
-                continue;
-              }
-
-              MarkerData data = MarkerData(
-                  marker: Marker(
-                      markerId: MarkerId(building.id),
-                      position: LatLng(building.latitude, building.longitude),
-                      infoWindow: InfoWindow(
-                          title: building.name,
-                          snippet:
-                              'There are $preferredRestroomCount restrooms matching your preference in this building.\n${_ratingValueMap[building.id]}'),
-                      onTap: () {
-                        // hide currently open snackbar
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        // show the snackbar for the tapped building
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: _customSnackBarContent(building),
-                            backgroundColor: Colors.black87,
-                            duration: const Duration(milliseconds: 5000),
-                            width: 320.0, // Width of the SnackBar.
-                            padding: const EdgeInsets.symmetric(
-                                horizontal:
-                                    15.0, // Inner padding for SnackBar content.
-                                vertical: 10.0),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(35.0),
-                            ),
-                          ),
-                        );
-                      }),
-                  child: _customMarker(
-                      preferredRestroomCount,
-                      Color.fromRGBO(
-                          0, 30 + counter * 10, 50 + counter * 40, 0.75)));
-              _customMarkers.add(data);
-              counter += 1;
-            } // end of for loop
-
-            // zoom in to current location
-            _zoomLevel = 15.7;
-
-            // move the map to the current position
-            // _controller.animateCamera(
-            //   CameraUpdate.newCameraPosition(
-            //     CameraPosition(
-            //         target: LatLng(
-            //             _currLocation.latitude!, _currLocation.longitude!),
-            //         zoom: _zoomLevel),
-            //   ),
-            // );
-          });
-
-          // hide the info snackbar
-          //ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        },
-        label: const Text('Nearby'),
-        icon: const Icon(Icons.saved_search),
+      floatingActionButton: SpeedDial(
         backgroundColor: Colors.blue,
+        label: const Text("Menu"),
+        direction: SpeedDialDirection.up,
+        animatedIcon: AnimatedIcons.menu_close,
+        children: [
+          SpeedDialChild(
+              child: const Icon(
+                Icons.saved_search,
+                color: Colors.white,
+              ),
+              backgroundColor: Colors.blue,
+              label: 'Nearby',
+              onTap: () async {
+                // clear currently open snackbars
+                ScaffoldMessenger.of(context).clearSnackBars();
+
+                // show the snackbar for info
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: _customSnackBarInfoContent(),
+                    backgroundColor: Colors.black87,
+                    duration: const Duration(milliseconds: 2500),
+                    width: 320.0, // Width of the SnackBar.
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15.0, // Inner padding for SnackBar content.
+                        vertical: 10.0),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(35.0),
+                    ),
+                  ),
+                );
+
+                // get neary by restrooms
+                _getNearbyRestrooms();
+              }),
+          SpeedDialChild(
+            child: const Icon(
+              Icons.filter_list,
+              color: Colors.white,
+            ),
+            backgroundColor: Colors.blue,
+            label: 'Filter',
+            onTap: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const FilterWidget();
+                  });
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavBar(
         selectedIndex: index,
       ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  void _getNearbyRestrooms() async {
+    print("inside of get nearby restrooms");
+    List<Building> matchingPrefBuildings = _buildings;
+
+    // Get user preference for currently logged in user
+    String? userPreference = await sharedPref.UserPreferences.getPreference();
+
+    // Sort the matching buildings by manhattan distance
+    matchingPrefBuildings.sort((a, b) => a
+        .manhattanDistance(_currLocation)
+        .compareTo(b.manhattanDistance(_currLocation)));
+
+    setState(() {
+      _customMarkers.clear();
+      int counter = 0;
+      for (Building building in matchingPrefBuildings) {
+        int preferredRestroomCount;
+
+        if (userPreference == "male") {
+          preferredRestroomCount = building.maleCount;
+        } else if (userPreference == "female") {
+          preferredRestroomCount = building.femaleCount;
+        } else if (userPreference == "unisex") {
+          preferredRestroomCount = building.unisexCount;
+        } else {
+          preferredRestroomCount = building.restroomCount;
+        }
+
+        if (preferredRestroomCount == 0) {
+          continue;
+        }
+
+        MarkerData data = MarkerData(
+            marker: Marker(
+                markerId: MarkerId(building.id),
+                position: LatLng(building.latitude, building.longitude),
+                infoWindow: InfoWindow(
+                    title: building.name,
+                    snippet:
+                        'There are $preferredRestroomCount restrooms matching your preference in this building.\n${_ratingValueMap[building.id]}'),
+                onTap: () {
+                  // hide currently open snackbar
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  // show the snackbar for the tapped building
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: _customSnackBarContent(building),
+                      backgroundColor: Colors.black87,
+                      duration: const Duration(milliseconds: 5000),
+                      width: 320.0, // Width of the SnackBar.
+                      padding: const EdgeInsets.symmetric(
+                          horizontal:
+                              15.0, // Inner padding for SnackBar content.
+                          vertical: 10.0),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(35.0),
+                      ),
+                    ),
+                  );
+                }),
+            child: _customMarker(preferredRestroomCount,
+                Color.fromRGBO(0, 30 + counter * 10, 50 + counter * 40, 0.75)));
+        _customMarkers.add(data);
+        counter += 1;
+      } // end of for loop
+
+      // zoom in to current location
+      _zoomLevel = 15.7;
+
+      // move the map to the current position
+      // _controller.animateCamera(
+      //   CameraUpdate.newCameraPosition(
+      //     CameraPosition(
+      //         target: LatLng(
+      //             _currLocation.latitude!, _currLocation.longitude!),
+      //         zoom: _zoomLevel),
+      //   ),
+      // );
+    });
   }
 
   Future<String> _getSummaryRatingForBuilding(String buildingId) async {
@@ -326,7 +326,6 @@ class _MapScreenState extends State<MapScreen> {
         buildings.add(buildingData);
       } catch (e) {
         print(e);
-        print("here");
       }
     }
 
@@ -405,7 +404,8 @@ class _MapScreenState extends State<MapScreen> {
                   ))
             ]),
             Text(
-              '# of Restrooms: ${building.restroomCount}',
+              //'Total # of Restrooms: ${building.restroomCount}',
+              'Click right to see the floor maps',
               style: const TextStyle(color: Colors.white, fontSize: 11.0),
             )
           ],

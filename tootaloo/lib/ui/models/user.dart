@@ -4,6 +4,7 @@ class User {
   final List<dynamic> posts_ids;
   final List<dynamic> following_ids;
   final String preference;
+  final List<dynamic> favorite_restrooms_ids;
   num reports;
 
   User({
@@ -12,6 +13,7 @@ class User {
         required this.posts_ids,
         required this.following_ids,
         required this.preference,
+        required this.favorite_restrooms_ids,
         this.reports = 0
       });
 }

@@ -17,7 +17,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
 
   _read() async {
     String fileText;
-    fileText = await rootBundle.loadString("assets/terms_of_service.txt");
+    fileText = await rootBundle.loadString("assets/text/terms_of_service.txt");
     setState(() {
       tosText = fileText;
     });

@@ -4,8 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
-import 'package:tootaloo/ui/screens/posts/following_screen.dart';
-import 'package:tootaloo/ui/screens/trending_screen.dart';
 
 class ReportUserButton extends StatefulWidget {
   String type;
@@ -59,7 +57,7 @@ class _ReportUserButtonState extends State<ReportUserButton> {
     return IconButton(
         padding: const EdgeInsets.all(0),
         constraints: const BoxConstraints(),
-        icon: const Icon(Icons.flag_outlined, color: Colors.orange),
+        icon: const Icon(Icons.flag_outlined, color: Colors.orange, size: 16),
         onPressed: () {
           _checkReported(widget.reportedUsername, widget.type).then((value) {
             if (!value) {

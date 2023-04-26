@@ -151,14 +151,19 @@ Future<List<Rating>> getRating(List<String> ids) async {
 
   for (var rating in responseData) {
     Rating ratingData = Rating(
+        id: "",
         building: rating["building"],
         room: rating["room"],
-        overall_rating: rating["overall_rating"],
+        overallRating: rating["overall_rating"],
         cleanliness: rating["cleanliness"],
         internet: rating["internet"],
+        upvotes: 0,
+        downvotes: 0,
         vibe: rating["vibe"],
+        privacy: rating["privacy"],
         review: rating["review"],
-        by: rating["by"]);
+        by: rating["by"],
+        owned: false);
     ratings.add(ratingData);
   }
 
