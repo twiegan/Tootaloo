@@ -16,23 +16,24 @@ class _TopNavBarState extends State<TopNavBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.settings),
-        onPressed: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (BuildContext context, Animation<double> animation1,
-                  Animation<double> animation2) {
-                return const SettingsUserScreen(title: "App Settings");
-              },
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
-        },
-        color: Colors.black,
-      ),
+      // leading: IconButton(
+      //   icon: const Icon(Icons.settings),
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       PageRouteBuilder(
+      //         pageBuilder: (BuildContext context, Animation<double> animation1,
+      //             Animation<double> animation2) {
+      //           return const SettingsUserScreen(title: "App Settings");
+      //         },
+      //         transitionDuration: Duration.zero,
+      //         reverseTransitionDuration: Duration.zero,
+      //       ),
+      //     );
+      //   },
+      //   color: Colors.black,
+      // ),
+      automaticallyImplyLeading: false,
       title: Text(widget.title, style: const TextStyle(color: Colors.black)),
       actions: <Widget>[
         IconButton(

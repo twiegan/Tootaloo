@@ -31,10 +31,10 @@ class RestroomSearchScreen extends StatefulWidget {
 
 /* Define screen state */
 class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
-  late Future<AppUser> _appUser;
   bool _favorited = false;
   final int index = 2;
   late String _selectedRestroom = "";
+  late AppUser _user = AppUser(username: null, id: null, preference: null);
   // names map of restrooms we get from API (id: restroom_name)
   late Map<String, String> _restroomNames = {};
   // restroom to display built from names map
@@ -61,6 +61,9 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
           setState(() {
             _restroomNames = restrooms;
           })
+        });
+    getUser().then((appUser) => {
+          setState(() => {_user = appUser})
         });
   }
 
@@ -100,22 +103,18 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                         (k) => _restroomNames[k] == _selectedRestroom,
                         orElse: () => '');
                     if (key != '') {
-                      getUser().then((appUser) => {
-                            if (appUser.id != "null")
-                              {
-                                getSearchedRestrooms(key).then((restrooms) => {
-                                      setState(() {
-                                        _restroom = restrooms.first;
-                                        checkFavorited(
-                                                appUser.id, restrooms.first.id)
-                                            .then((favorited) => {
-                                                  setState(() {
-                                                    _favorited = favorited;
-                                                  })
-                                                });
-                                      })
-                                    })
+                      getSearchedRestrooms(key).then((restrooms) => {
+                            setState(() {
+                              _restroom = restrooms.first;
+                              if (_user.id != "null") {
+                                checkFavorited(_user.id, restrooms.first.id)
+                                    .then((favorited) => {
+                                          setState(() {
+                                            _favorited = favorited;
+                                          })
+                                        });
                               }
+                            })
                           });
                     }
                   },
@@ -136,44 +135,48 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                       Text(_restroom.building,
                           style: const TextStyle(
                               fontSize: 42, fontWeight: FontWeight.bold)),
-                      IconButton(
-                          icon: _favorited
-                              ? const Icon(
-                                  Icons.favorite_rounded,
-                                  color: Colors.red,
-                                  size: 40,
-                                )
-                              : const Icon(Icons.favorite_outline_rounded,
-                                  color: Colors.red, size: 40),
-                          onPressed: () {
-                            if (_restroom.id != "") {
-                              getUser().then((appUser) => {
-                                    if (appUser.id != "null")
-                                      {
-                                        _favorited
-                                            ? unfavoriteRestroom(
-                                                    appUser.id, _restroom.id)
-                                                .then((unfavorited) => {
-                                                      setState(() {
-                                                        unfavorited
-                                                            ? _favorited = false
-                                                            : _favorited = true;
+                      if (_user.id != "null")
+                        IconButton(
+                            icon: _favorited
+                                ? const Icon(
+                                    Icons.favorite_rounded,
+                                    color: Colors.red,
+                                    size: 40,
+                                  )
+                                : const Icon(Icons.favorite_outline_rounded,
+                                    color: Colors.red, size: 40),
+                            onPressed: () {
+                              if (_restroom.id != "") {
+                                getUser().then((appUser) => {
+                                      if (appUser.id != "null")
+                                        {
+                                          _favorited
+                                              ? unfavoriteRestroom(
+                                                      appUser.id, _restroom.id)
+                                                  .then((unfavorited) => {
+                                                        setState(() {
+                                                          unfavorited
+                                                              ? _favorited =
+                                                                  false
+                                                              : _favorited =
+                                                                  true;
+                                                        })
                                                       })
-                                                    })
-                                            : favoriteRestroom(
-                                                    appUser.id, _restroom.id)
-                                                .then((favorited) => {
-                                                      setState(() {
-                                                        favorited
-                                                            ? _favorited = true
-                                                            : _favorited =
-                                                                false;
+                                              : favoriteRestroom(
+                                                      appUser.id, _restroom.id)
+                                                  .then((favorited) => {
+                                                        setState(() {
+                                                          favorited
+                                                              ? _favorited =
+                                                                  true
+                                                              : _favorited =
+                                                                  false;
+                                                        })
                                                       })
-                                                    })
-                                      }
-                                  });
-                            }
-                          }),
+                                        }
+                                    });
+                              }
+                            }),
                     ],
                   ))),
               Padding(
@@ -252,7 +255,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                                                       return RatingsViewScreen(
                                                           title:
                                                               "${_restroom.building}-${_restroom.room} Reviews",
-                                                          ratings: ratings);
+                                                          id: _restroom.id);
                                                     },
                                                     transitionDuration:
                                                         Duration.zero,
@@ -341,7 +344,7 @@ Future<bool> checkFavorited(String? userId, String restroomId) async {
       preference: responseData["user"]["bathroom_preference"],
       favorite_restrooms_ids: responseData["user"]["favorite_restrooms"]);
 
-  for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {    
+  for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {
     if (favorite_restrooms_id_map.length > 0) {
       if (favorite_restrooms_id_map['\$oid'] == restroomId) {
         return true;
@@ -361,7 +364,6 @@ Future<Map<String, String>> _getRestrooms() async {
   for (var restroom in responseData) {
     tempRestrooms[restroom["_id"].values.first] =
         "${restroom["building"]} ${restroom["room"]}";
-    ;
   }
 
   return tempRestrooms;

@@ -11,6 +11,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart' as sharedPref;
 import 'package:tootaloo/ui/screens/login_screen.dart';
 
+import '../components/admin_bottom_nav_bar.dart';
+
 class SettingsUserScreen extends StatefulWidget {
   const SettingsUserScreen({super.key, required this.title});
   final String title;
@@ -150,6 +152,20 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
         bottomNavigationBar: BottomNavBar(
           selectedIndex: index,
         ),
+      );
+    }
+    else if (_user.username == "shradmin") {
+      return Scaffold(
+          appBar: const TopNavBar(title: "Admin Logout"),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const <Widget>[
+                LogoutButton()
+              ],
+            ),
+          ),
+          bottomNavigationBar: const AdminBottomNavBar(selectedIndex: -1,)
       );
     }
     return Scaffold(

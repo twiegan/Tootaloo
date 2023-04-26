@@ -245,10 +245,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
                   labelText: 'Username',
                   hintText: 'Enter your new username!',
+                  errorText:
+                      _username != null && _username.length > 10 ? 'Username is longer than 10 characters' : null,
                   filled: true,
                   fillColor: Colors.white,
                 ),
@@ -354,6 +356,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         print("EMPTY USERNAME");
                         showPopupMessage(context, const Icon(Icons.error),
                             " Error", "User name is empty");
+                        return;
+                      }
+                      if (_username.length > 10) {
+                        print("USERNAME TOO LONG");
+                        showPopupMessage(context, const Icon(Icons.error),
+                            " Error", "Username is longer than 10 characters");
                         return;
                       }
 

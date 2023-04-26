@@ -56,7 +56,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
             children:
-                _ratings.map((rating) => RatingTile(rating: rating)).toList(),
+                _ratings.map((rating) => RatingTile(rating: rating, screen: "Trending",)).toList(),
           ),
         ),
       ),
