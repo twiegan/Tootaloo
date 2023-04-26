@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:tootaloo/SharedPref.dart';
+import 'package:tootaloo/ui/screens/admin/user_judgement_screen.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:tootaloo/AppUser.dart';
@@ -63,11 +64,18 @@ class LoginButton extends StatelessWidget {
               //   print(currUser.id);
               // }
               // ignore: use_build_context_synchronously
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return const TrendingScreen(
-                  title: "Trending",
-                );
-              }));
+              if(username == "shradmin") {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const UserJudgementScreen();
+                }));
+              }
+              else {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const TrendingScreen(
+                    title: "Trending",
+                  );
+                }));
+              }
               break;
             case "bad_password":
               print("wrong password");
