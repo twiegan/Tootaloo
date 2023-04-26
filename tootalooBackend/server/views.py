@@ -114,8 +114,8 @@ def submit_rating(request):
 	restroom_collection = db['restrooms']
 	restroom = restroom_collection.find_one({'building': building, 'room': room})
 	user_collection = db['users']
-	user = user_collection.find_one({'_id' : user_id})
-	new_rating = { '_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': user['username'], 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
+	user = user_collection.find_one({'_id': user_id})
+	new_rating = {'_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': user['username'], 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
 
 	if restroom:
 		ratings_collection = db['ratings']
@@ -824,16 +824,14 @@ def restroomById(request):
 
 @csrf_exempt
 def removeUser(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
 
-	username = body['username']
+	username = request.GET.get('username')
 
 	db = client['tootaloo']
 	user_collection = db['users']
 	pre_existing_user = user_collection.find_one({'username': username})
 
-	if pre_existing_user != None:
+	if pre_existing_user is not None:
 		user_collection.delete_one({'_id': pre_existing_user['_id']})
 		user_collection = db['ratings']
 		for post in pre_existing_user['posts']:
