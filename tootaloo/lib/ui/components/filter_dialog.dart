@@ -179,7 +179,8 @@ class _FilterWidgetState extends State<FilterWidget> {
       dynamic responseData = json.decode(response.body);
 
       // with the IDs, get the data for each restroom
-      dynamic favoriteRestroomIds = responseData['user']['favorite_bathrooms'];
+      dynamic favoriteRestroomIds = responseData['user']['favorite_restrooms'];
+      favoriteRestroomIds ??= [];
       for (dynamic restroomId in favoriteRestroomIds) {
         Map<String, dynamic> queryParams = {"restroom_id": restroomId['\$oid']};
         Uri uri = Uri.http(
@@ -253,7 +254,7 @@ class _FilterWidgetState extends State<FilterWidget> {
 
     // show the snackbar for info
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(widget.buildContext).showSnackBar(
       SnackBar(
         content: customSnackBarInfoContent(
             "Finding restrooms based on      \nyour filter.", description),

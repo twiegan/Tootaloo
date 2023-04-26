@@ -621,7 +621,7 @@ def insert_user(request):
 
   db = client['tootaloo']
   user_collection = db['users']
-  new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash, 'bathroom_preference': bathroom_preference, 'email': email, "favorite_bathrooms": []}
+  new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash, 'bathroom_preference': bathroom_preference, 'email': email, "favorite_restrooms": [], 'reported_users': [], 'reports': 0}
   _id = user_collection.insert_one(new_user)
   print("inserted user with id: ", _id.inserted_id)
 
