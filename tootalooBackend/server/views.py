@@ -110,10 +110,11 @@ def submit_rating(request):
 	body = json.loads(body_unicode)
 	building = ''
 	room = ''
-	user_id = body['user_id']
 	if body['user_id'] == 'null':
 		return HttpResponse('false')
-	user_id = body['user_id']
+	user_id = ObjectId(body['user_id'])
+	print(user_id, "userid")
+
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	new_id = ObjectId()
@@ -123,6 +124,7 @@ def submit_rating(request):
 	restroom = restroom_collection.find_one({'building': building, 'room': room})
 	user_collection = db['users']
 	user = user_collection.find_one({'_id': user_id})
+	print(user)
 	new_rating = {'_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': user['username'], 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
 
 	if restroom:

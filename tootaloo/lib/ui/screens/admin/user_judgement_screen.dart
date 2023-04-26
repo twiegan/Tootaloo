@@ -107,7 +107,7 @@ class _UserJudgementState extends State<UserJudgementScreen> {
           ] : [
             UserDisplayItem(username: _users.first.username, ratings:  _currentRatings, reports: _users.first.reports),
             Positioned(
-                top: 600,
+                top: MediaQuery.of(context).size.height/2.5 + 180,
                 width: MediaQuery.of(context).size.width,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -343,7 +343,7 @@ class _UserDisplayItemState extends State<UserDisplayItem> {
               width: MediaQuery.of(context).size.width,
               child: Container(
                   margin: const EdgeInsets.only(left: 0, right: 0),
-                  height: MediaQuery.of(context).size.height - 440,
+                  height: MediaQuery.of(context).size.height/2.5,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: const Color.fromRGBO(181, 211, 235, 1)
