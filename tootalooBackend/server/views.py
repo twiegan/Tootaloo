@@ -113,7 +113,7 @@ def submit_rating(request):
 	user_id = body['user_id']
 	if body['user_id'] == 'null':
 		return HttpResponse('false')
-	user_id = body['user_id']
+	user_id = ObjectId(body['user_id'])
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	new_id = ObjectId()
