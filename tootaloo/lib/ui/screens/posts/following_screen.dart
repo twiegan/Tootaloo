@@ -129,7 +129,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
             children:
-                _ratings.map((rating) => RatingTile(rating: rating)).toList(),
+                _ratings.map((rating) => RatingTile(rating: rating, screen: "Following",)).toList(),
           ),
         ),
       ),

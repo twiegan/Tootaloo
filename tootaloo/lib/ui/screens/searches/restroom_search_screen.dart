@@ -251,8 +251,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                                                                 animation2) {
                                                       return RatingsViewScreen(
                                                           title:
-                                                              "${_restroom.building}-${_restroom.room} Reviews",
-                                                          ratings: ratings);
+                                                              "${_restroom.building}-${_restroom.room} Reviews", id: _restroom.id);
                                                     },
                                                     transitionDuration:
                                                         Duration.zero,
@@ -361,7 +360,6 @@ Future<Map<String, String>> _getRestrooms() async {
   for (var restroom in responseData) {
     tempRestrooms[restroom["_id"].values.first] =
         "${restroom["building"]} ${restroom["room"]}";
-    ;
   }
 
   return tempRestrooms;

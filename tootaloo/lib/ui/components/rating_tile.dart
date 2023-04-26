@@ -6,12 +6,15 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/components/report_post_button.dart';
+import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:tootaloo/ui/screens/searches/ratings_view_screen.dart';
 
-void confirmDelete(BuildContext context, String id) {
+void confirmDelete(
+    BuildContext context, String id, String screen, Rating rating) {
   showDialog(
       context: context,
       barrierDismissible:
@@ -31,18 +34,59 @@ void confirmDelete(BuildContext context, String id) {
             OutlinedButton(
               onPressed: () {
                 deletePost(id).then((ret) => {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (BuildContext context,
-                              Animation<double> animation1,
-                              Animation<double> animation2) {
-                            return const TrendingScreen(title: "Trending");
-                          },
-                          transitionDuration: Duration.zero,
-                          reverseTransitionDuration: Duration.zero,
-                        ),
-                      ),
+                      if (screen == "Trending")
+                        {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation1,
+                                  Animation<double> animation2) {
+                                return const TrendingScreen(title: "Trending");
+                              },
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          ),
+                        }
+                      else if (screen == "Following")
+                        {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation1,
+                                  Animation<double> animation2) {
+                                return const FollowingScreen(
+                                    title: "Following");
+                              },
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          ),
+                        }
+                      else
+                        {
+                          getRestroomByName(rating.building, rating.room)
+                              .then((id) => {
+                                    Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder: (BuildContext context,
+                                            Animation<double> animation1,
+                                            Animation<double> animation2) {
+                                          return RatingsViewScreen(
+                                              title:
+                                                  "${rating.building}-${rating.room} Reviews",
+                                              id: id);
+                                        },
+                                        transitionDuration: Duration.zero,
+                                        reverseTransitionDuration:
+                                            Duration.zero,
+                                      ),
+                                    ),
+                                  })
+                        }
                     });
               },
               style: ButtonStyle(
@@ -144,6 +188,18 @@ void _updateVotes(id, int votes, String type) async {
   );
 }
 
+Future<String> getRestroomByName(String building, String room) async {
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restroom_id_by_name/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'building': building, 'room': room}),
+  );
+  return json.decode(response.body)['id'].toString();
+}
+
 Future<bool> _checkVoted(ratingId) async {
   AppUser user = await UserPreferences.getUser();
   String userId = "";
@@ -185,9 +241,34 @@ Future<bool> deletePost(ratingId) async {
   return true;
 }
 
+Future<bool> _userOwned(ratingId) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return true;
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/post_owned/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(
+        <String, String>{'rating_id': ratingId.toString(), 'user_id': userId}),
+  );
+  if (response.body.toString() == 'false') {
+    print("false");
+    return false;
+  }
+  print("true");
+  return true;
+}
+
 class RatingTile extends StatefulWidget {
   final Rating rating;
-  const RatingTile({super.key, required this.rating});
+  final String screen;
+  const RatingTile({super.key, required this.rating, required this.screen});
   @override
   _RatingTileState createState() => _RatingTileState();
 }
@@ -195,6 +276,7 @@ class RatingTile extends StatefulWidget {
 class _RatingTileState extends State<RatingTile> {
   int _upvotes = 0;
   int _downvotes = 0;
+  bool _owned = false;
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   Future<bool> changeDial(bool open) async {
@@ -202,6 +284,12 @@ class _RatingTileState extends State<RatingTile> {
       isDialOpen.value = open;
     });
     return open;
+  }
+
+  void initState() {
+    super.initState();
+
+    _userOwned(widget.rating.id).then((owned) => {setState(() => _owned = owned)});
   }
 
   @override
@@ -340,7 +428,7 @@ class _RatingTileState extends State<RatingTile> {
                             openCloseDial: isDialOpen,
                             closeManually: false,
                             children: [
-                              if (widget.rating.owned)
+                              if (_owned)
                                 SpeedDialChild(
                                     child: const Icon(
                                       Icons.edit,
@@ -370,7 +458,7 @@ class _RatingTileState extends State<RatingTile> {
                                       );
                                       // });
                                     }),
-                              if (widget.rating.owned)
+                              if (_owned)
                                 SpeedDialChild(
                                   child: const Icon(
                                     Icons.delete,
@@ -383,7 +471,8 @@ class _RatingTileState extends State<RatingTile> {
                                     if (widget.rating.id != null) {
                                       id = widget.rating.id.toString();
                                     }
-                                    confirmDelete(context, id);
+                                    confirmDelete(context, id, widget.screen,
+                                        widget.rating);
                                   },
                                 ),
                               SpeedDialChild(
