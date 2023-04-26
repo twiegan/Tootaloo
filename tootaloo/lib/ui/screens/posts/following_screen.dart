@@ -170,11 +170,22 @@ Future<bool> _userOwned(ratingId) async {
 }
 
 Future<List<Rating>> _getRatings() async {
-  // get the building markers from the database/backend
-  // TODO: change this url later
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    //TODO: add popup to notify user must be logged in
+    return [];
+  }
+  userId = user.id!;
   String url =
       "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/following_ratings/";
-  final response = await http.get(Uri.parse(url));
+  final response = await http.post(Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'user_id': userId,
+      }));
   var responseData = json.decode(response.body);
 
   List<Rating> ratings = [];
@@ -191,8 +202,7 @@ Future<List<Rating>> _getRatings() async {
         vibe: rating["vibe"],
         privacy: rating["privacy"],
         upvotes: rating["upvotes"],
-        downvotes: rating["downvotes"],
-        owned: false);
+        downvotes: rating["downvotes"]);
     ratings.add(ratingData);
   }
   return ratings;

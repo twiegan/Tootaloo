@@ -109,11 +109,14 @@ def submit_rating(request):
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	new_id = ObjectId()
-	new_rating = { '_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': 'FakeUser1', 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
 
 	db = client['tootaloo']
 	restroom_collection = db['restrooms']
 	restroom = restroom_collection.find_one({'building': building, 'room': room})
+	user_collection = db['users']
+	user = user_collection.find_one({'_id' : user_id})
+	new_rating = { '_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']), 'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']), 'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'], 'upvotes': 0, 'downvotes': 0, 'by': user['username'], 'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [], 'reported_users': [], 'reports': 0 }
+
 	if restroom:
 		ratings_collection = db['ratings']
 		ratings_collection.insert_one(new_rating)
@@ -280,19 +283,22 @@ def ratings(request):
 	
 	return resp
 
-
+@csrf_exempt
 def following_ratings(request):
-	print('got GET request for ratings')
-	
-	db = client['tootaloo']
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
 
+	user_id = body['user_id']
+	if user_id == 'null':
+		return HttpResponse('No user_id')
+	user_id = ObjectId(user_id)
+
+	db = client['tootaloo']
 	user_collection = db['users']
 
-	user = user_collection.find({'username': 'FakeUser1'})
-	following = user[0]['following']
-	print(user[0]['_id'])
-	following.append(user[0]['_id'])
-	print(following)
+	user = user_collection.find_one({'_id': user_id})
+	following = user['following']
+	following.append(user['_id'])
 	ratings_collection = db['ratings']	
 
 	ratings = ratings_collection.find({'by_id' : {'$in' : following}}).sort('createdAt', 1).limit(40)
