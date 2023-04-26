@@ -414,20 +414,19 @@ def restroomsByBuildingAndFloor(request):
 	return resp
 
 
+@csrf_exempt
 def userByUsername(request):
 
 	print("GET request received: userByUsername")
-
-	username = request.GET.get('username', '')
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	username = body['username']
 	print("username: ", username)
 
 	db = client['tootaloo']
 	user_collection = db['users']
 
-	users = user_collection.find({"username": username}, {"passHash": 0})
-
-	for user in users:
-		print("User: ", user)
+	user = user_collection.find_one({"username": username})
 
 	resp = HttpResponse(dumps(user, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'

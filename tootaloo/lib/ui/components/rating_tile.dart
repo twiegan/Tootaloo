@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/ui/components/report_post_button.dart';
+import 'package:tootaloo/ui/models/user.dart';
 import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 import 'package:tootaloo/ui/models/rating.dart';
@@ -265,6 +266,44 @@ Future<bool> _userOwned(ratingId) async {
   return true;
 }
 
+Future<String> _getUserPref(username) async {
+  AppUser user = await UserPreferences.getUser();
+  String userId = "";
+  if (user.id == null) {
+    return "unisex";
+  }
+  userId = user.id!;
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/user-by-username/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'username': username}),
+  );
+  return json.decode(response.body)['bathroom_preference'];
+}
+
+Icon _getProfileIcon(String preference) {
+  switch (preference) {
+    case "male":
+      return const Icon(
+        Icons.man,
+        color: Colors.blue,
+      );
+    case "female":
+      return const Icon(
+        Icons.woman,
+        color: Colors.pink,
+      );
+    default:
+      return const Icon(
+        Icons.family_restroom,
+        color: Colors.green,
+      );
+  }
+}
+
 class RatingTile extends StatefulWidget {
   final Rating rating;
   final String screen;
@@ -277,6 +316,7 @@ class _RatingTileState extends State<RatingTile> {
   int _upvotes = 0;
   int _downvotes = 0;
   bool _owned = false;
+  String _preference = "unisex";
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   Future<bool> changeDial(bool open) async {
@@ -289,7 +329,11 @@ class _RatingTileState extends State<RatingTile> {
   void initState() {
     super.initState();
 
-    _userOwned(widget.rating.id).then((owned) => {setState(() => _owned = owned)});
+    _userOwned(widget.rating.id)
+        .then((owned) => {setState(() => _owned = owned)});
+    _getUserPref(widget.rating.by).then((pref) => {setState(() => {
+      _preference = pref
+    })});
   }
 
   @override
@@ -320,7 +364,7 @@ class _RatingTileState extends State<RatingTile> {
                                 SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         0.08,
-                                    child: const Icon(Icons.account_circle)),
+                                    child: _getProfileIcon(_preference)),
                                 Text(widget.rating.by)
                               ],
                             ),
