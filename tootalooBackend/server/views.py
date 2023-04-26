@@ -119,7 +119,7 @@ def submit_rating(request):
 	room = ''
 	if body['user_id'] == 'null':
 		return HttpResponse('false')
-	user_id = ObjectId(user_id)
+	user_id = body['user_id']
 	if ' ' in body['restroom']:
 		building, room = body['restroom'].split()
 	
@@ -745,4 +745,44 @@ def restroomById(request):
 	response = {'status': "success", 'restroom': restroom}
 	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
 	resp['Content-Type'] = 'application/json'
+	return resp
+
+@csrf_exempt
+def removeUser(request):
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+
+	username = body['username']
+
+	db = client['tootaloo']
+	user_collection = db['users']
+	pre_existing_user = user_collection.find_one({'username': username})
+
+	if pre_existing_user != None:
+		user_collection.delete_one({'_id': pre_existing_user['_id']})
+		user_collection = db['ratings']
+		for post in pre_existing_user['posts']:
+			user_collection.delete_one({'_id': post['_id']})
+		return HttpResponse("delete_success")
+	else:
+		return HttpResponse("delete_fail")
+
+
+@csrf_exempt
+def reportedUsers(request):
+
+	print("GET request received: reportedUsers")
+
+	# Connect to db and search for users with reports
+	db = client['tootaloo']
+	user_collection = db['users']
+
+	users = user_collection.find({"reports": {"$gt": 0}}).limit(40)
+	print(users)
+
+
+	# Return response
+	resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
+	resp['Content-Type'] = 'application/json'
+
 	return resp
