@@ -1,7 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
@@ -14,6 +14,11 @@ import 'package:tootaloo/ui/models/user.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+
+double roundDouble(double value, int places) {
+  num mod = pow(10.0, places);
+  return ((value * mod).round().toDouble() / mod);
+}
 
 /* Define the screen itself */
 class RestroomSearchScreen extends StatefulWidget {
@@ -123,56 +128,54 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
           Column(
             children: [
               Padding(
-                padding: EdgeInsets.all(15),
-                child: Expanded(child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(_restroom.building,
-                        style: const TextStyle(
-                            fontSize: 42, fontWeight: FontWeight.bold)),
-                    IconButton(
-                        icon: _favorited
-                            ? const Icon(
-                                Icons.favorite_rounded,
-                                size: 40,
-                              )
-                            : const Icon(Icons.favorite_outline_rounded,
-                                size: 40),
-                        onPressed: () {
-                          if (_restroom.id != "") {
-                            getUser().then((appUser) => {
-                                  if (appUser.id != "null")
-                                    {
-                                      _favorited
-                                          ? unfavoriteRestroom(
-                                                  appUser.id, _restroom.id)
-                                              .then((unfavorited) => {
-                                                    setState(() {
-                                                      unfavorited
-                                                          ? _favorited =
-                                                              false
-                                                          : _favorited =
-                                                              true;
+                  padding: EdgeInsets.all(15),
+                  child: Expanded(
+                      child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(_restroom.building,
+                          style: const TextStyle(
+                              fontSize: 42, fontWeight: FontWeight.bold)),
+                      IconButton(
+                          icon: _favorited
+                              ? const Icon(
+                                  Icons.favorite_rounded,
+                                  color: Colors.red,
+                                  size: 40,
+                                )
+                              : const Icon(Icons.favorite_outline_rounded,
+                                  color: Colors.red, size: 40),
+                          onPressed: () {
+                            if (_restroom.id != "") {
+                              getUser().then((appUser) => {
+                                    if (appUser.id != "null")
+                                      {
+                                        _favorited
+                                            ? unfavoriteRestroom(
+                                                    appUser.id, _restroom.id)
+                                                .then((unfavorited) => {
+                                                      setState(() {
+                                                        unfavorited
+                                                            ? _favorited = false
+                                                            : _favorited = true;
+                                                      })
                                                     })
-                                                  })
-                                          : favoriteRestroom(
-                                                  appUser.id, _restroom.id)
-                                              .then((favorited) => {
-                                                    setState(() {
-                                                      favorited
-                                                          ? _favorited =
-                                                              true
-                                                          : _favorited =
-                                                              false;
+                                            : favoriteRestroom(
+                                                    appUser.id, _restroom.id)
+                                                .then((favorited) => {
+                                                      setState(() {
+                                                        favorited
+                                                            ? _favorited = true
+                                                            : _favorited =
+                                                                false;
+                                                      })
                                                     })
-                                                  })
-                                    }
-                                });
-                          }
-                        }),
-                  ],
-                ))
-              ),
+                                      }
+                                  });
+                            }
+                          }),
+                    ],
+                  ))),
               Padding(
                 padding: EdgeInsets.all(15),
                 child: Row(
@@ -191,11 +194,12 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                       child: Column(
                         children: [
                           Text(
-                              "Cleanliness: ${_restroom.cleanliness.toString()}",
+                              "Cleanliness: ${roundDouble(_restroom.cleanliness, 2)}",
                               style: const TextStyle(fontSize: 22)),
-                          Text("Internet: ${_restroom.internet.toString()}",
+                          Text(
+                              "Internet: ${roundDouble(_restroom.internet, 2)}",
                               style: const TextStyle(fontSize: 22)),
-                          Text("Vibe: ${_restroom.vibe.toString()}",
+                          Text("Vibe: ${roundDouble(_restroom.vibe, 2)}",
                               style: const TextStyle(fontSize: 22)),
                         ],
                       ),
@@ -211,7 +215,7 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                       child: Column(
                         children: [
                           Text(
-                              "${_restroom.rating} with ${_restroom.ratings_ids.length} ratings",
+                              "${roundDouble(_restroom.rating, 2)} with ${_restroom.ratings_ids.length} ratings",
                               style: const TextStyle(fontSize: 22)),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -338,8 +342,12 @@ Future<bool> checkFavorited(String? userId, String restroomId) async {
       favorite_restrooms_ids: responseData["user"]["favorite_restrooms"]);
 
   for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {
-    if (favorite_restrooms_id_map.values.first == restroomId) {
-      return true;
+    //if (favorite_restrooms_id_map.values.first == restroomId) {
+    
+    if (favorite_restrooms_id_map.length > 0) {
+      if (favorite_restrooms_id_map['\$oid'] == restroomId) {
+        return true;
+      }
     }
   }
 
