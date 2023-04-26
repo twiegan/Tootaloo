@@ -341,9 +341,7 @@ Future<bool> checkFavorited(String? userId, String restroomId) async {
       preference: responseData["user"]["bathroom_preference"],
       favorite_restrooms_ids: responseData["user"]["favorite_restrooms"]);
 
-  for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {
-    //if (favorite_restrooms_id_map.values.first == restroomId) {
-    
+  for (var favorite_restrooms_id_map in userData.favorite_restrooms_ids) {    
     if (favorite_restrooms_id_map.length > 0) {
       if (favorite_restrooms_id_map['\$oid'] == restroomId) {
         return true;
