@@ -162,6 +162,7 @@ class _MapScreenState extends State<MapScreen> {
         },
       ),
       floatingActionButton: SpeedDial(
+        childMargin: const EdgeInsets.symmetric(vertical: 15),
         backgroundColor: Colors.blue,
         label: const Text("Menu"),
         direction: SpeedDialDirection.up,
