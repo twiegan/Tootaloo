@@ -172,7 +172,7 @@ Future<bool> _userOwned(ratingId) async {
 Future<List<Rating>> _getRatings() async {
   AppUser user = await UserPreferences.getUser();
   String userId = "";
-  if (user.id == null) {
+  if (user.id == null || user.id == "") {
     //TODO: add popup to notify user must be logged in
     return [];
   }
@@ -186,6 +186,9 @@ Future<List<Rating>> _getRatings() async {
       body: jsonEncode(<String, String>{
         'user_id': userId,
       }));
+  if (response.body.toString() == "No user_id") {
+    return [];
+  }
   var responseData = json.decode(response.body);
 
   List<Rating> ratings = [];
