@@ -281,7 +281,11 @@ Future<String> _getUserPref(username) async {
     },
     body: jsonEncode(<String, String>{'username': username}),
   );
-  return json.decode(response.body)['bathroom_preference'];
+  var responseData = json.decode(response.body);
+  if (responseData != null) {
+    return responseData['bathroom_preference'];
+  }
+  return "";
 }
 
 Icon _getProfileIcon(String preference) {
@@ -331,9 +335,9 @@ class _RatingTileState extends State<RatingTile> {
 
     _userOwned(widget.rating.id)
         .then((owned) => {setState(() => _owned = owned)});
-    _getUserPref(widget.rating.by).then((pref) => {setState(() => {
-      _preference = pref
-    })});
+    _getUserPref(widget.rating.by).then((pref) => {
+          setState(() => {_preference = pref})
+        });
   }
 
   @override
