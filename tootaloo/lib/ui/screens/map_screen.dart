@@ -13,6 +13,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/filter_dialog.dart';
+import 'package:tootaloo/ui/components/map_screen_components.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 // ignore: library_prefixes
 import 'package:tootaloo/SharedPref.dart' as sharedPref;
@@ -32,6 +33,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
   final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
   final Location location = Location();
 
@@ -128,9 +131,17 @@ class _MapScreenState extends State<MapScreen> {
 
   final int index = 3;
 
+  callback(newMarkers) {
+    // callback function to modify the custom markers list from the diaglog
+    setState(() {
+      _customMarkers = newMarkers;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       appBar: const TopNavBar(title: "Map"),
       body: CustomGoogleMapMarkerBuilder(
         customMarkers: _customMarkers,
@@ -172,7 +183,9 @@ class _MapScreenState extends State<MapScreen> {
                 // show the snackbar for info
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: _customSnackBarInfoContent(),
+                    content: customSnackBarInfoContent(
+                        "Finding closest restrooms\nmatching your preference.",
+                        "(Closer the darker the marker)"),
                     backgroundColor: Colors.black87,
                     duration: const Duration(milliseconds: 2500),
                     width: 320.0, // Width of the SnackBar.
@@ -200,7 +213,9 @@ class _MapScreenState extends State<MapScreen> {
               showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return const FilterWidget();
+                    return FilterWidget(
+                        callback: callback,
+                        buildContext: scaffoldKey.currentContext!);
                   });
             },
           ),
@@ -214,7 +229,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _getNearbyRestrooms() async {
-    print("inside of get nearby restrooms");
     List<Building> matchingPrefBuildings = _buildings;
 
     // Get user preference for currently logged in user
@@ -245,6 +259,15 @@ class _MapScreenState extends State<MapScreen> {
           continue;
         }
 
+        String restroomCountDescription = "";
+        if (preferredRestroomCount == 1) {
+          restroomCountDescription =
+              "There is $preferredRestroomCount restroom";
+        } else {
+          restroomCountDescription =
+              "There are $preferredRestroomCount restrooms";
+        }
+
         MarkerData data = MarkerData(
             marker: Marker(
                 markerId: MarkerId(building.id),
@@ -252,7 +275,7 @@ class _MapScreenState extends State<MapScreen> {
                 infoWindow: InfoWindow(
                     title: building.name,
                     snippet:
-                        'There are $preferredRestroomCount restrooms matching your preference in this building.\n${_ratingValueMap[building.id]}'),
+                        '$restroomCountDescription matching your preference in this building.\n${_ratingValueMap[building.id]}'),
                 onTap: () {
                   // hide currently open snackbar
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -403,10 +426,10 @@ class _MapScreenState extends State<MapScreen> {
                     fadingEdgeEndFraction: 0.1,
                   ))
             ]),
-            Text(
+            const Text(
               //'Total # of Restrooms: ${building.restroomCount}',
               'Click right to see the floor maps',
-              style: const TextStyle(color: Colors.white, fontSize: 11.0),
+              style: TextStyle(color: Colors.white, fontSize: 11.0),
             )
           ],
         ),
@@ -425,37 +448,37 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _customSnackBarInfoContent() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          margin: const EdgeInsets.only(
-              left: 8.0, top: 8.0, bottom: 8.0, right: 25.0),
-          width: 24,
-          height: 24,
-          padding: const EdgeInsets.all(2.0),
-          child: const CircularProgressIndicator(
-            color: Colors.greenAccent,
-            strokeWidth: 3,
-          ),
-        ),
-        Column(children: const [
-          Text(
-            "Finding closest restrooms\nmatching your preference.",
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.0,
-                fontWeight: FontWeight.bold),
-          ),
-          Text("(Closer the darker the marker)",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.0,
-                  fontStyle: FontStyle.normal)),
-        ]),
-      ],
-    );
-  }
+  // Widget _customSnackBarInfoContent() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
+  //     crossAxisAlignment: CrossAxisAlignment.center,
+  //     children: <Widget>[
+  //       Container(
+  //         margin: const EdgeInsets.only(
+  //             left: 8.0, top: 8.0, bottom: 8.0, right: 25.0),
+  //         width: 24,
+  //         height: 24,
+  //         padding: const EdgeInsets.all(2.0),
+  //         child: const CircularProgressIndicator(
+  //           color: Colors.greenAccent,
+  //           strokeWidth: 3,
+  //         ),
+  //       ),
+  //       Column(children: const [
+  //         Text(
+  //           "Finding closest restrooms\nmatching your preference.",
+  //           style: TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 14.0,
+  //               fontWeight: FontWeight.bold),
+  //         ),
+  //         Text("(Closer the darker the marker)",
+  //             style: TextStyle(
+  //                 color: Colors.white,
+  //                 fontSize: 13.0,
+  //                 fontStyle: FontStyle.normal)),
+  //       ]),
+  //     ],
+  //   );
+  // }
 }

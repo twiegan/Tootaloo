@@ -35,6 +35,7 @@ class FloorMapState extends State<FloorMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: SizedBox(
               width: MediaQuery.of(context).size.width * 0.80,
@@ -65,7 +66,14 @@ class FloorMapState extends State<FloorMap> {
                 maxScale: 3,
                 child: Image.asset(imagePath,
                     width: 400,
-                    height: 600), // TODO: Change image size if necessary
+                    height: 600,
+                    errorBuilder: (context, error, stackTrace) => Padding(
+                        padding: EdgeInsets.only(
+                            bottom: 50,
+                            top: MediaQuery.of(context).size.height * 0.40),
+                        child: Image.asset(
+                          'assets/images/filenotfound.gif',
+                        ))), // change image size if necessary
               ),
             ),
             DropdownButtonFloors(callback)
