@@ -254,24 +254,22 @@ class _FilterWidgetState extends State<FilterWidget> {
 
     // show the snackbar for info
     // ignore: use_build_context_synchronously
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: customSnackBarInfoContent(
-              "Finding restrooms based on      \nyour filter.", description),
-          backgroundColor: Colors.black87,
-          duration: const Duration(milliseconds: 2500),
-          width: 320.0, // Width of the SnackBar.
-          padding: const EdgeInsets.symmetric(
-              horizontal: 15.0, // Inner padding for SnackBar content.
-              vertical: 10.0),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(35.0),
-          ),
+    ScaffoldMessenger.of(widget.buildContext).showSnackBar(
+      SnackBar(
+        content: customSnackBarInfoContent(
+            "Finding restrooms based on      \nyour filter.", description),
+        backgroundColor: Colors.black87,
+        duration: const Duration(milliseconds: 2500),
+        width: 320.0, // Width of the SnackBar.
+        padding: const EdgeInsets.symmetric(
+            horizontal: 15.0, // Inner padding for SnackBar content.
+            vertical: 10.0),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(35.0),
         ),
-      );
-    }
+      ),
+    );
 
     // Group the items by building
     var buildingGroups =
