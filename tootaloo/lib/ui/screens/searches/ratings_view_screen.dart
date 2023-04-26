@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
-import 'package:tootaloo/ui/components/searches_tiles/RatingTileItem.dart';
+import 'package:tootaloo/ui/components/rating_tile.dart';
 
 class RatingsViewScreen extends StatefulWidget {
   const RatingsViewScreen(
@@ -21,10 +21,10 @@ class _RatingsViewScreenState extends State<RatingsViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<RatingTileItem> ratingTileItems = [];
+    List<RatingTile> ratingTileItems = [];
 
     for (Rating rating in widget.ratings) {
-      RatingTileItem ratingTileItem = RatingTileItem(rating: rating);
+      RatingTile ratingTileItem = RatingTile(rating: rating);
       ratingTileItems.add(ratingTileItem);
     }
 

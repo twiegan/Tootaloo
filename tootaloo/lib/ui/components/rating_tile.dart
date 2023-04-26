@@ -11,6 +11,124 @@ import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/ui/screens/posts/trending_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
+void confirmDelete(BuildContext context, String id) {
+  showDialog(
+      context: context,
+      barrierDismissible:
+          false, // disables popup to close if tapped outside popup (need a button to close)
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              Icon(Icons.delete, color: Colors.red),
+              Text(
+                "Confirm Remove",
+              ),
+            ],
+          ),
+          content: const Text("Are you sure you want to remove this post?"),
+          actions: <Widget>[
+            OutlinedButton(
+              onPressed: () {
+                deletePost(id).then((ret) => {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (BuildContext context,
+                              Animation<double> animation1,
+                              Animation<double> animation2) {
+                            return const TrendingScreen(title: "Trending");
+                          },
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      ),
+                    });
+              },
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0))),
+                  side: MaterialStateProperty.all(const BorderSide(
+                      color: Colors.red,
+                      width: 1.0,
+                      style: BorderStyle.solid))),
+              child: const Text(
+                "Confirm",
+                style: TextStyle(color: Colors.red),
+              ),
+
+//closes popup //closes popup
+            ),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              }, //closes popup
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)))),
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      });
+}
+
+void confirmReport(BuildContext context, String id) {
+  showDialog(
+      context: context,
+      barrierDismissible:
+          false, // disables popup to close if tapped outside popup (need a button to close)
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              Icon(
+                Icons.flag,
+                color: Colors.orange,
+              ),
+              Text(
+                "Confirm Report",
+              ),
+            ],
+          ),
+          content: const Text(
+            "Are you sure you want to report this post?",
+          ),
+          actions: <Widget>[
+            OutlinedButton(
+              onPressed: () {
+                checkReported(id, "rating").then((value) {
+                  if (!value) {
+                    updateReports(id, "rating");
+                  }
+                });
+                Navigator.of(context).pop();
+              },
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0))),
+                  side: MaterialStateProperty.all(const BorderSide(
+                      color: Colors.orange,
+                      width: 1.0,
+                      style: BorderStyle.solid))),
+              child:
+                  const Text("Confirm", style: TextStyle(color: Colors.orange)),
+//closes popup
+            ),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              }, //closes popup
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0)))),
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      });
+}
+
 void _updateVotes(id, int votes, String type) async {
   final response = await http.post(
     Uri.parse(
@@ -210,96 +328,11 @@ class _RatingTileState extends State<RatingTile> {
                               style: const TextStyle(color: Colors.red),
                             )
                           ]),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.center,
-                      //   mainAxisSize: MainAxisSize.min,
-                      //   children: [
-                      //     if (widget.rating.owned)
-                      //       Expanded(
-                      //           child: IconButton(
-                      //               // constraints: BoxConstraints(
-                      //               //   maxWidth: MediaQuery.of(context).size.width * 0.03,
-                      //               // ),
-                      //               onPressed: () {
-                      //                 String id = "";
-                      //                 if (widget.rating.id != null) {
-                      //                   id = widget.rating.id.toString();
-                      //                 }
-                      //                 Navigator.push(
-                      //                   context,
-                      //                   PageRouteBuilder(
-                      //                     pageBuilder: (BuildContext context,
-                      //                         Animation<double> animation1,
-                      //                         Animation<double> animation2) {
-                      //                       return ReviewScreen(id: id);
-                      //                     },
-                      //                     transitionDuration: Duration.zero,
-                      //                     reverseTransitionDuration: Duration.zero,
-                      //                   ),
-                      //                 );
-                      //               },
-                      //               style: IconButton.styleFrom(
-                      //                 padding: EdgeInsets.zero,
-                      //                 // minimumSize: Size(
-                      //                 //     MediaQuery.of(context).size.width *
-                      //                 //         0.04,
-                      //                 //     MediaQuery.of(context).size.width *
-                      //                 //         0.03),
-                      //                 // tapTargetSize:
-                      //                 //     MaterialTapTargetSize.shrinkWrap,
-                      //                 // alignment: Alignment.centerLeft),
-                      //               ),
-                      //               icon: const Icon(Icons.edit,
-                      //                   color: Colors.blue, size: 16))),
-                      //     if (widget.rating.owned)
-                      //       Expanded(
-                      //           child: IconButton(
-                      //               // constraints: BoxConstraints(
-                      //               //   maxWidth: MediaQuery.of(context).size.width * 0.03,
-                      //               // ),
-                      //               onPressed: () {
-                      //                 String id = "";
-                      //                 if (widget.rating.id != null) {
-                      //                   id = widget.rating.id.toString();
-                      //                 }
-                      //                 deletePost(id).then((ret) => {
-                      //                       Navigator.push(
-                      //                         context,
-                      //                         PageRouteBuilder(
-                      //                           pageBuilder: (BuildContext context,
-                      //                               Animation<double> animation1,
-                      //                               Animation<double> animation2) {
-                      //                             return const TrendingScreen(
-                      //                                 title: "Trending");
-                      //                           },
-                      //                           transitionDuration: Duration.zero,
-                      //                           reverseTransitionDuration:
-                      //                               Duration.zero,
-                      //                         ),
-                      //                       ),
-                      //                     });
-                      //               },
-                      //               style: IconButton.styleFrom(
-                      //                   padding: EdgeInsets.zero,
-
-                      //                   // minimumSize: Size(
-                      //                   //     MediaQuery.of(context).size.width *
-                      //                   //         0.04,
-                      //                   //     MediaQuery.of(context).size.width *
-                      //                   //         0.03),
-                      //                   // tapTargetSize:
-                      //                   //     MaterialTapTargetSize.shrinkWrap,
-                      //                   alignment: Alignment.centerLeft),
-                      //               icon: const Icon(Icons.delete,
-                      //                   color: Colors.red, size: 16))),
-                      //     if (!widget.rating.owned)
-                      //       ReportPostButton(type: "rating", rating: widget.rating)
-                      //   ],
-                      // )
                       Padding(
                           padding: const EdgeInsets.all(5),
                           child: SpeedDial(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Color.fromARGB(255, 242, 242, 242),
+                            foregroundColor: Colors.blue,
                             direction: SpeedDialDirection.up,
                             animatedIcon: AnimatedIcons.menu_close,
                             buttonSize: const Size(30, 30),
@@ -350,23 +383,7 @@ class _RatingTileState extends State<RatingTile> {
                                     if (widget.rating.id != null) {
                                       id = widget.rating.id.toString();
                                     }
-
-                                    deletePost(id).then((ret) => {
-                                          Navigator.push(
-                                            context,
-                                            PageRouteBuilder(
-                                              pageBuilder: (BuildContext context,
-                                                  Animation<double> animation1,
-                                                  Animation<double> animation2) {
-                                                return const TrendingScreen(
-                                                    title: "Trending");
-                                              },
-                                              transitionDuration: Duration.zero,
-                                              reverseTransitionDuration:
-                                                  Duration.zero,
-                                            ),
-                                          ),
-                                        });
+                                    confirmDelete(context, id);
                                   },
                                 ),
                               SpeedDialChild(
@@ -377,14 +394,11 @@ class _RatingTileState extends State<RatingTile> {
                                 backgroundColor: Colors.orange,
                                 label: 'Report',
                                 onTap: () {
-                                  isDialOpen.value = false;
-
-                                  checkReported(widget.rating.id, "rating")
-                                      .then((value) {
-                                    if (!value) {
-                                      updateReports(widget.rating.id, "rating");
-                                    }
-                                  });
+                                  String id = "";
+                                  if (widget.rating.id != null) {
+                                    id = widget.rating.id.toString();
+                                  }
+                                  confirmReport(context, id);
                                 },
                               ),
                             ],
