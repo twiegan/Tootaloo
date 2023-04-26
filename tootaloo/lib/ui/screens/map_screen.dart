@@ -33,13 +33,14 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
+  //final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
   final Location location = Location();
 
   late double _zoomLevel;
-  late LocationData _currLocation;
+  LocationData _currLocation =
+      LocationData.fromMap({'latitude': 40.427715, 'longitude': -86.916992});
   late Map<String, String> _ratingValueMap;
   late List<Building> _buildings;
   late List<MarkerData> _customMarkers;
@@ -55,8 +56,6 @@ class _MapScreenState extends State<MapScreen> {
     location.onLocationChanged.listen((l) {
       setState(() {
         _currLocation = l;
-        print(
-            "setting current location to: ${_currLocation.latitude}, ${_currLocation.longitude}");
       });
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -72,12 +71,6 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
 
     _zoomLevel = 14.0;
-    setState(() => {
-          _currLocation = LocationData.fromMap({
-            'latitude': _initialcameraposition.latitude,
-            'longitude': _initialcameraposition.longitude,
-          })
-        });
 
     // add the custom markers retrieved to _customMarkers
     _ratingValueMap = <String, String>{};
@@ -126,6 +119,11 @@ class _MapScreenState extends State<MapScreen> {
               })
             });
       }
+      location.getLocation().then((l) {
+        setState(() {
+          _currLocation = l;
+        });
+      });
     });
   }
 
@@ -298,7 +296,7 @@ class _MapScreenState extends State<MapScreen> {
                   );
                 }),
             child: _customMarker(preferredRestroomCount,
-                Color.fromRGBO(0, 30 + counter * 10, 50 + counter * 40, 0.75)));
+                Color.fromRGBO(0, 10 + counter * 15, 50 + counter * 20, 0.75)));
         _customMarkers.add(data);
         counter += 1;
       } // end of for loop
