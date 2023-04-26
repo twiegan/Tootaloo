@@ -447,38 +447,4 @@ class _MapScreenState extends State<MapScreen> {
       ],
     );
   }
-
-  // Widget _customSnackBarInfoContent() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
-  //     crossAxisAlignment: CrossAxisAlignment.center,
-  //     children: <Widget>[
-  //       Container(
-  //         margin: const EdgeInsets.only(
-  //             left: 8.0, top: 8.0, bottom: 8.0, right: 25.0),
-  //         width: 24,
-  //         height: 24,
-  //         padding: const EdgeInsets.all(2.0),
-  //         child: const CircularProgressIndicator(
-  //           color: Colors.greenAccent,
-  //           strokeWidth: 3,
-  //         ),
-  //       ),
-  //       Column(children: const [
-  //         Text(
-  //           "Finding closest restrooms\nmatching your preference.",
-  //           style: TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 14.0,
-  //               fontWeight: FontWeight.bold),
-  //         ),
-  //         Text("(Closer the darker the marker)",
-  //             style: TextStyle(
-  //                 color: Colors.white,
-  //                 fontSize: 13.0,
-  //                 fontStyle: FontStyle.normal)),
-  //       ]),
-  //     ],
-  //   );
-  // }
 }

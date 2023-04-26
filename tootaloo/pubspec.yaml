@@ -78,6 +78,9 @@ flutter:
     - assets/images/floor_maps/HAAS/
     - assets/images/floor_maps/LWSN/
     - assets/images/floor_maps/PMU/
+    - assets/images/floor_maps/WALC/
+    - assets/images/floor_maps/KRCH/
+    - assets/images/floor_maps/ME/
     - assets/images/tootaloo_logo.png
     - assets/images/
 

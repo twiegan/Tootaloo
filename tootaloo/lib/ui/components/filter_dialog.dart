@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:tootaloo/ui/models/building.dart';
+import 'package:tootaloo/ui/screens/posts/following_screen.dart';
 import 'package:tootaloo/ui/screens/review_screen.dart';
 import 'package:tootaloo/ui/screens/floor_map_screen.dart';
 import 'package:custom_map_markers/custom_map_markers.dart';
@@ -151,8 +152,10 @@ class _FilterWidgetState extends State<FilterWidget> {
             // clear currently open snackbars
             ScaffoldMessenger.of(context).clearSnackBars();
 
-            _filterRestrooms(
-                isChangingStation, isHygiene, isFavorited, ratingValue);
+            if (mounted) {
+              _filterRestrooms(
+                  isChangingStation, isHygiene, isFavorited, ratingValue);
+            }
           },
           child: const Text('Submit'),
         )
@@ -350,7 +353,7 @@ class _FilterWidgetState extends State<FilterWidget> {
   }
 
   Future<AppUser> _getUser() async {
-    // await pause(const Duration(milliseconds: 700));
+    //await pause(const Duration(milliseconds: 100));
     return await UserPreferences.getUser();
   }
 }
