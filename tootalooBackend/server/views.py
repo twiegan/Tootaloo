@@ -349,6 +349,17 @@ def buildings(request):
 	
 	return resp
 
+def building_by_id(request):
+  db = client['tootaloo']  
+  buildings_collection = db['buildings']
+  
+  buildingId = request.GET.get('building')
+  building = buildings_collection.find_one({"_id": buildingId});
+  
+  resp = HttpResponse(dumps(building, sort_keys=True, indent=4, default=json_util.default))
+  resp['Content-Type'] = 'application/json'
+  
+  return resp
 
 def ratingsByIds(request):
 

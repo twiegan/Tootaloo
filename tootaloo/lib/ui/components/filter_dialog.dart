@@ -1,18 +1,29 @@
 import 'dart:convert';
 
+import 'package:marquee/marquee.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:tootaloo/AppUser.dart';
 import 'package:tootaloo/SharedPref.dart';
-import '../screens/review_screen.dart';
+import 'package:tootaloo/ui/models/building.dart';
+import 'package:tootaloo/ui/screens/review_screen.dart';
+import 'package:tootaloo/ui/screens/floor_map_screen.dart';
+import 'package:custom_map_markers/custom_map_markers.dart';
+import 'package:tootaloo/ui/components/map_screen_components.dart';
 
 String URL =
     "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}";
 
+// ignore: must_be_immutable
 class FilterWidget extends StatefulWidget {
-  const FilterWidget({super.key});
+  FilterWidget({super.key, required this.callback, required this.buildContext});
+
+  BuildContext buildContext;
+  Function callback; // callback function to modify _customMarkers
 
   @override
   State<StatefulWidget> createState() => _FilterWidgetState();
@@ -109,7 +120,7 @@ class _FilterWidgetState extends State<FilterWidget> {
                     textAlign: TextAlign.center,
                   ))),
           Transform.translate(
-              offset: const Offset(0, 19.0),
+              offset: const Offset(0, 10.0),
               child: Slider(
                 activeColor: Colors.blue,
                 min: 0.0,
@@ -133,7 +144,13 @@ class _FilterWidgetState extends State<FilterWidget> {
           },
         ),
         TextButton(
-          onPressed: () async {
+          onPressed: () {
+            // hide alert dialog and filter restrooms
+            Navigator.of(context).pop();
+
+            // clear currently open snackbars
+            ScaffoldMessenger.of(context).clearSnackBars();
+
             _filterRestrooms(
                 isChangingStation, isHygiene, isFavorited, ratingValue);
           },
@@ -145,8 +162,6 @@ class _FilterWidgetState extends State<FilterWidget> {
 
   void _filterRestrooms(bool isChangingStation, bool isHygiene,
       bool isFavorited, double ratingValue) async {
-    print("$isChangingStation, $isHygiene, $isFavorited, $ratingValue");
-
     List<dynamic> restroomsToFilter = [];
     if (isFavorited) {
       // get the restrooms that are favorited by the user to filter
@@ -183,38 +198,251 @@ class _FilterWidgetState extends State<FilterWidget> {
     // now filter based on hygiene products, changing station and rating
     List<dynamic> filteredRestrooms = restroomsToFilter;
 
-    if (isChangingStation) {
-      // by changing station
-      filteredRestrooms = filteredRestrooms
-          .where((restroom) => restroom['changing-station'] == true)
-          .toList();
-    }
+    // description for the loading snackbar
+    List<String> descriptionList = [];
 
     if (isHygiene) {
-      //by hygiene products
+      // filter by hygiene products
       filteredRestrooms = filteredRestrooms
           .where((restroom) => restroom['hygiene-products'] == true)
           .toList();
+      // add hygiene to desscription
+      descriptionList.add("hygiene");
     }
 
-    // by rating
+    if (isChangingStation) {
+      // filter by changing station
+      filteredRestrooms = filteredRestrooms
+          .where((restroom) => restroom['changing-station'] == true)
+          .toList();
+      // add changing to description
+      descriptionList.add("changing");
+    }
+
+    if (isFavorited) {
+      // add favorited to description
+      descriptionList.add("favorited");
+    }
+
+    if (ratingValue > 0) {
+      // add rating to description
+      descriptionList.add("rating");
+    }
+    // filter by rating
     filteredRestrooms = filteredRestrooms
         .where((restroom) => restroom['rating'] > ratingValue)
         .toList();
 
-    //print(filteredRestrooms);
+    if (descriptionList.isEmpty) {
+      // no options chosen for the filter
+      return;
+    }
 
-    List<dynamic> rooms =
-        filteredRestrooms.map((restroom) => restroom["room"]).toList();
+    String description = "(${descriptionList.join(", ")})";
 
-    print(rooms);
-    print("================================================");
+    if (filteredRestrooms.isEmpty) {
+      // No restroom matched the filter
+      // ignore: use_build_context_synchronously
+      showPopupMessage(widget.buildContext, const Icon(Icons.info),
+          " No Matching restroom", "No restroom matched your filter.");
+      return;
+    }
 
-    //TODO: update custom markers from map screen
+    // show the snackbar for info
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: customSnackBarInfoContent(
+            "Finding restrooms based on      \nyour filter.", description),
+        backgroundColor: Colors.black87,
+        duration: const Duration(milliseconds: 2500),
+        width: 320.0, // Width of the SnackBar.
+        padding: const EdgeInsets.symmetric(
+            horizontal: 15.0, // Inner padding for SnackBar content.
+            vertical: 10.0),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(35.0),
+        ),
+      ),
+    );
+
+    // Group the items by building
+    var buildingGroups =
+        groupBy(filteredRestrooms, (dynamic item) => item['building']);
+
+    // populate custom markers for the map screen
+    List<MarkerData> markers = <MarkerData>[];
+
+    for (var buildingGroup in buildingGroups.entries) {
+      try {
+        Uri uri = Uri.parse("$URL/building_by_id");
+        uri = uri.replace(query: "building=${buildingGroup.key}");
+
+        final response = await http.get(uri);
+        var building = jsonDecode(response.body);
+
+        String restroomCountDescription = "";
+        if (buildingGroup.value.length == 1) {
+          restroomCountDescription =
+              "There is ${buildingGroup.value.length} restroom";
+        } else {
+          restroomCountDescription =
+              "There are ${buildingGroup.value.length} restrooms";
+        }
+
+        List<dynamic> roomNumbers =
+            buildingGroup.value.map((restroom) => restroom["room"]).toList();
+
+        Building buildingData = Building(
+          id: building["_id"],
+          name: building["name"],
+          restroomCount: building["restroomCount"],
+          latitude: building["latitude"],
+          longitude: building["longitude"],
+          floors: building["floors"],
+          maleCount: building["maleCount"],
+          femaleCount: building["femaleCount"],
+          unisexCount: building["unisexCount"],
+        );
+
+        MarkerData markerData = MarkerData(
+            marker: Marker(
+                markerId: MarkerId(buildingData.id),
+                position: LatLng(buildingData.latitude, buildingData.longitude),
+                infoWindow: InfoWindow(
+                    title: buildingData.name,
+                    snippet:
+                        '$restroomCountDescription matching your filter in this building.\nRoom #: ${roomNumbers.join(', ')}'),
+                onTap: () {
+                  // hide currently open snackbar
+                  ScaffoldMessenger.of(widget.buildContext)
+                      .hideCurrentSnackBar();
+                  // show the snackbar for the tapped building
+                  ScaffoldMessenger.of(widget.buildContext).showSnackBar(
+                    SnackBar(
+                      content: _customSnackBarContent(
+                          buildingData, widget.buildContext),
+                      backgroundColor: Colors.black87,
+                      duration: const Duration(milliseconds: 5000),
+                      width: 320.0, // Width of the SnackBar.
+                      padding: const EdgeInsets.symmetric(
+                          horizontal:
+                              15.0, // Inner padding for SnackBar content.
+                          vertical: 10.0),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(35.0),
+                      ),
+                    ),
+                  );
+                }),
+            child: customMarker(buildingGroup.value.length, Colors.black));
+
+        // append the marker to display on the map
+        markers.add(markerData);
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    widget.callback(markers);
   }
 
   Future<AppUser> _getUser() async {
     // await pause(const Duration(milliseconds: 700));
     return await UserPreferences.getUser();
   }
+}
+
+void showPopupMessage(
+    BuildContext context, Icon icon, String title, String text) {
+  showDialog(
+      context: context,
+      barrierDismissible:
+          false, // disables popup to close if tapped outside popup (need a button to close)
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              icon,
+              Text(
+                title,
+              ),
+            ],
+          ),
+          content: Text(text),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }, //closes popup
+            ),
+          ],
+        );
+      });
+}
+
+Widget _customSnackBarContent(Building building, BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: <Widget>[
+      Container(
+        margin: const EdgeInsets.only(
+            left: 8.0, top: 8.0, bottom: 8.0, right: 12.0),
+        width: 15.0,
+        height: 15.0,
+        decoration: BoxDecoration(
+            color: Colors.greenAccent,
+            borderRadius: BorderRadius.circular(40.0)),
+      ), //Dot on the left
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(children: <Widget>[
+            Text(
+              "${building.id}: ",
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+                width: 150,
+                height: 20,
+                child: Marquee(
+                  text: building.name,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  blankSpace: 30.0,
+                  velocity: 50.0,
+                  showFadingOnlyWhenScrolling: true,
+                  fadingEdgeStartFraction: 0.1,
+                  fadingEdgeEndFraction: 0.1,
+                ))
+          ]),
+          const Text(
+            //'Total # of Restrooms: ${building.restroomCount}',
+            'Click right to see the floor maps',
+            style: TextStyle(color: Colors.white, fontSize: 11.0),
+          )
+        ],
+      ),
+      const Spacer(), // extra spacing
+      IconButton(
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => FloorMap(building: building)),
+            );
+          },
+          icon: const Icon(Icons.navigate_next, color: Colors.white)),
+    ],
+  );
 }
