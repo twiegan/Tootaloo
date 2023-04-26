@@ -118,7 +118,7 @@ void confirmDelete(
       });
 }
 
-void confirmReport(BuildContext context, String id) {
+void confirmReport(BuildContext context, String id, String username) {
   showDialog(
       context: context,
       barrierDismissible:
@@ -145,6 +145,7 @@ void confirmReport(BuildContext context, String id) {
                 checkReported(id, "rating").then((value) {
                   if (!value) {
                     updateReports(id, "rating");
+                    _updateUserReports(username);
                   }
                 });
                 Navigator.of(context).pop();
@@ -306,6 +307,19 @@ Icon _getProfileIcon(String preference) {
         color: Colors.green,
       );
   }
+}
+
+void _updateUserReports(String reportedUsername) async {
+  print("USER REPORT START");
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-user-reports/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{'type': "users", 'reported_username': reportedUsername}),
+  );
+  print("RESPONSE: $response}");
 }
 
 class RatingTile extends StatefulWidget {
@@ -532,10 +546,12 @@ class _RatingTileState extends State<RatingTile> {
                                 label: 'Report',
                                 onTap: () {
                                   String id = "";
+                                  String username = "";
                                   if (widget.rating.id != null) {
                                     id = widget.rating.id.toString();
+                                    username = widget.rating.by;
                                   }
-                                  confirmReport(context, id);
+                                  confirmReport(context, id, username);
                                 },
                               ),
                             ],
