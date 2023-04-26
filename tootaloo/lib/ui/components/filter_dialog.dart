@@ -179,7 +179,8 @@ class _FilterWidgetState extends State<FilterWidget> {
       dynamic responseData = json.decode(response.body);
 
       // with the IDs, get the data for each restroom
-      dynamic favoriteRestroomIds = responseData['user']['favorite_bathrooms'];
+      dynamic favoriteRestroomIds = responseData['user']['favorite_restrooms'];
+      favoriteRestroomIds ??= [];
       for (dynamic restroomId in favoriteRestroomIds) {
         Map<String, dynamic> queryParams = {"restroom_id": restroomId['\$oid']};
         Uri uri = Uri.http(
@@ -253,22 +254,24 @@ class _FilterWidgetState extends State<FilterWidget> {
 
     // show the snackbar for info
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: customSnackBarInfoContent(
-            "Finding restrooms based on      \nyour filter.", description),
-        backgroundColor: Colors.black87,
-        duration: const Duration(milliseconds: 2500),
-        width: 320.0, // Width of the SnackBar.
-        padding: const EdgeInsets.symmetric(
-            horizontal: 15.0, // Inner padding for SnackBar content.
-            vertical: 10.0),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(35.0),
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: customSnackBarInfoContent(
+              "Finding restrooms based on      \nyour filter.", description),
+          backgroundColor: Colors.black87,
+          duration: const Duration(milliseconds: 2500),
+          width: 320.0, // Width of the SnackBar.
+          padding: const EdgeInsets.symmetric(
+              horizontal: 15.0, // Inner padding for SnackBar content.
+              vertical: 10.0),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(35.0),
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // Group the items by building
     var buildingGroups =
