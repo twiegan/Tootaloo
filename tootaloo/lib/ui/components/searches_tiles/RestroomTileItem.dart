@@ -117,7 +117,7 @@ class _RestroomTileItemState extends State<RestroomTileItem> {
                                                 return RatingsViewScreen(
                                                     title:
                                                         "${widget.restroom.building}-${widget.restroom.room} Reviews",
-                                                    ratings: ratings);
+                                                    id: widget.restroom.id);
                                               },
                                               transitionDuration: Duration.zero,
                                               reverseTransitionDuration:

@@ -38,4 +38,5 @@ urlpatterns = [
   path('user-by-id/', views.userById, name='user-by-id'),
   path('favorite-restroom/', views.favoriteRestroom, name='favorite-restroom'),
   path('unfavorite-restroom/', views.unfavoriteRestroom, name='unfavorite-restroom'),
+  path('restroom_id_by_name/', views.restroom_id_by_name, name='restroom_id_by_name'),
 ]
