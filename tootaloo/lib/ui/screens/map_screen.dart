@@ -33,13 +33,14 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
+  //final LatLng _initialcameraposition = const LatLng(40.427715, -86.916992);
   final Location location = Location();
 
   late double _zoomLevel;
-  late LocationData _currLocation;
+  LocationData _currLocation =
+      LocationData.fromMap({'latitude': 40.427715, 'longitude': -86.916992});
   late Map<String, String> _ratingValueMap;
   late List<Building> _buildings;
   late List<MarkerData> _customMarkers;
@@ -55,8 +56,6 @@ class _MapScreenState extends State<MapScreen> {
     location.onLocationChanged.listen((l) {
       setState(() {
         _currLocation = l;
-        print(
-            "setting current location to: ${_currLocation.latitude}, ${_currLocation.longitude}");
       });
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -72,12 +71,6 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
 
     _zoomLevel = 14.0;
-    setState(() => {
-          _currLocation = LocationData.fromMap({
-            'latitude': _initialcameraposition.latitude,
-            'longitude': _initialcameraposition.longitude,
-          })
-        });
 
     // add the custom markers retrieved to _customMarkers
     _ratingValueMap = <String, String>{};
@@ -126,6 +119,11 @@ class _MapScreenState extends State<MapScreen> {
               })
             });
       }
+      location.getLocation().then((l) {
+        setState(() {
+          _currLocation = l;
+        });
+      });
     });
   }
 
@@ -164,6 +162,7 @@ class _MapScreenState extends State<MapScreen> {
         },
       ),
       floatingActionButton: SpeedDial(
+        childMargin: const EdgeInsets.symmetric(vertical: 15),
         backgroundColor: Colors.blue,
         label: const Text("Menu"),
         direction: SpeedDialDirection.up,
@@ -298,7 +297,7 @@ class _MapScreenState extends State<MapScreen> {
                   );
                 }),
             child: _customMarker(preferredRestroomCount,
-                Color.fromRGBO(0, 30 + counter * 10, 50 + counter * 40, 0.75)));
+                Color.fromRGBO(0, 10 + counter * 15, 50 + counter * 20, 0.75)));
         _customMarkers.add(data);
         counter += 1;
       } // end of for loop
@@ -447,38 +446,4 @@ class _MapScreenState extends State<MapScreen> {
       ],
     );
   }
-
-  // Widget _customSnackBarInfoContent() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.start, //change here don't //worked
-  //     crossAxisAlignment: CrossAxisAlignment.center,
-  //     children: <Widget>[
-  //       Container(
-  //         margin: const EdgeInsets.only(
-  //             left: 8.0, top: 8.0, bottom: 8.0, right: 25.0),
-  //         width: 24,
-  //         height: 24,
-  //         padding: const EdgeInsets.all(2.0),
-  //         child: const CircularProgressIndicator(
-  //           color: Colors.greenAccent,
-  //           strokeWidth: 3,
-  //         ),
-  //       ),
-  //       Column(children: const [
-  //         Text(
-  //           "Finding closest restrooms\nmatching your preference.",
-  //           style: TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 14.0,
-  //               fontWeight: FontWeight.bold),
-  //         ),
-  //         Text("(Closer the darker the marker)",
-  //             style: TextStyle(
-  //                 color: Colors.white,
-  //                 fontSize: 13.0,
-  //                 fontStyle: FontStyle.normal)),
-  //       ]),
-  //     ],
-  //   );
-  // }
 }
