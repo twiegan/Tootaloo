@@ -229,13 +229,13 @@ class _FilterWidgetState extends State<FilterWidget> {
     }
 
     if (ratingValue > 0) {
+      // filter by rating
+      filteredRestrooms = filteredRestrooms
+          .where((restroom) => restroom['rating'] > ratingValue)
+          .toList();
       // add rating to description
       descriptionList.add("rating");
     }
-    // filter by rating
-    filteredRestrooms = filteredRestrooms
-        .where((restroom) => restroom['rating'] > ratingValue)
-        .toList();
 
     if (descriptionList.isEmpty) {
       // no options chosen for the filter
