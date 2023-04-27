@@ -70,12 +70,15 @@ class _RatingsViewScreenState extends State<RatingsViewScreen> {
 Future<List<Rating>> _getRatings(List<String> ids) async {
   // Send request to backend and parse response
   // TODO: change this url later
-  Map<String, dynamic> queryParams = {"ids[]": ids};
-  Uri uri = Uri.http(
-      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
-      "/ratings-by-ids/",
-      queryParams);
-  final response = await http.get(uri);
+  String url =
+      "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings-by-ids/";
+  final response = await http.post(Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, List<String>>{
+        'ids[]': ids,
+      }));
   dynamic responseData = json.decode(response.body);
 
   // Build rating list based on response

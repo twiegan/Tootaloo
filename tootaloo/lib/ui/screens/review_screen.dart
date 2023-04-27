@@ -300,8 +300,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 items: _restrooms,
                 dropdownDecoratorProps: const DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: "Menu mode",
-                    hintText: "country in menu mode",
+                    labelText: "Restroom",
+                    hintText: "choose restroom",
                   ),
                 ),
                 onChanged: (value) {

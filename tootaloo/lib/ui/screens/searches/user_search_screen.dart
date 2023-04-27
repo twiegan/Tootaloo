@@ -3,18 +3,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
-
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
-import 'package:tootaloo/ui/components/report_user_button.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/UserTileItem.dart';
 import 'package:tootaloo/ui/models/User.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/SharedPref.dart';
-import 'package:tootaloo/AppUser.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-
 import '../../components/rating_tile.dart';
 
 /* Define the screen itself */
@@ -31,6 +27,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   final int index = 2;
   bool _followed = false;
   bool _reported = false;
+  AppUser _currUser = AppUser(username: "", id: "", preference: "");
 
   late String _selectedUser = "";
   // names map of restrooms we get from API (id: restroom_name)
@@ -52,7 +49,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             _userNames = users;
           })
         });
-
+    UserPreferences.getUser()
+        .then((user) => {setState(() => _currUser = user)});
     _ratings = [];
   }
 
@@ -76,7 +74,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         items: _userNames.values.toList(),
                         dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            hintText: "search a user here",
+                            labelText: "Select a user",
                           ),
                         ),
                         onChanged: (value) async {
@@ -90,29 +88,31 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           setState(() => _reported = reported);
 
                           if (_selectedUser == "") return; // Sanity Check
-                          AppUser appUser = await UserPreferences.getUser();
-                          if (appUser.id == "null") return; // Sanity Check
                           var key = _userNames.keys.firstWhere(
                               (k) => _userNames[k] == _selectedUser,
                               orElse: () => '');
                           if (key != '') {
                             setState(() => _ratings = []);
                             getSearchedUser(key).then((user) => {
-                                  checkFollowed(appUser.id, user.id)
-                                      .then((followed) => {
-                                            setState(() {
-                                              _followed = followed;
-                                              _user = User(
-                                                  id: user.id,
-                                                  username: user.username,
-                                                  posts_ids: user.posts_ids,
-                                                  preference: user.preference,
-                                                  following_ids:
-                                                      user.following_ids,
-                                                  favorite_restrooms_ids: user
-                                                      .favorite_restrooms_ids);
-                                            })
-                                          }),
+                                  setState(() {
+                                    _user = User(
+                                        id: user.id,
+                                        username: user.username,
+                                        posts_ids: user.posts_ids,
+                                        preference: user.preference,
+                                        following_ids: user.following_ids,
+                                        favorite_restrooms_ids:
+                                            user.favorite_restrooms_ids);
+                                  }),
+                                  if (_currUser.id != "null")
+                                    {
+                                      checkFollowed(_currUser.id, user.id)
+                                          .then((followed) => {
+                                                setState(() {
+                                                  _followed = followed;
+                                                })
+                                              })
+                                    },
                                   _getRatings(user).then((ratings) => {
                                         for (var rating in ratings)
                                           {
@@ -135,55 +135,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           }
                         },
                         selectedItem: _selectedUser))),
-            // OutlinedButton.icon(
-            //     onPressed: () async {
-            //       if (_selectedUser == "") return; // Sanity Check
-            //       AppUser appUser = await UserPreferences.getUser();
-            //       if (appUser.id == "null") return; // Sanity Check
-            //       var key = _userNames.keys.firstWhere(
-            //           (k) => _userNames[k] == _selectedUser,
-            //           orElse: () => '');
-            //       if (key != '') {
-            //         setState(() => _ratings = []);
-            //         getSearchedUser(key).then((user) => {
-            //               checkFollowed(appUser.id, user.id)
-            //                   .then((followed) => {
-            //                         setState(() {
-            //                           _followed = followed;
-            //                           _user = User(
-            //                               id: user.id,
-            //                               username: user.username,
-            //                               posts_ids: user.posts_ids,
-            //                               preference: user.preference,
-            //                               following_ids: user.following_ids,
-            //                               favorite_restrooms_ids:
-            //                                   user.favorite_restrooms_ids);
-            //                         })
-            //                       }),
-            //               _getRatings(user).then((ratings) => {
-            //                     for (var rating in ratings)
-            //                       {
-            //                         _userOwned(rating.id).then((owned) => {
-            //                               setState(() {
-            //                                 rating.owned = owned;
-            //                               })
-            //                             }),
-            //                         setState(() {
-            //                           _ratings.add(rating);
-            //                         }),
-            //                       },
-            //                     _ratings.sort((a, b) =>
-            //                         a.downvotes.compareTo(b.downvotes)),
-            //                     _ratings.sort(
-            //                         (b, a) => a.upvotes.compareTo(b.upvotes)),
-            //                   }),
-            //             });
-            //       }
-            //     },
-            //     icon: const Icon(Icons.search),
-            //     label: const Text('Search'),
-            //     style: OutlinedButton.styleFrom(
-            //         foregroundColor: Colors.lightBlue)),
           ]),
           if (_selectedUser != "")
             Row(
@@ -233,6 +184,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         const Text("following"),
                       ],
                     )),
+                // if (_currUser.id != "null")
                 Padding(
                     padding: const EdgeInsets.all(5),
                     child: OutlinedButton(
@@ -276,6 +228,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                 //             icon: Icon(Icons.flag_outlined, color: Colors.orange,)),
 
                 //     ),
+                // if (_currUser.id != "null")
                 IconButton(
                     padding: const EdgeInsets.all(0),
                     constraints: const BoxConstraints(),
@@ -293,16 +246,21 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     }),
               ],
             ),
-          Expanded(
-              child: ListView(
-            // children: articles.map(_buildArticle).toList(),
-            children: _ratings
-                .map((rating) => RatingTile(
-                      rating: rating,
-                      screen: "Following",
-                    ))
-                .toList(),
-          )),
+          if (_selectedUser != "")
+            Expanded(
+                child: ListView(
+              // children: articles.map(_buildArticle).toList(),
+              children: _ratings
+                  .map((rating) => RatingTile(
+                        rating: rating,
+                        screen: "Following",
+                      ))
+                  .toList(),
+            )),
+          if (_selectedUser == "")
+            const Padding(
+                padding: EdgeInsets.only(top: 200),
+                child: Text("Search for a user"))
         ]),
       ),
       bottomNavigationBar: BottomNavBar(
