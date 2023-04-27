@@ -59,6 +59,7 @@ Future<Rating> _getRating(String id) async {
     privacy: responseRating["privacy"],
     upvotes: responseRating["upvotes"],
     downvotes: responseRating["downvotes"],
+    reports: responseRating["reports"],
   );
   return rating;
 }

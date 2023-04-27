@@ -428,6 +428,7 @@ Future<List<Rating>> getRating(List<String> ids) async {
         downvotes: rating["downvotes"],
         review: rating["review"],
         by: rating["by"],
+        reports: rating["reports"],
         owned: false);
     ratings.add(ratingData);
   }
