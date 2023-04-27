@@ -69,7 +69,6 @@ class _RatingsViewScreenState extends State<RatingsViewScreen> {
 /* Get list of ratings the user searches for from the backend */
 Future<List<Rating>> _getRatings(List<String> ids) async {
   // Send request to backend and parse response
-  // TODO: change this url later
   String url =
       "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings-by-ids/";
   final response = await http.post(Uri.parse(url),
@@ -111,23 +110,14 @@ Future<Restroom> _getSearchedRestroom(String restroomId) async {
   if (restroomId.contains("{")) {
     restroomId = restroomId.split(": ")[1].split("}")[0];
   }
-  // Map<String, dynamic> queryParams = {
-  //   "restroom_id": restroomId
-  // };
-  // Uri uri = Uri.http(
-  //     dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
-  //     "/restroom-by-id/",
-  //     queryParams);
-  // final response = await http.get(uri);
-  String url =
-      "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/restroom-by-id/";
-  final response = await http.post(Uri.parse(url),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'restroom_id': restroomId,
-      }));
+  Map<String, dynamic> queryParams = {
+    "restroom_id": restroomId
+  };
+  Uri uri = Uri.http(
+      dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'),
+      "/restroom-by-id/",
+      queryParams);
+  final response = await http.get(uri);
   dynamic responseData = json.decode(response.body);
 
   Restroom restroom = Restroom(

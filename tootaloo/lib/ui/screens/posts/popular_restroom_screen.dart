@@ -108,11 +108,11 @@ class _ListTileItemState extends State<ListTileItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-          color: Colors.white10,
-          // child: const Text("what"),
-          child: Row(
+        padding: const EdgeInsets.all(10),
+        child: Container(
+            color: Colors.white10,
+            // child: const Text("what"),
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,55 +187,47 @@ class _ListTileItemState extends State<ListTileItem> {
                       )
                     ]),
                 IntrinsicHeight(
-                    child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('${roundDouble(widget.restroom.rating, 2)}',
-                            style: const TextStyle(fontSize: 30)),
-                        const Icon(Icons.star,
-                            color: Color.fromARGB(255, 224, 202, 0), size: 30),
-                      ],
-                    ),
-                    Flexible(
-                      flex: 5,
-                      child: Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text('Reviews', style: TextStyle(fontSize: 20)),
-                          IconButton(
-                              onPressed: () {
-                                print(widget.restroom.id);
-                                Navigator.push(
-                                    context,
-                                    PageRouteBuilder(
-                                      pageBuilder: (BuildContext context,
-                                          Animation<double> animation1,
-                                          Animation<double> animation2) {
-                                        return RatingsViewScreen(
-                                            title:
-                                                "${widget.restroom.building}-${widget.restroom.room} Reviews",
-                                            id: widget.restroom.id);
-                                      },
-                                      transitionDuration: Duration.zero,
-                                      reverseTransitionDuration: Duration.zero,
-                                    ));
-                              },
-                              icon: const Icon(Icons.arrow_circle_right_rounded,
-                                  color: Colors.blue, size: 20))
+                          Text('${roundDouble(widget.restroom.rating, 2)}',
+                              style: const TextStyle(fontSize: 30)),
+                          const Icon(Icons.star,
+                              color: Color.fromARGB(255, 224, 202, 0),
+                              size: 30),
                         ],
                       ),
-                    ),
-                  ],
-                ))
-              ])),
-    );
+                      FloatingActionButton.extended(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (BuildContext context,
+                                      Animation<double> animation1,
+                                      Animation<double> animation2) {
+                                    return RatingsViewScreen(
+                                        title:
+                                            "${widget.restroom.building}-${widget.restroom.room} Reviews",
+                                        id: widget.restroom.id);
+                                  },
+                                  transitionDuration: Duration.zero,
+                                  reverseTransitionDuration: Duration.zero,
+                                ));
+                          },
+                          backgroundColor: Colors.blue,
+                          label: const Text('Reviews'),
+                          icon: const Icon(Icons.arrow_circle_right_rounded,
+                              color: Colors.white))
+                    ],
+                  ),
+                ),
+              ],
+            )));
   }
 }
