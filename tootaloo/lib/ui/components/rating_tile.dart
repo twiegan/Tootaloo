@@ -118,7 +118,8 @@ void confirmDelete(
       });
 }
 
-void confirmReport(BuildContext context, String id, String username) {
+void confirmReport(
+    BuildContext context, String id, String username, String idReportedBy) {
   showDialog(
       context: context,
       barrierDismissible:
@@ -144,8 +145,8 @@ void confirmReport(BuildContext context, String id, String username) {
               onPressed: () {
                 checkReported(id, "rating").then((value) {
                   if (!value) {
-                    updateReports(id, "rating");
-                    _updateUserReports(username);
+                    _updateRatingReports(id, "rating", idReportedBy);
+                    _updateUserReports(username, "user", idReportedBy);
                   }
                 });
                 Navigator.of(context).pop();
@@ -309,17 +310,52 @@ Icon _getProfileIcon(String preference) {
   }
 }
 
-void _updateUserReports(String reportedUsername) async {
-  print("USER REPORT START");
+// void _updateUserReports(String reportedUsername) async {
+//   print("USER REPORT START");
+//   final response = await http.post(
+//     Uri.parse(
+//         'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-user-reports/'),
+//     headers: <String, String>{
+//       'Content-Type': 'application/json; charset=UTF-8',
+//     },
+//     body: jsonEncode(<String, String>{'type': "users", 'reported_username': reportedUsername}),
+//   );
+//   print("RESPONSE: $response}");
+// }
+
+void _updateRatingReports(id, String type, String idReportedBy) async {
+  print(
+      "inside of _updateRatingReports: post id: $id, idReportedBy $idReportedBy");
+  final response = await http.post(
+    Uri.parse(
+        'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-rating-reports/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'type': type,
+      'id': id.toString(),
+      'id_reported_by': idReportedBy
+    }),
+  );
+}
+
+void _updateUserReports(
+    String reportedUsername, String type, String idReportedBy) async {
+  print(
+      "inside of _updateUserReports: reported username: $reportedUsername, idReportedBy: $idReportedBy");
   final response = await http.post(
     Uri.parse(
         'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-user-reports/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(<String, String>{'type': "users", 'reported_username': reportedUsername}),
+    body: jsonEncode(<String, String>{
+      'type': type,
+      'reported_username': reportedUsername,
+      'id_reported_by': idReportedBy
+    }),
   );
-  print("RESPONSE: $response}");
 }
 
 class RatingTile extends StatefulWidget {
@@ -337,6 +373,8 @@ class _RatingTileState extends State<RatingTile> {
   String _preference = "unisex";
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
+  AppUser _currUser = AppUser(username: "", id: "", preference: "");
+
   Future<bool> changeDial(bool open) async {
     setState(() {
       isDialOpen.value = open;
@@ -352,6 +390,8 @@ class _RatingTileState extends State<RatingTile> {
     _getUserPref(widget.rating.by).then((pref) => {
           setState(() => {_preference = pref})
         });
+    UserPreferences.getUser()
+        .then((user) => {setState(() => _currUser = user)});
   }
 
   @override
@@ -551,7 +591,8 @@ class _RatingTileState extends State<RatingTile> {
                                     id = widget.rating.id.toString();
                                     username = widget.rating.by;
                                   }
-                                  confirmReport(context, id, username);
+                                  confirmReport(
+                                      context, id, username, _currUser.id!);
                                 },
                               ),
                             ],

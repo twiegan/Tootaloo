@@ -50,7 +50,6 @@ def update_votes(request):
     id_query = {'_id': rating_id}
     new_upvotes = {'$set': {body['type']: int(body['votes'])}}
 
-
     db = client['tootaloo']
     ratings_collection = db['ratings']
     ratings_collection.update_one(id_query, new_upvotes)
@@ -261,7 +260,7 @@ def delete_post(request):
         {'building': rating['building'], 'room': rating['room']})
 
     if len(restroom['ratings']) - 1 == 0:
-				# handle division by zero
+        # handle division by zero
         new_cleanliness = new_internet = new_vibe = new_privacy = 0
     else:
         new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (
@@ -843,14 +842,27 @@ def updateRatingReports(request):
     print("POST request: updateRatingReports")
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
-    type = body['type']
+    # type = body['type']
     rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-    query = {'_id': rating_id}
-    update_expression = {'$inc': {"reports": 1}}
 
     db = client['tootaloo']
-    collection = db[type]
-    collection.update_one(query, update_expression)
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
+
+    # increment reports count by one
+    query = {'_id': rating_id}
+    update_expression = {'$inc': {"reports": 1}}
+    ratings_collection.update_one(query, update_expression)
+
+    # get the id of the user who reported the rating
+    id_reported_by = body['id_reported_by']
+    id_reported_by = ObjectId(id_reported_by)
+
+    if rating != None and rating['reported_users'] != None and id_reported_by not in rating['reported_users']:
+        # push the id the of the user who reported the rating to the reported_users list
+        id_query = {'_id': rating_id}
+        new_voted = {'$push': {'reported_users': id_reported_by}}
+        ratings_collection.update_one(id_query, new_voted)
 
     return HttpResponse()
 
@@ -874,10 +886,10 @@ def checkRatingReported(request):
     if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
         return HttpResponse('true')
 
-    if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
-        id_query = {'_id': rating_id}
-        new_voted = {'$push': {'reported_users': user_id}}
-        ratings_collection.update_one(id_query, new_voted)
+    # if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
+    #     id_query = {'_id': rating_id}
+    #     new_voted = {'$push': {'reported_users': user_id}}
+    #     ratings_collection.update_one(id_query, new_voted)
 
     return HttpResponse('false')
 
@@ -890,6 +902,7 @@ def updateUserReports(request):
     reported_username = body['reported_username']
     print('reported_username: ', reported_username)
 
+    # find the id of the user that got reported from the database
     db = client['tootaloo']
     users_collection = db['users']
     reported_user = users_collection.find_one({'username': reported_username})
@@ -897,15 +910,21 @@ def updateUserReports(request):
     print('reported_user: ', reported_user)
     print('reported_id: ', reported_id)
 
+    # increment reports count by one
     query = {'_id': reported_id}
     update_expression = {'$inc': {"reports": 1}}
     print('query & update_expression: ', query, update_expression)
     users_collection.update_one(query, update_expression)
 
-    if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user[
+    # get the id of the user who reported the rating
+    id_reported_by = body['id_reported_by']
+    id_reported_by = ObjectId(id_reported_by)
+
+    if reported_user != None and reported_user['reported_users'] != None and id_reported_by not in reported_user[
             'reported_users']:
+        # push the id the of the user who reported the rating to the reported_users list
         id_query = {'_id': reported_id}
-        new_voted = {'$push': {'reported_users': user_id}}
+        new_voted = {'$push': {'reported_users': id_reported_by}}
         users_collection.update_one(id_query, new_voted)
 
     return HttpResponse()
@@ -948,7 +967,8 @@ def restroom_id_by_name(request):
     db = client['tootaloo']
     restrooms_collection = db['restrooms']
     print(building, room)
-    restroom = restrooms_collection.find_one({'building': building, 'room' : room})
+    restroom = restrooms_collection.find_one(
+        {'building': building, 'room': room})
 
     response = {'status': "success", 'id': restroom['_id']}
     resp = HttpResponse(dumps(response, sort_keys=True,
@@ -1079,7 +1099,8 @@ def reportedRatings(request):
     for rating in ratings_data:
         ratingsRet.append(rating)
 
-    resp = HttpResponse(dumps(ratingsRet, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(ratingsRet, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp

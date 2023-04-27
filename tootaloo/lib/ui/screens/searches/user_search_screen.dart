@@ -238,7 +238,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     onPressed: () {
                       _checkReported(_selectedUser, "users").then((value) {
                         if (!value) {
-                          confirmReport(context, _selectedUser);
+                          confirmReport(context, _selectedUser, _currUser.id!);
                         } else {
                           alreadyReported(context);
                         }
@@ -339,19 +339,19 @@ Future<List<Rating>> _getRatings(User user) async {
   List<Rating> ratings = [];
   for (var rating in responseData) {
     Rating ratingData = Rating(
-        id: rating["_id"],
-        building: rating["building"],
-        by: rating["by"],
-        room: rating["room"],
-        review: rating["review"],
-        overallRating: rating["overall_rating"],
-        internet: rating["internet"],
-        cleanliness: rating["cleanliness"],
-        vibe: rating["vibe"],
-        privacy: rating["privacy"],
-        upvotes: rating["upvotes"],
-        downvotes: rating["downvotes"],
-        reports: rating["reports"],
+      id: rating["_id"],
+      building: rating["building"],
+      by: rating["by"],
+      room: rating["room"],
+      review: rating["review"],
+      overallRating: rating["overall_rating"],
+      internet: rating["internet"],
+      cleanliness: rating["cleanliness"],
+      vibe: rating["vibe"],
+      privacy: rating["privacy"],
+      upvotes: rating["upvotes"],
+      downvotes: rating["downvotes"],
+      reports: rating["reports"],
     );
     ratings.add(ratingData);
   }
@@ -422,7 +422,8 @@ Future<bool> _checkReported(String reportedUsername, String type) async {
   return true;
 }
 
-void confirmReport(BuildContext context, reportedUsername) {
+void confirmReport(
+    BuildContext context, reportedUsername, String idReportedBy) {
   showDialog(
       context: context,
       barrierDismissible:
@@ -446,7 +447,7 @@ void confirmReport(BuildContext context, reportedUsername) {
           actions: <Widget>[
             OutlinedButton(
               onPressed: () {
-                _updateReports(reportedUsername, "users");
+                _updateReports(reportedUsername, "users", idReportedBy);
                 Navigator.of(context).pop();
               },
               style: ButtonStyle(
@@ -510,14 +511,18 @@ void alreadyReported(BuildContext context) {
       });
 }
 
-void _updateReports(String reportedUsername, String type) async {
+void _updateReports(
+    String reportedUsername, String type, String idReportedBy) async {
   final response = await http.post(
     Uri.parse(
         'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/update-user-reports/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(
-        <String, String>{'type': type, 'reported_username': reportedUsername}),
+    body: jsonEncode(<String, String>{
+      'type': type,
+      'reported_username': reportedUsername,
+      'id_reported_by': idReportedBy
+    }),
   );
 }
