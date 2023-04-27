@@ -361,17 +361,19 @@ def building_by_id(request):
   
   return resp
 
+@csrf_exempt
 def ratingsByIds(request):
 
 	print("GET request received: ratings")
-
-	ids = request.GET.getlist('ids[]', '')
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	ids = body['ids[]']
 	print("ids: ", ids)
 
 	db = client['tootaloo']
 	ratings_collection = db['ratings']
 
-	ratings_data = ratings_collection.find({"_id":{"$in": [ObjectId(id) for id in ids]}})
+	ratings_data = ratings_collection.find({"_id":{"$in": [ObjectId(id['$oid']) for id in ids]}})
 
 	ratings = []
 	for rating in ratings_data:
@@ -810,6 +812,11 @@ def updateUserReports(request):
 	update_expression = {'$inc': {"reports" : 1}}
 	print('query & update_expression: ', query, update_expression)
 	users_collection.update_one(query, update_expression)
+
+	if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user['reported_users']:
+		id_query = { '_id': reported_id }
+		new_voted = { '$push': { 'reported_users': user_id } }
+		users_collection.update_one(id_query, new_voted)
         
 	return HttpResponse()
         
@@ -837,11 +844,6 @@ def checkUserReported(request):
 
 	if reported_user != None and reported_user['reported_users'] != None and user_id in reported_user['reported_users']:
 		return HttpResponse('true')
-
-	if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user['reported_users']:
-		id_query = { '_id': reported_id }
-		new_voted = { '$push': { 'reported_users': user_id } }
-		users_collection.update_one(id_query, new_voted)
 
 	return HttpResponse('false')
 
