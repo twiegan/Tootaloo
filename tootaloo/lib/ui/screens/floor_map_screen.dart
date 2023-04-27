@@ -65,8 +65,8 @@ class FloorMapState extends State<FloorMap> {
                 minScale: 0.5,
                 maxScale: 3,
                 child: Image.asset(imagePath,
-                    width: 400,
-                    height: 600,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.7,
                     errorBuilder: (context, error, stackTrace) => Padding(
                         padding: EdgeInsets.only(
                             bottom: 50,
