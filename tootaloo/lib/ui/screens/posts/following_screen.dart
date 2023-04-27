@@ -205,7 +205,9 @@ Future<List<Rating>> _getRatings() async {
         vibe: rating["vibe"],
         privacy: rating["privacy"],
         upvotes: rating["upvotes"],
-        downvotes: rating["downvotes"]);
+        downvotes: rating["downvotes"],
+        reports: rating["reports"],
+    );
     ratings.add(ratingData);
   }
   return ratings;

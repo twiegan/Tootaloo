@@ -39,4 +39,5 @@ urlpatterns = [
   path('favorite-restroom/', views.favoriteRestroom, name='favorite-restroom'),
   path('unfavorite-restroom/', views.unfavoriteRestroom, name='unfavorite-restroom'),
   path('restroom_id_by_name/', views.restroom_id_by_name, name='restroom_id_by_name'),
+  path('reported-ratings/', views.reportedRatings, name='reported-ratings'),
 ]

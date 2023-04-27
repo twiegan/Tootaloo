@@ -107,7 +107,7 @@ class _UserJudgementState extends State<UserJudgementScreen> {
           ] : [
             UserDisplayItem(username: _users.first.username, ratings:  _currentRatings, reports: _users.first.reports),
             Positioned(
-                top: MediaQuery.of(context).size.height/2.5 + 180,
+                top: MediaQuery.of(context).size.height/3 + 240,
                 width: MediaQuery.of(context).size.width,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,10 +238,15 @@ class _UserJudgementState extends State<UserJudgementScreen> {
   }
   Future<List<Rating>> _getRatings(List<String> ids) async {
     // Send request to backend and parse response
-    Map<String, dynamic> queryParams = {"ids[]": ids};
-    Uri uri = Uri.http(
-        dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found'), "/ratings-by-ids/", queryParams);
-    final response = await http.get(uri);
+    String url =
+        "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/ratings-by-ids/";
+    final response = await http.post(Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, List<String>>{
+          'ids[]': ids,
+        }));
     dynamic responseData = json.decode(response.body);
 
     // Build rating list based on response
@@ -261,6 +266,7 @@ class _UserJudgementState extends State<UserJudgementScreen> {
           privacy: rating["privacy"],
           review: rating["review"],
           by: rating["by"],
+          reports: rating["reports"],
           owned: false);
       ratings.add(ratingData);
     }

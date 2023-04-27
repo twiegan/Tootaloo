@@ -11,6 +11,7 @@ class Rating {
   final num privacy;
   final int upvotes;
   final int downvotes;
+  final int reports;
   bool owned;
 
   Rating(
@@ -26,5 +27,6 @@ class Rating {
       required this.privacy,
       required this.upvotes,
       required this.downvotes,
+      required this.reports,
       this.owned = false});
 }
