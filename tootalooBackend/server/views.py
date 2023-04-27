@@ -15,7 +15,8 @@ from bson.objectid import ObjectId
 from datetime import datetime
 
 # for sending email
-import smtplib, ssl
+import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -34,674 +35,717 @@ environ.Env.read_env()
 
 # from .models import Restroom
 # PyMongo client
-client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
+client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'),
+                             tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
+
 
 @csrf_exempt
 def update_votes(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['id']:
-		rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['id'])
-	id_query = { '_id':  rating_id}
-	new_upvotes = { '$set': { body['type']: int(body['votes']) } }
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['id']:
+        rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['id'])
+    id_query = {'_id':  rating_id}
+    new_upvotes = {'$set': {body['type']: int(body['votes'])}}
 
-	db = client['tootaloo']
-	ratings_collection = db['ratings']
-	ratings_collection.update_one(id_query, new_upvotes)
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
+    ratings_collection.update_one(id_query, new_upvotes)
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 @csrf_exempt
 def check_votes(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['rating_id']:
-		rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['rating_id'])
-	user_id = body['user_id']
-	if user_id == 'null':
-		return HttpResponse('true')
-	user_id = ObjectId(user_id)
-	db = client['tootaloo']
-	ratings_collection = db['ratings']
-	rating = ratings_collection.find_one({'_id': rating_id})
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['rating_id']:
+        rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['rating_id'])
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('true')
+    user_id = ObjectId(user_id)
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
 
-	if rating != None and rating['voted_users'] != None and user_id in rating['voted_users']:
-		return HttpResponse('true')
+    if rating != None and rating['voted_users'] != None and user_id in rating['voted_users']:
+        return HttpResponse('true')
 
-	if rating != None and rating['voted_users'] != None and user_id not in rating['voted_users']:
-		id_query = {'_id': rating_id}
-		new_voted = {'$push': {'voted_users': user_id}}
-		ratings_collection.update_one(id_query, new_voted)
+    if rating != None and rating['voted_users'] != None and user_id not in rating['voted_users']:
+        id_query = {'_id': rating_id}
+        new_voted = {'$push': {'voted_users': user_id}}
+        ratings_collection.update_one(id_query, new_voted)
 
-	return HttpResponse('false')
+    return HttpResponse('false')
 
 
 @csrf_exempt
 def post_owned(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	print('owned ids: ')
-	print(body['rating_id'])
-	if '{' in body['rating_id']:
-		rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['rating_id'])
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    print('owned ids: ')
+    print(body['rating_id'])
+    if '{' in body['rating_id']:
+        rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['rating_id'])
 
-	user_id = body['user_id']
-	if user_id == 'null':
-		return HttpResponse('false')
-	user_id = ObjectId(user_id)
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('false')
+    user_id = ObjectId(user_id)
 
-	db = client['tootaloo']
-	ratings_collection = db['ratings']
-	rating = ratings_collection.find_one({'_id': rating_id})
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
 
-	users_collection = db['users']
-	user = users_collection.find_one({'username': rating['by']})
+    users_collection = db['users']
+    user = users_collection.find_one({'username': rating['by']})
 
-	if user and user['_id'] == user_id:
-		return HttpResponse('true')
-	return HttpResponse('false')
+    if user and user['_id'] == user_id:
+        return HttpResponse('true')
+    return HttpResponse('false')
 
 
 @csrf_exempt
 def submit_rating(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	building = ''
-	room = ''
-	if body['user_id'] == 'null':
-		return HttpResponse('false')
-	user_id = ObjectId(body['user_id'])
-	if ' ' in body['restroom']:
-		building, room = body['restroom'].split()
-	new_id = ObjectId()
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    building = ''
+    room = ''
+    if body['user_id'] == 'null':
+        return HttpResponse('false')
+    user_id = ObjectId(body['user_id'])
+    if ' ' in body['restroom']:
+        building, room = body['restroom'].split()
+    new_id = ObjectId()
 
-	db = client['tootaloo']
-	restroom_collection = db['restrooms']
-	restroom = restroom_collection.find_one({'building': building, 'room': room})
-	user_collection = db['users']
-	user = user_collection.find_one({'_id': user_id})
-	print(user)
-	new_rating = {'_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']),
-				'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']),
-				'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'],
-				'upvotes': 0, 'downvotes': 0, 'by': user['username'],
-				'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [],
-				'reported_users': [], 'reports': 0}
+    db = client['tootaloo']
+    restroom_collection = db['restrooms']
+    restroom = restroom_collection.find_one(
+        {'building': building, 'room': room})
+    user_collection = db['users']
+    user = user_collection.find_one({'_id': user_id})
+    print(user)
+    new_rating = {'_id': new_id, 'building': building, 'room': room, 'overall_rating': float(body['overall_rating']),
+                  'cleanliness': float(body['cleanliness']), 'internet': float(body['internet']),
+                  'vibe': float(body['vibe']), 'privacy': float(body['privacy']), 'review': body['review'],
+                  'upvotes': 0, 'downvotes': 0, 'by': user['username'],
+                  'createdAt': datetime.today().replace(microsecond=0), 'by_id': user_id, 'voted_users': [],
+                  'reported_users': [], 'reports': 0}
 
-	if restroom:
-		ratings_collection = db['ratings']
-		ratings_collection.insert_one(new_rating)
-		new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
-					len(restroom['ratings']) + 1)
-		new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
-					len(restroom['ratings']) + 1)
-		new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
-					len(restroom['ratings']) + 1)
-		new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
-					len(restroom['ratings']) + 1)
-		new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
-		restroom_collection.update_one({'_id': restroom['_id']}, {
-			'$set': {
-				'cleanliness': new_cleanliness,
-				'internet': new_internet,
-				'vibe': new_vibe,
-				'privacy': new_privacy,
-				'rating': new_overall,
-			}
-		})
-		restroom_collection.update_one({'_id': restroom['_id']}, {
-			'$push': {
-				'ratings': new_id,
-			}
-		})
-		user_collection.update_one({'_id': user_id}, {
-			'$push': {
-				'posts': new_id,
-			}
-		})
+    if restroom:
+        ratings_collection = db['ratings']
+        ratings_collection.insert_one(new_rating)
+        new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
+            len(restroom['ratings']) + 1)
+        new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
+            len(restroom['ratings']) + 1)
+        new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
+            len(restroom['ratings']) + 1)
+        new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
+            len(restroom['ratings']) + 1)
+        new_overall = (new_cleanliness + new_internet +
+                       new_vibe + new_privacy) / 4
+        restroom_collection.update_one({'_id': restroom['_id']}, {
+            '$set': {
+                'cleanliness': new_cleanliness,
+                'internet': new_internet,
+                'vibe': new_vibe,
+                'privacy': new_privacy,
+                'rating': new_overall,
+            }
+        })
+        restroom_collection.update_one({'_id': restroom['_id']}, {
+            '$push': {
+                'ratings': new_id,
+            }
+        })
+        user_collection.update_one({'_id': user_id}, {
+            '$push': {
+                'posts': new_id,
+            }
+        })
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 @csrf_exempt
 def edit_rating(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['id']:
-		rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['id'])
-	building = ''
-	room = ''
-	if ' ' in body['restroom']:
-		building, room = body['restroom'].split()
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['id']:
+        rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['id'])
+    building = ''
+    room = ''
+    if ' ' in body['restroom']:
+        building, room = body['restroom'].split()
 
-	db = client['tootaloo']
-	restroom_collection = db['restrooms']
-	restroom = restroom_collection.find_one({'building': building, 'room': room})
-	if restroom:
-		ratings_collection = db['ratings']
-		ratings_collection.update_one({'_id': rating_id}, {
-			'$set': {
-				'building': building,
-				'room': room,
-				'overall_rating': float(body['overall_rating']),
-				'cleanliness': float(body['cleanliness']),
-				'internet': float(body['internet']),
-				'vibe': float(body['vibe']),
-				'review': body['review'],
-			}
-		})
-		new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
-					len(restroom['ratings']) + 1)
-		new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
-					len(restroom['ratings']) + 1)
-		new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
-					len(restroom['ratings']) + 1)
-		new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
-					len(restroom['ratings']) + 1)
-		new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
-		restroom_collection.update_one({'_id': restroom['_id']}, {
-			'$set': {
-				'cleanliness': new_cleanliness,
-				'internet': new_internet,
-				'vibe': new_vibe,
-				'privacy': new_privacy,
-				'rating': new_overall,
-			}
-		})
+    db = client['tootaloo']
+    restroom_collection = db['restrooms']
+    restroom = restroom_collection.find_one(
+        {'building': building, 'room': room})
+    if restroom:
+        ratings_collection = db['ratings']
+        ratings_collection.update_one({'_id': rating_id}, {
+            '$set': {
+                'building': building,
+                'room': room,
+                'overall_rating': float(body['overall_rating']),
+                'cleanliness': float(body['cleanliness']),
+                'internet': float(body['internet']),
+                'vibe': float(body['vibe']),
+                'review': body['review'],
+            }
+        })
+        new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
+            len(restroom['ratings']) + 1)
+        new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
+            len(restroom['ratings']) + 1)
+        new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
+            len(restroom['ratings']) + 1)
+        new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
+            len(restroom['ratings']) + 1)
+        new_overall = (new_cleanliness + new_internet +
+                       new_vibe + new_privacy) / 4
+        restroom_collection.update_one({'_id': restroom['_id']}, {
+            '$set': {
+                'cleanliness': new_cleanliness,
+                'internet': new_internet,
+                'vibe': new_vibe,
+                'privacy': new_privacy,
+                'rating': new_overall,
+            }
+        })
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 @csrf_exempt
 def delete_post(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['id']:
-		rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['id'])
-	user_id = body['user_id']
-	if user_id == 'null':
-		return HttpResponse('true')
-	user_id = ObjectId(user_id)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['id']:
+        rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['id'])
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('true')
+    user_id = ObjectId(user_id)
 
-	db = client['tootaloo']
-	rating_collection = db['ratings']
-	user_collection = db['users']
-	rating = rating_collection.find_one({'_id': rating_id})
-	rating_collection.delete_one({'_id': rating_id})
-	user_collection.update_one(
-		{'_id': user_id},
-		{'$pull': {'posts': rating_id}}
-	)
-	restroom_collection = db['restrooms']
-	restroom = restroom_collection.find_one({'building': rating['building'], 'room': rating['room']})
+    db = client['tootaloo']
+    rating_collection = db['ratings']
+    user_collection = db['users']
+    rating = rating_collection.find_one({'_id': rating_id})
+    rating_collection.delete_one({'_id': rating_id})
+    user_collection.update_one(
+        {'_id': user_id},
+        {'$pull': {'posts': rating_id}}
+    )
+    restroom_collection = db['restrooms']
+    restroom = restroom_collection.find_one(
+        {'building': rating['building'], 'room': rating['room']})
 
-	new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (
-				len(restroom['ratings']) - 1)
-	new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(rating['internet'])) / (
-				len(restroom['ratings']) - 1)
-	new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) - float(rating['vibe'])) / (len(restroom['ratings']) - 1)
-	new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(rating['privacy'])) / (
-				len(restroom['ratings']) - 1)
-	new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+    if len(restroom['ratings']) - 1 == 0:
+				# handle division by zero
+        new_cleanliness = new_internet = new_vibe = new_privacy = 0
+    else:
+        new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (
+            len(restroom['ratings']) - 1)
+        new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(rating['internet'])) / (
+            len(restroom['ratings']) - 1)
+        new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) -
+                    float(rating['vibe'])) / (len(restroom['ratings']) - 1)
+        new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(rating['privacy'])) / (
+            len(restroom['ratings']) - 1)
+    new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
 
-	restroom_collection.update_one({'_id': restroom['_id']}, {
-		'$set': {
-			'cleanliness': new_cleanliness,
-			'internet': new_internet,
-			'vibe': new_vibe,
-			'privacy': new_privacy,
-			'rating': new_overall,
-		}
-	})
-	restroom_collection.update_one({'_id': restroom['_id']}, {
-		'$pull': {
-			'ratings': rating['_id'],
-		}
-	})
-	user_collection.update_one({'_id': user_id}, {
-		'$pull': {
-			'posts': rating['_id'],
-		}
-	})
+    restroom_collection.update_one({'_id': restroom['_id']}, {
+        '$set': {
+            'cleanliness': new_cleanliness,
+            'internet': new_internet,
+            'vibe': new_vibe,
+            'privacy': new_privacy,
+            'rating': new_overall,
+        }
+    })
+    restroom_collection.update_one({'_id': restroom['_id']}, {
+        '$pull': {
+            'ratings': rating['_id'],
+        }
+    })
+    user_collection.update_one({'_id': user_id}, {
+        '$pull': {
+            'posts': rating['_id'],
+        }
+    })
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 def restrooms(request):
-	db = client['tootaloo']
-	restrooms_collection = db['restrooms']
-	restrooms = restrooms_collection.find().sort("rating", -1)
-	print(restrooms)
-	resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    db = client['tootaloo']
+    restrooms_collection = db['restrooms']
+    restrooms = restrooms_collection.find().sort("rating", -1)
+    print(restrooms)
+    resp = HttpResponse(dumps(restrooms, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def users(request):
-	db = client['tootaloo']
-	users_collection = db['users']
-	users = users_collection.find().sort("username", -1)
-	print(users)
-	resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    db = client['tootaloo']
+    users_collection = db['users']
+    users = users_collection.find().sort("username", -1)
+    print(users)
+    resp = HttpResponse(dumps(users, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 @csrf_exempt
 def rating_by_id(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['rating_id']:
-		rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['rating_id'])
-	print(rating_id)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['rating_id']:
+        rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['rating_id'])
+    print(rating_id)
 
-	db = client['tootaloo']
-	rating_collection = db['ratings']
-	rating = rating_collection.find_one({'_id': rating_id})
-	resp = HttpResponse(dumps(rating, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    db = client['tootaloo']
+    rating_collection = db['ratings']
+    rating = rating_collection.find_one({'_id': rating_id})
+    resp = HttpResponse(dumps(rating, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def ratings(request):
-	print('got GET request for ratings')
+    print('got GET request for ratings')
 
-	db = client['tootaloo']
+    db = client['tootaloo']
 
-	ratings_collection = db['ratings']
+    ratings_collection = db['ratings']
 
-	ratings = ratings_collection.find().sort('upvotes', -1).limit(40)
+    ratings = ratings_collection.find().sort('upvotes', -1).limit(40)
 
-	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 @csrf_exempt
 def following_ratings(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
 
-	user_id = body['user_id']
-	if user_id == 'null':
-		return HttpResponse('No user_id')
-	user_id = ObjectId(user_id)
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('No user_id')
+    user_id = ObjectId(user_id)
 
-	db = client['tootaloo']
-	user_collection = db['users']
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	user = user_collection.find_one({'_id': user_id})
-	following = user['following']
-	following.append(user['_id'])
-	ratings_collection = db['ratings']
+    user = user_collection.find_one({'_id': user_id})
+    following = user['following']
+    following.append(user['_id'])
+    ratings_collection = db['ratings']
 
-	ratings = ratings_collection.find({'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
+    ratings = ratings_collection.find(
+        {'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
 
-	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def buildings(request):
-	print('got GET request for buildings')
+    print('got GET request for buildings')
 
-	db = client['tootaloo']
-	buildings_collection = db['buildings']
+    db = client['tootaloo']
+    buildings_collection = db['buildings']
 
-	buildings = buildings_collection.find()
+    buildings = buildings_collection.find()
 
-	resp = HttpResponse(dumps(buildings, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(buildings, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def building_by_id(request):
-	db = client['tootaloo']
-	buildings_collection = db['buildings']
+    db = client['tootaloo']
+    buildings_collection = db['buildings']
 
-	buildingId = request.GET.get('building')
-	building = buildings_collection.find_one({"_id": buildingId});
+    buildingId = request.GET.get('building')
+    building = buildings_collection.find_one({"_id": buildingId})
 
-	resp = HttpResponse(dumps(building, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(building, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 @csrf_exempt
 def ratingsByIds(request):
 
-	print("GET request received: ratings")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	ids = body['ids[]']
-	print("ids: ", ids)
+    print("GET request received: ratings")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    ids = body['ids[]']
+    print("ids: ", ids)
 
-	db = client['tootaloo']
-	ratings_collection = db['ratings']
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
 
-	ratings_data = ratings_collection.find({"_id":{"$in": [ObjectId(id['$oid']) if '$oid' in id else ObjectId(id) for id in ids]}})
+    ratings_data = ratings_collection.find({"_id": {"$in": [ObjectId(
+        id['$oid']) if '$oid' in id else ObjectId(id) for id in ids]}})
 
-	ratings = []
-	for rating in ratings_data:
-		ratings.append(rating)
+    ratings = []
+    for rating in ratings_data:
+        ratings.append(rating)
 
-	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def restroomsByBuildingAndFloor(request):
-	# TODO: refactor as restroomsByBuildingAndOrFloor
+    # TODO: refactor as restroomsByBuildingAndOrFloor
+    '''Endpoint accepts 2 query params (building && floor) used to search db'''
 
-	'''Endpoint accepts 2 query params (building && floor) used to search db'''
+    print("GET request received: restrooms")
 
-	print("GET request received: restrooms")
+    # Connect to db and search restrooms based on query params
+    db = client['tootaloo']
+    restrooms_collection = db['restrooms']
 
-	# Connect to db and search restrooms based on query params
-	db = client['tootaloo']
-	restrooms_collection = db['restrooms']
+    building = request.GET.get('building', '')
+    floor = request.GET.get('floor', '')
 
-	building = request.GET.get('building', '')
-	floor = request.GET.get('floor', '')
+    if building == "" and floor != "":
+        restrooms = restrooms_collection.find({'floor': int(floor)})
+    elif building != "" and floor == "":
+        restrooms = restrooms_collection.find({'building': building})
+    elif building != "" and floor != "":
+        restrooms = restrooms_collection.find(
+            {'building': building, 'floor': int(floor)})
+    else:
+        return None
 
-	if building == "" and floor != "":
-		restrooms = restrooms_collection.find({'floor': int(floor)})
-	elif building != "" and floor == "":
-		restrooms = restrooms_collection.find({'building': building})
-	elif building != "" and floor != "":
-		restrooms = restrooms_collection.find({'building': building, 'floor': int(floor)})
-	else:
-		return None
+    # Return response
+    resp = HttpResponse(dumps(restrooms, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	# Return response
-	resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-
-	return resp
+    return resp
 
 
 @csrf_exempt
 def userByUsername(request):
-	print("GET request received: userByUsername")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	username = body['username']
-	print("username: ", username)
+    print("GET request received: userByUsername")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    username = body['username']
+    print("username: ", username)
 
-	db = client['tootaloo']
-	user_collection = db['users']
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	user = user_collection.find_one({"username": username})
+    user = user_collection.find_one({"username": username})
 
-	resp = HttpResponse(dumps(user, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(
+        dumps(user, sort_keys=True, indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 @csrf_exempt
 def followUserByUsername(request):
-	if request.method == "POST":
-		print("POST request received: followUserByUsername")
+    if request.method == "POST":
+        print("POST request received: followUserByUsername")
 
-		followerUsername = request.GET.get('followerUsername', '')
-		targetUsername = request.GET.get('targetUsername', '')
-		print("followerUsername: ", followerUsername)
-		print("targetUsername: ", targetUsername)
+        followerUsername = request.GET.get('followerUsername', '')
+        targetUsername = request.GET.get('targetUsername', '')
+        print("followerUsername: ", followerUsername)
+        print("targetUsername: ", targetUsername)
 
-		db = client['tootaloo']
-		user_collection = db['users']
+        db = client['tootaloo']
+        user_collection = db['users']
 
-		target_id = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+        target_id = user_collection.find_one(
+            {"username": targetUsername}, {"_id": 1})["_id"]
 
-		print("target_id: ", target_id)
-		try:
-			result = user_collection.update_one({'username': followerUsername}, {'$push': {'following': target_id}})
-			resp = HttpResponse(
-				dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
-			resp['Content-Type'] = 'application/json'
-			return resp
-		except pymongo.errors.PyMongoError as e:
-			resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
-			resp['Content-Type'] = 'application/json'
+        print("target_id: ", target_id)
+        try:
+            result = user_collection.update_one({'username': followerUsername}, {
+                                                '$push': {'following': target_id}})
+            resp = HttpResponse(
+                dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
+            resp['Content-Type'] = 'application/json'
+            return resp
+        except pymongo.errors.PyMongoError as e:
+            resp = HttpResponse(dumps(
+                {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+            resp['Content-Type'] = 'application/json'
 
 
 @csrf_exempt
 def unfollowUserByUsername(request):
-	if request.method == "POST":
-		print("POST request received: unfollowUserByUsername")
+    if request.method == "POST":
+        print("POST request received: unfollowUserByUsername")
 
-		followerUsername = request.GET.get('followerUsername', '')
-		targetUsername = request.GET.get('targetUsername', '')
-		print("followerUsername: ", followerUsername)
-		print("targetUsername: ", targetUsername)
+        followerUsername = request.GET.get('followerUsername', '')
+        targetUsername = request.GET.get('targetUsername', '')
+        print("followerUsername: ", followerUsername)
+        print("targetUsername: ", targetUsername)
 
-		db = client['tootaloo']
-		user_collection = db['users']
+        db = client['tootaloo']
+        user_collection = db['users']
 
-		target_id = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+        target_id = user_collection.find_one(
+            {"username": targetUsername}, {"_id": 1})["_id"]
 
-		print("target_id: ", target_id)
-		try:
-			result = user_collection.update_one({'username': followerUsername}, {'$pull': {'following': target_id}})
-			resp = HttpResponse(
-				dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
-			resp['Content-Type'] = 'application/json'
-			return resp
-		except pymongo.errors.PyMongoError as e:
-			resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
-			resp['Content-Type'] = 'application/json'
+        print("target_id: ", target_id)
+        try:
+            result = user_collection.update_one({'username': followerUsername}, {
+                                                '$pull': {'following': target_id}})
+            resp = HttpResponse(
+                dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
+            resp['Content-Type'] = 'application/json'
+            return resp
+        except pymongo.errors.PyMongoError as e:
+            resp = HttpResponse(dumps(
+                {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+            resp['Content-Type'] = 'application/json'
 
 
 def checkFollowingByUsername(request):
-	followerUsername = request.GET.get('followerUsername', '')
-	targetUsername = request.GET.get('targetUsername', '')
+    followerUsername = request.GET.get('followerUsername', '')
+    targetUsername = request.GET.get('targetUsername', '')
 
-	db = client['tootaloo']
-	user_collection = db['users']
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	followerUserFollowing = user_collection.find_one({"username": followerUsername}, {"_id": 0, "following": 1})
-	targetUserId = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+    followerUserFollowing = user_collection.find_one(
+        {"username": followerUsername}, {"_id": 0, "following": 1})
+    targetUserId = user_collection.find_one(
+        {"username": targetUsername}, {"_id": 1})["_id"]
 
-	if targetUserId in followerUserFollowing["following"]:
-		resp = HttpResponse(dumps({"response": "Following"}, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
-	else:
-		resp = HttpResponse(dumps({"response": "Not Following"}, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
+    if targetUserId in followerUserFollowing["following"]:
+        resp = HttpResponse(dumps(
+            {"response": "Following"}, sort_keys=True, indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
+    else:
+        resp = HttpResponse(dumps(
+            {"response": "Not Following"}, sort_keys=True, indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
 
 
 def summary_ratings_building(request):
-	buildingId = request.GET.get('building')
+    buildingId = request.GET.get('building')
 
-	db = client['tootaloo']
+    db = client['tootaloo']
 
-	ratings_collection = db['ratings']
+    ratings_collection = db['ratings']
 
-	numRatings = ratings_collection.count_documents({'building': buildingId})
-	if numRatings == 0:
-		resp = HttpResponse("No ratings for this building.")
-		resp['Content-Type'] = 'text/plain'
-		return resp
+    numRatings = ratings_collection.count_documents({'building': buildingId})
+    if numRatings == 0:
+        resp = HttpResponse("No ratings for this building.")
+        resp['Content-Type'] = 'text/plain'
+        return resp
 
-	ratings = ratings_collection.find({'building': buildingId},
-									{'overall_rating': 1, 'cleanliness': 1, 'internet': 1, 'vibe': 1, '_id': 0})
+    ratings = ratings_collection.find({'building': buildingId},
+                                      {'overall_rating': 1, 'cleanliness': 1, 'internet': 1, 'vibe': 1, '_id': 0})
 
-	overallRatingAvg = 0
-	cleanlinessAvg = 0
-	internetAvg = 0
-	vibeAvg = 0
+    overallRatingAvg = 0
+    cleanlinessAvg = 0
+    internetAvg = 0
+    vibeAvg = 0
 
-	for rating in ratings:
-		overallRatingAvg += rating['overall_rating']
-		cleanlinessAvg += rating['cleanliness']
-		internetAvg += rating['internet']
-		vibeAvg += rating['vibe']
+    for rating in ratings:
+        overallRatingAvg += rating['overall_rating']
+        cleanlinessAvg += rating['cleanliness']
+        internetAvg += rating['internet']
+        vibeAvg += rating['vibe']
 
-	overallRatingAvg /= numRatings
-	cleanlinessAvg /= numRatings
-	internetAvg /= numRatings
-	vibeAvg /= numRatings
+    overallRatingAvg /= numRatings
+    cleanlinessAvg /= numRatings
+    internetAvg /= numRatings
+    vibeAvg /= numRatings
 
-	ratingResult = "Average ratings: Overall: {0:.2f}\nCleanliness: {1:.2f}, Internet: {2:.2f}, Vibe: {3:.2f}".format(
-		overallRatingAvg, cleanlinessAvg, internetAvg, vibeAvg)
+    ratingResult = "Average ratings: Overall: {0:.2f}\nCleanliness: {1:.2f}, Internet: {2:.2f}, Vibe: {3:.2f}".format(
+        overallRatingAvg, cleanlinessAvg, internetAvg, vibeAvg)
 
-	resp = HttpResponse(ratingResult)
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(ratingResult)
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 @csrf_exempt
 def login(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	username = body['username']
-	passHash = body['passHash']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    username = body['username']
+    passHash = body['passHash']
 
-	db = client['tootaloo']
-	user_collection = db['users']
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	user = user_collection.find_one({'username': username})
-	userID = str(user.get('_id'))
-	bathroom_preference = user['bathroom_preference']
+    user = user_collection.find_one({'username': username})
+    userID = str(user.get('_id'))
+    bathroom_preference = user['bathroom_preference']
 
-	response = {}
+    response = {}
 
-	if user == None:
-		response = {'status': "user_dne", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-		resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
+    if user == None:
+        response = {'status': "user_dne", 'user_id': userID,
+                    'bathroom_preference': bathroom_preference}
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
 
-	if user['passHash'] == passHash:
-		response = {'status': "good_login", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-		resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
+    if user['passHash'] == passHash:
+        response = {'status': "good_login", 'user_id': userID,
+                    'bathroom_preference': bathroom_preference}
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
 
-	response = {'status': "bad_password", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    response = {'status': "bad_password", 'user_id': userID,
+                'bathroom_preference': bathroom_preference}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def user_register(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
 
-	username = body['username']
-	# passHash = body['passHash']
-	# bathroom_preference = body['bathroom_preference']
-	email = body['email']
+    username = body['username']
+    # passHash = body['passHash']
+    # bathroom_preference = body['bathroom_preference']
+    email = body['email']
 
-	db = client['tootaloo']
-	user_collection = db['users']
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	pre_existing_user_email = user_collection.find_one({'email': email})
-	if pre_existing_user_email != None:
-		response = {'status': 'email_taken'}
-		resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
+    pre_existing_user_email = user_collection.find_one({'email': email})
+    if pre_existing_user_email != None:
+        response = {'status': 'email_taken'}
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
 
-	pre_existing_user = user_collection.find_one({'username': username})
+    pre_existing_user = user_collection.find_one({'username': username})
 
-	if pre_existing_user == None:
-		verification_code = send_verification_email(email)
-		print("verification code sent to the user: ", verification_code)
-		response = {'status': 'register_success', 'verification_code': verification_code}
-	else:
-		response = {'status': 'username_taken'}
+    if pre_existing_user == None:
+        verification_code = send_verification_email(email)
+        print("verification code sent to the user: ", verification_code)
+        response = {'status': 'register_success',
+                    'verification_code': verification_code}
+    else:
+        response = {'status': 'username_taken'}
 
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def insert_user(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
 
-	username = body['username']
-	passHash = body['passHash']
-	bathroom_preference = body['bathroom_preference']
-	email = body['email']
+    username = body['username']
+    passHash = body['passHash']
+    bathroom_preference = body['bathroom_preference']
+    email = body['email']
 
-	db = client['tootaloo']
-	user_collection = db['users']
-	new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash,
-				'bathroom_preference': bathroom_preference, 'email': email, "favorite_restrooms": [],
-				'reported_users': [], 'reports': 0}
-	_id = user_collection.insert_one(new_user)
-	print("inserted user with id: ", _id.inserted_id)
+    db = client['tootaloo']
+    user_collection = db['users']
+    new_user = {'_id': ObjectId(), 'username': username, 'posts': [], 'following': [], 'passHash': passHash,
+                'bathroom_preference': bathroom_preference, 'email': email, "favorite_restrooms": [],
+                'reported_users': [], 'reports': 0}
+    _id = user_collection.insert_one(new_user)
+    print("inserted user with id: ", _id.inserted_id)
 
-	return HttpResponse("user_insert_success")
+    return HttpResponse("user_insert_success")
 
 
 @csrf_exempt
 def save_user_settings(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
 
-	username = body['username']
+    username = body['username']
 
-	db = client['tootaloo']
-	user_collection = db['users']
-	pre_existing_user = user_collection.find_one({'username': username})
+    db = client['tootaloo']
+    user_collection = db['users']
+    pre_existing_user = user_collection.find_one({'username': username})
 
-	if pre_existing_user != None:
-		user_collection.update_one({
-			'_id': pre_existing_user['_id']
-		}, {
-			'$set': {
-				'bathroom_preference': body['bathroom_preference']
-			}
-		})
-		return HttpResponse("save_success")
-	else:
-		return HttpResponse("save_fail")
+    if pre_existing_user != None:
+        user_collection.update_one({
+            '_id': pre_existing_user['_id']
+        }, {
+            '$set': {
+                'bathroom_preference': body['bathroom_preference']
+            }
+        })
+        return HttpResponse("save_success")
+    else:
+        return HttpResponse("save_fail")
 
 
 def send_verification_email(receiver_email):
-	sender_email = env('SENDER_EMAIL')
-	email_password = env('EMAIL_PASSWORD')
+    sender_email = env('SENDER_EMAIL')
+    email_password = env('EMAIL_PASSWORD')
 
-	message = MIMEMultipart("related")
-	message["Subject"] = "Verification Code for Tootaloo"
-	message["From"] = sender_email
-	message["To"] = receiver_email
+    message = MIMEMultipart("related")
+    message["Subject"] = "Verification Code for Tootaloo"
+    message["From"] = sender_email
+    message["To"] = receiver_email
 
-	# Random 4 digit verification code
-	code = random.randint(1000, 9999)
+    # Random 4 digit verification code
+    code = random.randint(1000, 9999)
 
-	# Create the plain-text and HTML version of your message
-	html = f"""\
+    # Create the plain-text and HTML version of your message
+    html = f"""\
 	<!DOCTYPE html>
 	<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 		<head>
@@ -759,268 +803,279 @@ def send_verification_email(receiver_email):
 	</html>
 	"""
 
-	# Add HTML/plain-text parts to MIMEMultipart message
-	message.attach(MIMEText(html, "html"))
+    # Add HTML/plain-text parts to MIMEMultipart message
+    message.attach(MIMEText(html, "html"))
 
-	# Attach Tootaloo logo
-	logoPath = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'server/assets/tootalooLogo.png')
-	fp = open(logoPath, 'rb')
-	messageImage = MIMEImage(fp.read())
-	fp.close()
+    # Attach Tootaloo logo
+    logoPath = os.path.join(os.path.dirname(
+        os.path.dirname(__file__)), 'server/assets/tootalooLogo.png')
+    fp = open(logoPath, 'rb')
+    messageImage = MIMEImage(fp.read())
+    fp.close()
 
-	messageImage.add_header('Content-ID', 'tootalooLogo')
-	message.attach(messageImage)
+    messageImage.add_header('Content-ID', 'tootalooLogo')
+    message.attach(messageImage)
 
-	# Create secure connection with server and send email
-	context = ssl.create_default_context()
-	with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-		server.login(sender_email, email_password)
-		server.sendmail(
-			sender_email, receiver_email, message.as_string()
-		)
+    # Create secure connection with server and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, email_password)
+        server.sendmail(
+            sender_email, receiver_email, message.as_string()
+        )
 
-	return code
+    return code
 
 
 def index(request):
-	# return HttpResponse(review_details)
-	return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
+    # return HttpResponse(review_details)
+    return HttpResponse('<h1>Hello and welcome to <u>Tootaloo</u></h1>')
 
 
 @csrf_exempt
 def updateRatingReports(request):
-	print("POST request: updateRatingReports")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	type = body['type']
-	rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-	query = {'_id': rating_id}
-	update_expression = {'$inc': {"reports": 1}}
+    print("POST request: updateRatingReports")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    type = body['type']
+    rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+    query = {'_id': rating_id}
+    update_expression = {'$inc': {"reports": 1}}
 
-	db = client['tootaloo']
-	collection = db[type]
-	collection.update_one(query, update_expression)
+    db = client['tootaloo']
+    collection = db[type]
+    collection.update_one(query, update_expression)
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 @csrf_exempt
 def checkRatingReported(request):
-	print("POST request: checkRatingReported")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
-	user_id = body['user_id']
-	if user_id == 'null':
-		return HttpResponse('true')
+    print("POST request: checkRatingReported")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    rating_id = ObjectId(body['rating_id'].split()[1].split('}')[0])
+    user_id = body['user_id']
+    if user_id == 'null':
+        return HttpResponse('true')
 
-	user_id = ObjectId(user_id)
-	db = client['tootaloo']
+    user_id = ObjectId(user_id)
+    db = client['tootaloo']
 
-	ratings_collection = db['ratings']
-	rating = ratings_collection.find_one({'_id': rating_id})
+    ratings_collection = db['ratings']
+    rating = ratings_collection.find_one({'_id': rating_id})
 
-	if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
-		return HttpResponse('true')
+    if rating != None and rating['reported_users'] != None and user_id in rating['reported_users']:
+        return HttpResponse('true')
 
-	if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
-		id_query = {'_id': rating_id}
-		new_voted = {'$push': {'reported_users': user_id}}
-		ratings_collection.update_one(id_query, new_voted)
+    if rating != None and rating['reported_users'] != None and user_id not in rating['reported_users']:
+        id_query = {'_id': rating_id}
+        new_voted = {'$push': {'reported_users': user_id}}
+        ratings_collection.update_one(id_query, new_voted)
 
-	return HttpResponse('false')
+    return HttpResponse('false')
 
 
 @csrf_exempt
 def updateUserReports(request):
-	print("POST request: updateUserReports")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	reported_username = body['reported_username']
-	print('reported_username: ', reported_username)
+    print("POST request: updateUserReports")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    reported_username = body['reported_username']
+    print('reported_username: ', reported_username)
 
-	db = client['tootaloo']
-	users_collection = db['users']
-	reported_user = users_collection.find_one({'username': reported_username})
-	reported_id = reported_user['_id']
-	print('reported_user: ', reported_user)
-	print('reported_id: ', reported_id)
+    db = client['tootaloo']
+    users_collection = db['users']
+    reported_user = users_collection.find_one({'username': reported_username})
+    reported_id = reported_user['_id']
+    print('reported_user: ', reported_user)
+    print('reported_id: ', reported_id)
 
-	query = {'_id': reported_id}
-	update_expression = {'$inc': {"reports": 1}}
-	print('query & update_expression: ', query, update_expression)
-	users_collection.update_one(query, update_expression)
+    query = {'_id': reported_id}
+    update_expression = {'$inc': {"reports": 1}}
+    print('query & update_expression: ', query, update_expression)
+    users_collection.update_one(query, update_expression)
 
-	if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user[
-		'reported_users']:
-		id_query = {'_id': reported_id}
-		new_voted = {'$push': {'reported_users': user_id}}
-		users_collection.update_one(id_query, new_voted)
+    if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user[
+            'reported_users']:
+        id_query = {'_id': reported_id}
+        new_voted = {'$push': {'reported_users': user_id}}
+        users_collection.update_one(id_query, new_voted)
 
-	return HttpResponse()
+    return HttpResponse()
 
 
 @csrf_exempt
 def checkUserReported(request):
-	print("POST request: checkUserReported")
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	reported_username = body['reported_username']
-	print("reported_username: ", reported_username)
-	user_id = body['user_id']
-	print("user_id: ", user_id)
-	if user_id == 'null':
-		return HttpResponse('true')
+    print("POST request: checkUserReported")
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    reported_username = body['reported_username']
+    print("reported_username: ", reported_username)
+    user_id = body['user_id']
+    print("user_id: ", user_id)
+    if user_id == 'null':
+        return HttpResponse('true')
 
-	user_id = ObjectId(user_id)
-	db = client['tootaloo']
+    user_id = ObjectId(user_id)
+    db = client['tootaloo']
 
-	users_collection = db['users']
-	reported_user = users_collection.find_one({'username': reported_username})
-	reported_id = reported_user['_id']
-	print('reported_user: ', reported_user)
-	print('reported_id: ', reported_id)
+    users_collection = db['users']
+    reported_user = users_collection.find_one({'username': reported_username})
+    reported_id = reported_user['_id']
+    print('reported_user: ', reported_user)
+    print('reported_id: ', reported_id)
 
-	if reported_user != None and reported_user['reported_users'] != None and user_id in reported_user['reported_users']:
-		return HttpResponse('true')
+    if reported_user != None and reported_user['reported_users'] != None and user_id in reported_user['reported_users']:
+        return HttpResponse('true')
 
-	return HttpResponse('false')
+    return HttpResponse('false')
 
 
 @csrf_exempt
 def restroom_id_by_name(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	building = body['building']
-	room = body['room']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    building = body['building']
+    room = body['room']
 
-	db = client['tootaloo']
-	restrooms_collection = db['restrooms']
-	print(building, room)
-	restroom = restrooms_collection.find_one({'building': building, 'room' : room})
+    db = client['tootaloo']
+    restrooms_collection = db['restrooms']
+    print(building, room)
+    restroom = restrooms_collection.find_one(
+        {'building': building, 'room': room})
 
-	response = {'status': "success", 'id': restroom['_id']}
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    response = {'status': "success", 'id': restroom['_id']}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def restroomById(request):
-	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+    restroom_id = ObjectId(request.GET.get('restroom_id', ''))
 
-	db = client['tootaloo']
-	restrooms_collection = db['restrooms']
-	restroom = restrooms_collection.find_one({'_id': restroom_id})
+    db = client['tootaloo']
+    restrooms_collection = db['restrooms']
+    restroom = restrooms_collection.find_one({'_id': restroom_id})
 
-	response = {'status': "success", 'restroom': restroom}
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    response = {'status': "success", 'restroom': restroom}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def removeUser(request):
-	username = request.GET.get('username')
+    username = request.GET.get('username')
 
-	db = client['tootaloo']
-	user_collection = db['users']
-	pre_existing_user = user_collection.find_one({'username': username})
+    db = client['tootaloo']
+    user_collection = db['users']
+    pre_existing_user = user_collection.find_one({'username': username})
 
-	if pre_existing_user is not None:
-		user_collection.delete_one({'_id': pre_existing_user['_id']})
-		user_collection = db['ratings']
-		for post in pre_existing_user['posts']:
-			user_collection.delete_one({'_id': post['_id']})
-		return HttpResponse("delete_success")
-	else:
-		return HttpResponse("delete_fail")
+    if pre_existing_user is not None:
+        user_collection.delete_one({'_id': pre_existing_user['_id']})
+        user_collection = db['ratings']
+        for post in pre_existing_user['posts']:
+            user_collection.delete_one({'_id': post['_id']})
+        return HttpResponse("delete_success")
+    else:
+        return HttpResponse("delete_fail")
 
 
 @csrf_exempt
 def reportedUsers(request):
-	print("GET request received: reportedUsers")
+    print("GET request received: reportedUsers")
 
-	# Connect to db and search for users with reports
-	db = client['tootaloo']
-	user_collection = db['users']
+    # Connect to db and search for users with reports
+    db = client['tootaloo']
+    user_collection = db['users']
 
-	users = user_collection.find({"reports": {"$gt": 0}}).limit(40)
-	print(users)
+    users = user_collection.find({"reports": {"$gt": 0}}).limit(40)
+    print(users)
 
-	# Return response
-	resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    # Return response
+    resp = HttpResponse(dumps(users, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
 
 
 def userById(request):
-	user_id = ObjectId(request.GET.get('user_id', ''))
+    user_id = ObjectId(request.GET.get('user_id', ''))
 
-	db = client['tootaloo']
-	users_collection = db['users']
-	user = users_collection.find_one({'_id': user_id})
-	print(user)
+    db = client['tootaloo']
+    users_collection = db['users']
+    user = users_collection.find_one({'_id': user_id})
+    print(user)
 
-	response = {'status': "success", 'user': user}
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    response = {'status': "success", 'user': user}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def favoriteRestroom(request):
-	user_id = ObjectId(request.GET.get('user_id', ''))
-	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+    user_id = ObjectId(request.GET.get('user_id', ''))
+    restroom_id = ObjectId(request.GET.get('restroom_id', ''))
 
-	db = client['tootaloo']
-	users_collection = db['users']
-	id_query = {'_id': user_id}
-	new_restrooms = {'$push': {'favorite_restrooms': restroom_id}}
-	users_collection.update_one(id_query, new_restrooms)
+    db = client['tootaloo']
+    users_collection = db['users']
+    id_query = {'_id': user_id}
+    new_restrooms = {'$push': {'favorite_restrooms': restroom_id}}
+    users_collection.update_one(id_query, new_restrooms)
 
-	user = users_collection.find_one({'_id': user_id})
-	response = {'response': "success", "user": user}
-	resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
-	return resp
+    user = users_collection.find_one({'_id': user_id})
+    response = {'response': "success", "user": user}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
+    return resp
 
 
 @csrf_exempt
 def unfavoriteRestroom(request):
-	user_id = ObjectId(request.GET.get('user_id', ''))
-	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
+    user_id = ObjectId(request.GET.get('user_id', ''))
+    restroom_id = ObjectId(request.GET.get('restroom_id', ''))
 
-	db = client['tootaloo']
-	users_collection = db['users']
+    db = client['tootaloo']
+    users_collection = db['users']
 
-	try:
-		result = users_collection.update_one({'_id': user_id}, {'$pull': {'favorite_restrooms': restroom_id}})
-		resp = HttpResponse(dumps({"response": "success"}, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
-	except pymongo.errors.PyMongoError as e:
-		resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
-		resp['Content-Type'] = 'application/json'
-		return resp
+    try:
+        result = users_collection.update_one(
+            {'_id': user_id}, {'$pull': {'favorite_restrooms': restroom_id}})
+        resp = HttpResponse(dumps(
+            {"response": "success"}, sort_keys=True, indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
+    except pymongo.errors.PyMongoError as e:
+        resp = HttpResponse(dumps(
+            {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+        resp['Content-Type'] = 'application/json'
+        return resp
 
 
 @csrf_exempt
 def reportedRatings(request):
-	print("GET request received: reported-ratings")
+    print("GET request received: reported-ratings")
 
-	db = client['tootaloo']
-	ratings_collection = db['ratings']
+    db = client['tootaloo']
+    ratings_collection = db['ratings']
 
-	ratings_data = ratings_collection.find({"reports": {"$gt": 0}}).limit(40)
+    ratings_data = ratings_collection.find({"reports": {"$gt": 0}}).limit(40)
 
-	print(ratings_data)
-	ratings = []
-	for rating in ratings_data:
-		ratings.append(rating)
+    print(ratings_data)
+    ratings = []
+    for rating in ratings_data:
+        ratings.append(rating)
 
-	resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
-	resp['Content-Type'] = 'application/json'
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
+    resp['Content-Type'] = 'application/json'
 
-	return resp
+    return resp
