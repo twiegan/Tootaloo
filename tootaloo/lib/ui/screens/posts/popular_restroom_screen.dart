@@ -133,7 +133,7 @@ class _ListTileItemState extends State<ListTileItem> {
                           ),
                           Text(
                             widget.restroom.building + widget.restroom.room,
-                            style: const TextStyle(fontSize: 40),
+                            style: const TextStyle(fontSize: 37),
                           ),
                         ],
                       ),
