@@ -23,17 +23,17 @@ class _PostJudgementState extends State<PostJudgementScreen> {
     super.initState();
     _reportedRatings = [];
     getReportedRatings().then((ratings) => {
-      setState(() {
-        ratings.sort((a, b) => b.reports.compareTo(a.reports));
-        _reportedRatings = ratings;
-        _loaded = true;
-      })
-    });
+          setState(() {
+            ratings.sort((a, b) => b.reports.compareTo(a.reports));
+            _reportedRatings = ratings;
+            _loaded = true;
+          })
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    if(!_loaded) {
+    if (!_loaded) {
       return Scaffold(
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
         appBar: const TopNavBar(title: "User Settings"),
@@ -43,7 +43,8 @@ class _PostJudgementState extends State<PostJudgementScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 100, vertical:250),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 200),
                 child: Container(
                   height: 200,
                   width: 200,
@@ -63,123 +64,125 @@ class _PostJudgementState extends State<PostJudgementScreen> {
       backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
       appBar: const TopNavBar(title: "Rating Judgement"),
       body: Stack(
-        children: _reportedRatings.isEmpty ? [
-          Positioned(
-            top: 40,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                height: 80,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color.fromRGBO(181, 211, 235, 1)
+        children: _reportedRatings.isEmpty
+            ? [
+                Positioned(
+                  top: 40,
+                  width: MediaQuery.of(context).size.width,
+                  child: Container(
+                      margin: const EdgeInsets.only(left: 20, right: 20),
+                      height: 80,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: const Color.fromRGBO(181, 211, 235, 1)),
+                      child: const DefaultTextStyle(
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                          child: Text(
+                              "No more reported posts! Try again later!"))),
                 ),
-                child: const DefaultTextStyle(
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                    child: Text("No more reported posts! Try again later!")
-                )
-            ),
-          ),
-        ] :[
-          RatingDisplayItem(
-            username: _reportedRatings.first.by,
-            reports: _reportedRatings.first.reports,
-            review: _reportedRatings.first.review,
-            bathroom: _reportedRatings.first.room,
-          ),
-          Positioned(
-              top: MediaQuery.of(context).size.height/2.5 + 180,
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(left: 20, right: 20),
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: const Color.fromRGBO(181, 211, 235, 1)
-                        ),
-                        child: Column(
+              ]
+            : [
+                RatingDisplayItem(
+                  username: _reportedRatings.first.by,
+                  reports: _reportedRatings.first.reports,
+                  review: _reportedRatings.first.review,
+                  bathroom: _reportedRatings.first.room,
+                ),
+                Positioned(
+                    top: MediaQuery.of(context).size.height / 2.5 + 180,
+                    width: MediaQuery.of(context).size.width,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           children: [
-                            const DefaultTextStyle(
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.green,
-                                ),
-                                textAlign: TextAlign.center,
-                                child: Text("Approve Post")
-                            ),
-                            IconButton(
-                                onPressed:() async {
-                                  setState(() {
-                                    _reportedRatings.removeAt(0);
-                                  });
-                                },
-                                alignment: Alignment.bottomCenter,
-                                icon: const Icon(Icons.check_circle_rounded,
-                                  color: Colors.green, size: 40,)
+                            Container(
+                              margin:
+                                  const EdgeInsets.only(left: 20, right: 20),
+                              height: 100,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      const Color.fromRGBO(181, 211, 235, 1)),
+                              child: Column(
+                                children: [
+                                  const DefaultTextStyle(
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.green,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      child: Text("Approve Post")),
+                                  IconButton(
+                                      onPressed: () async {
+                                        setState(() {
+                                          _reportedRatings.removeAt(0);
+                                        });
+                                      },
+                                      alignment: Alignment.bottomCenter,
+                                      icon: const Icon(
+                                        Icons.check_circle_rounded,
+                                        color: Colors.green,
+                                        size: 40,
+                                      )),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-
-                  ),
-                  Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(left: 20, right: 20),
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: const Color.fromRGBO(181, 211, 235, 1)
-                        ),
-                        child: Column(
+                        Column(
                           children: [
-                            const DefaultTextStyle(
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.red,
-                                ),
-                                textAlign: TextAlign.center,
-                                child: Text("Delete Post")
-                            ),
-                            IconButton(
-                                onPressed:() async {
-                                  await deletePost(_reportedRatings.first.id, _reportedRatings.first.by_id);
-                                  setState(() {
-                                    _reportedRatings.removeAt(0);
-                                  });
-                                },
-                                alignment: Alignment.bottomCenter,
-                                icon: const Icon(Icons.cancel_rounded,
-                                  color: Colors.red, size: 40,)
+                            Container(
+                              margin:
+                                  const EdgeInsets.only(left: 20, right: 20),
+                              height: 100,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      const Color.fromRGBO(181, 211, 235, 1)),
+                              child: Column(
+                                children: [
+                                  const DefaultTextStyle(
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.red,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      child: Text("Delete Post")),
+                                  IconButton(
+                                      onPressed: () async {
+                                        await deletePost(
+                                            _reportedRatings.first.id,
+                                            _reportedRatings.first.by_id);
+                                        setState(() {
+                                          _reportedRatings.removeAt(0);
+                                        });
+                                      },
+                                      alignment: Alignment.bottomCenter,
+                                      icon: const Icon(
+                                        Icons.cancel_rounded,
+                                        color: Colors.red,
+                                        size: 40,
+                                      )),
+                                ],
+                              ),
                             ),
                           ],
-                        ),
-                      ),
-                    ],
-
-                  )
-                ],
-              )
-          )
-        ],
+                        )
+                      ],
+                    ))
+              ],
       ),
       bottomNavigationBar: AdminBottomNavBar(
         selectedIndex: _index,
       ),
     );
-
   }
 
   Future<bool> deletePost(String ratingId, String userId) async {
@@ -189,11 +192,11 @@ class _PostJudgementState extends State<PostJudgementScreen> {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(
-          <String, String>{'id': ratingId, 'user_id': userId}),
+      body: jsonEncode(<String, String>{'id': ratingId, 'user_id': userId}),
     );
     return true;
   }
+
   Future<List<Rating>> getReportedRatings() async {
     String url =
         "http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/reported-ratings/";
@@ -223,8 +226,7 @@ class _PostJudgementState extends State<PostJudgementScreen> {
           by: rating["by"],
           reports: rating["reports"],
           by_id: rating["by_id"].toString(),
-          owned: false
-      );
+          owned: false);
       print("BY ID: ${ratingData.by_id}");
       ratings.add(ratingData);
     }
@@ -238,14 +240,18 @@ class RatingDisplayItem extends StatefulWidget {
   final String bathroom;
   final num reports;
   final String review;
-  const RatingDisplayItem({super.key, required this.username, required this.bathroom, required this.reports, required this.review});
+  const RatingDisplayItem(
+      {super.key,
+      required this.username,
+      required this.bathroom,
+      required this.reports,
+      required this.review});
 
   @override
   _RatingDisplayItemState createState() => _RatingDisplayItemState();
 }
 
 class _RatingDisplayItemState extends State<RatingDisplayItem> {
-
   @override
   void initState() {
     super.initState();
@@ -253,93 +259,79 @@ class _RatingDisplayItemState extends State<RatingDisplayItem> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Stack(
-        children: [
-          Positioned(
-            top: 40,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                height: 40,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color.fromRGBO(181, 211, 235, 1)
-                ),
-                child: DefaultTextStyle(
-                    style: const TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                    child: Text("USERNAME: ${widget.username}")
-                )
-            ),
-          ),
-          Positioned(
-            top: 100,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                height: 40,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color.fromRGBO(181, 211, 235, 1)
-                ),
-                child: DefaultTextStyle(
-                    style: const TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                    child: Text("REPORTS: ${widget.reports}")
-                )
-            ),
-          ),
-          Positioned(
-            top: 160,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                height: 40,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color.fromRGBO(181, 211, 235, 1)
-                ),
-                child: DefaultTextStyle(
-                    style: const TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                    child: Text("BATHROOM: ${widget.bathroom}")
-                )
-            ),
-          ),
-          Positioned(
-            top: 220,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                height: MediaQuery.of(context).size.height/2.5 - 60,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color.fromRGBO(181, 211, 235, 1)
-                ),
-                child: DefaultTextStyle(
-                    style: const TextStyle(
-                      fontSize: 30,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                    child: Text("Review:\n ${widget.review}")
-                )
-            ),
-          ),
-        ],
-      );
+    return Stack(
+      children: [
+        Positioned(
+          top: 40,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              height: 40,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color.fromRGBO(181, 211, 235, 1)),
+              child: DefaultTextStyle(
+                  style: const TextStyle(
+                    fontSize: 30,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                  child: Text("USERNAME: ${widget.username}"))),
+        ),
+        Positioned(
+          top: 100,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              height: 40,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color.fromRGBO(181, 211, 235, 1)),
+              child: DefaultTextStyle(
+                  style: const TextStyle(
+                    fontSize: 30,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                  child: Text("REPORTS: ${widget.reports}"))),
+        ),
+        Positioned(
+          top: 160,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              height: 40,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color.fromRGBO(181, 211, 235, 1)),
+              child: DefaultTextStyle(
+                  style: const TextStyle(
+                    fontSize: 30,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                  child: Text("BATHROOM: ${widget.bathroom}"))),
+        ),
+        Positioned(
+          top: 220,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              height: MediaQuery.of(context).size.height / 2.5 - 60,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color.fromRGBO(181, 211, 235, 1)),
+              child: DefaultTextStyle(
+                  style: const TextStyle(
+                    fontSize: 30,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                  child: Text("Review:\n ${widget.review}"))),
+        ),
+      ],
+    );
   }
-
 }
 
 class Rating {
@@ -361,18 +353,18 @@ class Rating {
 
   Rating(
       {required this.id,
-        required this.building,
-        required this.by,
-        required this.room,
-        required this.review,
-        required this.overallRating,
-        required this.internet,
-        required this.cleanliness,
-        required this.vibe,
-        required this.privacy,
-        required this.upvotes,
-        required this.downvotes,
-        required this.reports,
-        required this.by_id,
-        this.owned = false});
+      required this.building,
+      required this.by,
+      required this.room,
+      required this.review,
+      required this.overallRating,
+      required this.internet,
+      required this.cleanliness,
+      required this.vibe,
+      required this.privacy,
+      required this.upvotes,
+      required this.downvotes,
+      required this.reports,
+      required this.by_id,
+      this.owned = false});
 }

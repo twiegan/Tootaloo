@@ -81,18 +81,17 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
 
   @override
   void initState() {
-    _getUser().then((user) =>
-    {
-      setState(() {
-        _user = user;
-        _loaded = true;
-      })
-    });
+    _getUser().then((user) => {
+          setState(() {
+            _user = user;
+            _loaded = true;
+          })
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    if(!_loaded) {
+    if (!_loaded) {
       return Scaffold(
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
         appBar: const TopNavBar(title: "User Settings"),
@@ -102,7 +101,8 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 100, vertical:250),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 200),
                 child: Container(
                   height: 200,
                   width: 200,
@@ -118,7 +118,7 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
         ),
       );
     }
-    if(_user.username == 'null' && _user.id == 'null') {
+    if (_user.username == 'null' && _user.id == 'null') {
       return Scaffold(
         backgroundColor: const Color.fromRGBO(223, 241, 255, 1),
         appBar: const TopNavBar(title: "User Settings"),
@@ -128,7 +128,8 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical:250),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 250),
                 child: Container(
                   height: 75,
                   width: 350,
@@ -138,13 +139,17 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
                   ),
                   child: TextButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
                           return const LoginScreen();
                         }));
                       },
                       child: const Text(
                         "Log-In to Save Your Settings!",
-                        style: TextStyle(color:Colors.black, fontSize: 22,),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 22,
+                        ),
                       )),
                 ),
               ),
@@ -153,20 +158,18 @@ class _SettingsUserScreenState extends State<SettingsUserScreen> {
           selectedIndex: index,
         ),
       );
-    }
-    else if (_user.username == "shradmin") {
+    } else if (_user.username == "shradmin") {
       return Scaffold(
           appBar: const TopNavBar(title: "Admin Logout"),
           body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
-                LogoutButton()
-              ],
+              children: const <Widget>[LogoutButton()],
             ),
           ),
-          bottomNavigationBar: const AdminBottomNavBar(selectedIndex: -1,)
-      );
+          bottomNavigationBar: const AdminBottomNavBar(
+            selectedIndex: -1,
+          ));
     }
     return Scaffold(
       appBar: const TopNavBar(title: "User Settings"),

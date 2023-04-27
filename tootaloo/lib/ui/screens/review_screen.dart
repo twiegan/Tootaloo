@@ -133,8 +133,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
     return tempList;
   }
 
-  void submit(
-      restroom, cleanliness, internet, vibe, privacy, overallRating, review) async {
+  void submit(restroom, cleanliness, internet, vibe, privacy, overallRating,
+      review) async {
     AppUser user = await UserPreferences.getUser();
     String userId = "";
     if (user.id == null) {
@@ -226,7 +226,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             children: <Widget>[
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 250),
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 200),
                 child: Container(
                   height: 200,
                   width: 200,
@@ -405,7 +405,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: TextFormField(
-                  controller:_textEditingController,
+                  controller: _textEditingController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 10,
                   decoration: const InputDecoration(
@@ -423,27 +423,28 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         onPressed: () {
                           if (widget.id != "") {
                             edit(
-                              widget.id,
-                              _restroom,
-                              roundDouble(
-                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
-                              _cleanliness,
-                              _internet,
-                              _vibe,
-                              _privacy,
-                              _review);
+                                widget.id,
+                                _restroom,
+                                roundDouble(
+                                    (_vibe + _internet + _cleanliness) / 3.0,
+                                    1),
+                                _cleanliness,
+                                _internet,
+                                _vibe,
+                                _privacy,
+                                _review);
                           } else {
                             submit(
-                              _restroom,
-                              roundDouble(
-                                  (_vibe + _internet + _cleanliness) / 3.0, 1),
-                              _cleanliness,
-                              _internet,
-                              _vibe,
-                              _privacy,
-                              _review);
+                                _restroom,
+                                roundDouble(
+                                    (_vibe + _internet + _cleanliness) / 3.0,
+                                    1),
+                                _cleanliness,
+                                _internet,
+                                _vibe,
+                                _privacy,
+                                _review);
                           }
-                          
                         },
                         child: const Text('     Submit     '))))
           ],
