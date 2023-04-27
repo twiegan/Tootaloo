@@ -872,8 +872,10 @@ def restroom_id_by_name(request):
 
 @csrf_exempt
 def restroomById(request):
-	restroom_id = ObjectId(request.GET.get('restroom_id', ''))
-
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	print('restroom_id: ', body['restroom_id'])
+	restroom_id = ObjectId(body['restroom_id'])
 	db = client['tootaloo']
 	restrooms_collection = db['restrooms']
 	restroom = restrooms_collection.find_one({'_id': restroom_id})
