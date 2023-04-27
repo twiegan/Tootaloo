@@ -39,14 +39,15 @@ client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi
 
 @csrf_exempt
 def update_votes(request):
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	if '{' in body['id']:
-		rating_id = ObjectId(body['id'].split()[1].split('}')[0])
-	else:
-		rating_id = ObjectId(body['id'])
-	id_query = { '_id':  rating_id}
-	new_upvotes = { '$set': { body['type']: int(body['votes']) } }
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if '{' in body['id']:
+        rating_id = ObjectId(body['id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['id'])
+    id_query = {'_id': rating_id}
+    new_upvotes = {'$set': {body['type']: int(body['votes'])}}
+
 
     db = client['tootaloo']
     ratings_collection = db['ratings']
@@ -231,9 +232,14 @@ def delete_post(request):
     else:
         rating_id = ObjectId(body['id'])
     user_id = body['user_id']
+
     if user_id == 'null':
         return HttpResponse('true')
-    user_id = ObjectId(user_id)
+
+    if '{' in body['user_id']:
+        user_id = ObjectId(body['user_id'].split()[1].split('}')[0])
+    else:
+        rating_id = ObjectId(body['user_id'])
 
     db = client['tootaloo']
     rating_collection = db['ratings']
@@ -895,10 +901,10 @@ def restroom_id_by_name(request):
     building = body['building']
     room = body['room']
 
-	db = client['tootaloo']
-	restrooms_collection = db['restrooms']
-	print(building, room)
-	restroom = restrooms_collection.find_one({'building': building, 'room' : room})
+    db = client['tootaloo']
+    restrooms_collection = db['restrooms']
+    print(building, room)
+    restroom = restrooms_collection.find_one({'building': building, 'room' : room})
 
     response = {'status': "success", 'id': restroom['_id']}
     resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
@@ -1017,11 +1023,11 @@ def reportedRatings(request):
     ratings_data = ratings_collection.find({"reports": {"$gt": 0}}).limit(40)
 
     print(ratings_data)
-    ratings = []
+    ratingsRet = []
     for rating in ratings_data:
-        ratings.append(rating)
+        ratingsRet.append(rating)
 
-    resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(ratingsRet, sort_keys=True, indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp

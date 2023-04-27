@@ -182,7 +182,7 @@ class _PostJudgementState extends State<PostJudgementScreen> {
 
   }
 
-  Future<bool> deletePost(ratingId, userId) async {
+  Future<bool> deletePost(String ratingId, String userId) async {
     final response = await http.post(
       Uri.parse(
           'http://${dotenv.get('BACKEND_HOSTNAME', fallback: 'BACKEND_HOST not found')}/delete_post/'),
@@ -190,7 +190,7 @@ class _PostJudgementState extends State<PostJudgementScreen> {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(
-          <String, String>{'id': ratingId.toString(), 'user_id': userId}),
+          <String, String>{'id': ratingId, 'user_id': userId}),
     );
     return true;
   }
@@ -209,7 +209,7 @@ class _PostJudgementState extends State<PostJudgementScreen> {
 
     for (var rating in responseData) {
       Rating ratingData = Rating(
-          id: "",
+          id: rating["_id"].toString(),
           building: rating["building"],
           room: rating["room"],
           overallRating: rating["overall_rating"],
@@ -222,9 +222,10 @@ class _PostJudgementState extends State<PostJudgementScreen> {
           review: rating["review"],
           by: rating["by"],
           reports: rating["reports"],
-          by_id: rating["by_id"],
+          by_id: rating["by_id"].toString(),
           owned: false
       );
+      print("BY ID: ${ratingData.by_id}");
       ratings.add(ratingData);
     }
 
@@ -347,6 +348,7 @@ class Rating {
   final String by;
   final String room;
   final String review;
+  final String by_id;
   final num overallRating;
   final num internet;
   final num cleanliness;
@@ -355,7 +357,6 @@ class Rating {
   final int upvotes;
   final int downvotes;
   final int reports;
-  final String by_id;
   bool owned;
 
   Rating(
