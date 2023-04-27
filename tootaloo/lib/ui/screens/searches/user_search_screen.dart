@@ -3,18 +3,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tootaloo/AppUser.dart';
-
 import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
-import 'package:tootaloo/ui/components/report_user_button.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/UserTileItem.dart';
 import 'package:tootaloo/ui/models/User.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/SharedPref.dart';
-import 'package:tootaloo/AppUser.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-
 import '../../components/rating_tile.dart';
 
 /* Define the screen itself */
@@ -139,55 +135,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           }
                         },
                         selectedItem: _selectedUser))),
-            // OutlinedButton.icon(
-            //     onPressed: () async {
-            //       if (_selectedUser == "") return; // Sanity Check
-            //       AppUser appUser = await UserPreferences.getUser();
-            //       if (appUser.id == "null") return; // Sanity Check
-            //       var key = _userNames.keys.firstWhere(
-            //           (k) => _userNames[k] == _selectedUser,
-            //           orElse: () => '');
-            //       if (key != '') {
-            //         setState(() => _ratings = []);
-            //         getSearchedUser(key).then((user) => {
-            //               checkFollowed(appUser.id, user.id)
-            //                   .then((followed) => {
-            //                         setState(() {
-            //                           _followed = followed;
-            //                           _user = User(
-            //                               id: user.id,
-            //                               username: user.username,
-            //                               posts_ids: user.posts_ids,
-            //                               preference: user.preference,
-            //                               following_ids: user.following_ids,
-            //                               favorite_restrooms_ids:
-            //                                   user.favorite_restrooms_ids);
-            //                         })
-            //                       }),
-            //               _getRatings(user).then((ratings) => {
-            //                     for (var rating in ratings)
-            //                       {
-            //                         _userOwned(rating.id).then((owned) => {
-            //                               setState(() {
-            //                                 rating.owned = owned;
-            //                               })
-            //                             }),
-            //                         setState(() {
-            //                           _ratings.add(rating);
-            //                         }),
-            //                       },
-            //                     _ratings.sort((a, b) =>
-            //                         a.downvotes.compareTo(b.downvotes)),
-            //                     _ratings.sort(
-            //                         (b, a) => a.upvotes.compareTo(b.upvotes)),
-            //                   }),
-            //             });
-            //       }
-            //     },
-            //     icon: const Icon(Icons.search),
-            //     label: const Text('Search'),
-            //     style: OutlinedButton.styleFrom(
-            //         foregroundColor: Colors.lightBlue)),
           ]),
           if (_selectedUser != "")
             Row(
