@@ -383,11 +383,11 @@ Future<bool> _userOwned(ratingId) async {
 Icon _getProfileIcon(String preference) {
   switch (preference) {
     case "male":
-      return const Icon(Icons.man, color: Colors.blue, size: 100);
+      return const Icon(Icons.man, color: Colors.blue, size: 85);
     case "female":
-      return const Icon(Icons.woman, color: Colors.pink, size: 100);
+      return const Icon(Icons.woman, color: Colors.pink, size: 85);
     default:
-      return const Icon(Icons.family_restroom, color: Colors.green, size: 100);
+      return const Icon(Icons.family_restroom, color: Colors.green, size: 85);
   }
 }
 
