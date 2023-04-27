@@ -31,6 +31,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   final int index = 2;
   bool _followed = false;
   bool _reported = false;
+  AppUser _currUser = AppUser(username: "", id: "", preference: "");
 
   late String _selectedUser = "";
   // names map of restrooms we get from API (id: restroom_name)
@@ -52,7 +53,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             _userNames = users;
           })
         });
-
+    UserPreferences.getUser()
+        .then((user) => {setState(() => _currUser = user)});
     _ratings = [];
   }
 
@@ -76,7 +78,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         items: _userNames.values.toList(),
                         dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration: InputDecoration(
-                            hintText: "search a user here",
+                            labelText: "Select a user",
                           ),
                         ),
                         onChanged: (value) async {
@@ -90,29 +92,31 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                           setState(() => _reported = reported);
 
                           if (_selectedUser == "") return; // Sanity Check
-                          AppUser appUser = await UserPreferences.getUser();
-                          if (appUser.id == "null") return; // Sanity Check
                           var key = _userNames.keys.firstWhere(
                               (k) => _userNames[k] == _selectedUser,
                               orElse: () => '');
                           if (key != '') {
                             setState(() => _ratings = []);
                             getSearchedUser(key).then((user) => {
-                                  checkFollowed(appUser.id, user.id)
-                                      .then((followed) => {
-                                            setState(() {
-                                              _followed = followed;
-                                              _user = User(
-                                                  id: user.id,
-                                                  username: user.username,
-                                                  posts_ids: user.posts_ids,
-                                                  preference: user.preference,
-                                                  following_ids:
-                                                      user.following_ids,
-                                                  favorite_restrooms_ids: user
-                                                      .favorite_restrooms_ids);
-                                            })
-                                          }),
+                                  setState(() {
+                                    _user = User(
+                                        id: user.id,
+                                        username: user.username,
+                                        posts_ids: user.posts_ids,
+                                        preference: user.preference,
+                                        following_ids: user.following_ids,
+                                        favorite_restrooms_ids:
+                                            user.favorite_restrooms_ids);
+                                  }),
+                                  if (_currUser.id != "null")
+                                    {
+                                      checkFollowed(_currUser.id, user.id)
+                                          .then((followed) => {
+                                                setState(() {
+                                                  _followed = followed;
+                                                })
+                                              })
+                                    },
                                   _getRatings(user).then((ratings) => {
                                         for (var rating in ratings)
                                           {
@@ -233,6 +237,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         const Text("following"),
                       ],
                     )),
+                // if (_currUser.id != "null")
                 Padding(
                     padding: const EdgeInsets.all(5),
                     child: OutlinedButton(
@@ -276,6 +281,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                 //             icon: Icon(Icons.flag_outlined, color: Colors.orange,)),
 
                 //     ),
+                // if (_currUser.id != "null")
                 IconButton(
                     padding: const EdgeInsets.all(0),
                     constraints: const BoxConstraints(),
@@ -293,16 +299,21 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                     }),
               ],
             ),
-          Expanded(
-              child: ListView(
-            // children: articles.map(_buildArticle).toList(),
-            children: _ratings
-                .map((rating) => RatingTile(
-                      rating: rating,
-                      screen: "Following",
-                    ))
-                .toList(),
-          )),
+          if (_selectedUser != "")
+            Expanded(
+                child: ListView(
+              // children: articles.map(_buildArticle).toList(),
+              children: _ratings
+                  .map((rating) => RatingTile(
+                        rating: rating,
+                        screen: "Following",
+                      ))
+                  .toList(),
+            )),
+          if (_selectedUser == "")
+            const Padding(
+                padding: EdgeInsets.only(top: 200),
+                child: Text("Search for a user"))
         ]),
       ),
       bottomNavigationBar: BottomNavBar(

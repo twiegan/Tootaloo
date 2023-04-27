@@ -58,7 +58,7 @@ class _PopularRestroomScreenState extends State<PopularRestroomScreen> {
     return Scaffold(
       appBar: const TopNavBar(title: "PopularRestroom"),
       body: Scaffold(
-        appBar: const PostNavBar(title: "bitches", selectedIndex: 2),
+        appBar: const PostNavBar(title: "", selectedIndex: 2),
         body: Center(
           child: ListView(
             // children: articles.map(_buildArticle).toList(),
