@@ -129,7 +129,7 @@ class _ListTileItemState extends State<ListTileItem> {
                         children: [
                           const Icon(
                             Icons.airline_seat_legroom_extra,
-                            size: 40,
+                            size: 37,
                           ),
                           Text(
                             widget.restroom.building + widget.restroom.room,
