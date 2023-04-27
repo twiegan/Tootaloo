@@ -87,6 +87,7 @@ Future<List<Rating>> _getRatings() async {
         privacy: rating["privacy"],
         upvotes: rating["upvotes"],
         downvotes: rating["downvotes"],
+        reports: rating["reports"],
         owned: false);
     ratings.add(ratingData);
   }
