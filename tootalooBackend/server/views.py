@@ -15,7 +15,8 @@ from bson.objectid import ObjectId
 from datetime import datetime
 
 # for sending email
-import smtplib, ssl
+import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -34,7 +35,8 @@ environ.Env.read_env()
 
 # from .models import Restroom
 # PyMongo client
-client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'), tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
+client = pymongo.MongoClient(env('MONGODB_CONNECTION_STRING'),
+                             tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
 
 @csrf_exempt
@@ -126,7 +128,8 @@ def submit_rating(request):
 
     db = client['tootaloo']
     restroom_collection = db['restrooms']
-    restroom = restroom_collection.find_one({'building': building, 'room': room})
+    restroom = restroom_collection.find_one(
+        {'building': building, 'room': room})
     user_collection = db['users']
     user = user_collection.find_one({'_id': user_id})
     print(user)
@@ -141,14 +144,15 @@ def submit_rating(request):
         ratings_collection = db['ratings']
         ratings_collection.insert_one(new_rating)
         new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
-                    len(restroom['ratings']) + 1)
-        new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+            len(restroom['ratings']) + 1)
+        new_overall = (new_cleanliness + new_internet +
+                       new_vibe + new_privacy) / 4
         restroom_collection.update_one({'_id': restroom['_id']}, {
             '$set': {
                 'cleanliness': new_cleanliness,
@@ -187,7 +191,8 @@ def edit_rating(request):
 
     db = client['tootaloo']
     restroom_collection = db['restrooms']
-    restroom = restroom_collection.find_one({'building': building, 'room': room})
+    restroom = restroom_collection.find_one(
+        {'building': building, 'room': room})
     if restroom:
         ratings_collection = db['ratings']
         ratings_collection.update_one({'_id': rating_id}, {
@@ -202,14 +207,15 @@ def edit_rating(request):
             }
         })
         new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
-                    len(restroom['ratings']) + 1)
+            len(restroom['ratings']) + 1)
         new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
-                    len(restroom['ratings']) + 1)
-        new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
+            len(restroom['ratings']) + 1)
+        new_overall = (new_cleanliness + new_internet +
+                       new_vibe + new_privacy) / 4
         restroom_collection.update_one({'_id': restroom['_id']}, {
             '$set': {
                 'cleanliness': new_cleanliness,
@@ -251,15 +257,21 @@ def delete_post(request):
         {'$pull': {'posts': rating_id}}
     )
     restroom_collection = db['restrooms']
-    restroom = restroom_collection.find_one({'building': rating['building'], 'room': rating['room']})
+    restroom = restroom_collection.find_one(
+        {'building': rating['building'], 'room': rating['room']})
 
-    new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (
-                len(restroom['ratings']) - 1)
-    new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(rating['internet'])) / (
-                len(restroom['ratings']) - 1)
-    new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) - float(rating['vibe'])) / (len(restroom['ratings']) - 1)
-    new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(rating['privacy'])) / (
-                len(restroom['ratings']) - 1)
+    if len(restroom['ratings']) - 1 == 0:
+				# handle division by zero
+        new_cleanliness = new_internet = new_vibe = new_privacy = 0
+    else:
+        new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(rating['cleanliness'])) / (
+            len(restroom['ratings']) - 1)
+        new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(rating['internet'])) / (
+            len(restroom['ratings']) - 1)
+        new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) -
+                    float(rating['vibe'])) / (len(restroom['ratings']) - 1)
+        new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(rating['privacy'])) / (
+            len(restroom['ratings']) - 1)
     new_overall = (new_cleanliness + new_internet + new_vibe + new_privacy) / 4
 
     restroom_collection.update_one({'_id': restroom['_id']}, {
@@ -290,7 +302,8 @@ def restrooms(request):
     restrooms_collection = db['restrooms']
     restrooms = restrooms_collection.find().sort("rating", -1)
     print(restrooms)
-    resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(restrooms, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -301,7 +314,8 @@ def users(request):
     users_collection = db['users']
     users = users_collection.find().sort("username", -1)
     print(users)
-    resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(users, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -320,7 +334,8 @@ def rating_by_id(request):
     db = client['tootaloo']
     rating_collection = db['ratings']
     rating = rating_collection.find_one({'_id': rating_id})
-    resp = HttpResponse(dumps(rating, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(rating, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -335,7 +350,8 @@ def ratings(request):
 
     ratings = ratings_collection.find().sort('upvotes', -1).limit(40)
 
-    resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -359,9 +375,11 @@ def following_ratings(request):
     following.append(user['_id'])
     ratings_collection = db['ratings']
 
-    ratings = ratings_collection.find({'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
+    ratings = ratings_collection.find(
+        {'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
 
-    resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -375,7 +393,8 @@ def buildings(request):
 
     buildings = buildings_collection.find()
 
-    resp = HttpResponse(dumps(buildings, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(buildings, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -386,9 +405,10 @@ def building_by_id(request):
     buildings_collection = db['buildings']
 
     buildingId = request.GET.get('building')
-    building = buildings_collection.find_one({"_id": buildingId});
+    building = buildings_collection.find_one({"_id": buildingId})
 
-    resp = HttpResponse(dumps(building, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(building, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -406,13 +426,15 @@ def ratingsByIds(request):
     db = client['tootaloo']
     ratings_collection = db['ratings']
 
-    ratings_data = ratings_collection.find({"_id":{"$in": [ObjectId(id['$oid']) if '$oid' in id else ObjectId(id) for id in ids]}})
+    ratings_data = ratings_collection.find({"_id": {"$in": [ObjectId(
+        id['$oid']) if '$oid' in id else ObjectId(id) for id in ids]}})
 
     ratings = []
     for rating in ratings_data:
         ratings.append(rating)
 
-    resp = HttpResponse(dumps(ratings, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(ratings, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -420,7 +442,6 @@ def ratingsByIds(request):
 
 def restroomsByBuildingAndFloor(request):
     # TODO: refactor as restroomsByBuildingAndOrFloor
-
     '''Endpoint accepts 2 query params (building && floor) used to search db'''
 
     print("GET request received: restrooms")
@@ -437,12 +458,14 @@ def restroomsByBuildingAndFloor(request):
     elif building != "" and floor == "":
         restrooms = restrooms_collection.find({'building': building})
     elif building != "" and floor != "":
-        restrooms = restrooms_collection.find({'building': building, 'floor': int(floor)})
+        restrooms = restrooms_collection.find(
+            {'building': building, 'floor': int(floor)})
     else:
         return None
 
     # Return response
-    resp = HttpResponse(dumps(restrooms, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(restrooms, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -461,7 +484,8 @@ def userByUsername(request):
 
     user = user_collection.find_one({"username": username})
 
-    resp = HttpResponse(dumps(user, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(
+        dumps(user, sort_keys=True, indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -480,17 +504,20 @@ def followUserByUsername(request):
         db = client['tootaloo']
         user_collection = db['users']
 
-        target_id = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+        target_id = user_collection.find_one(
+            {"username": targetUsername}, {"_id": 1})["_id"]
 
         print("target_id: ", target_id)
         try:
-            result = user_collection.update_one({'username': followerUsername}, {'$push': {'following': target_id}})
+            result = user_collection.update_one({'username': followerUsername}, {
+                                                '$push': {'following': target_id}})
             resp = HttpResponse(
                 dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
             resp['Content-Type'] = 'application/json'
             return resp
         except pymongo.errors.PyMongoError as e:
-            resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+            resp = HttpResponse(dumps(
+                {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
             resp['Content-Type'] = 'application/json'
 
 
@@ -507,17 +534,20 @@ def unfollowUserByUsername(request):
         db = client['tootaloo']
         user_collection = db['users']
 
-        target_id = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+        target_id = user_collection.find_one(
+            {"username": targetUsername}, {"_id": 1})["_id"]
 
         print("target_id: ", target_id)
         try:
-            result = user_collection.update_one({'username': followerUsername}, {'$pull': {'following': target_id}})
+            result = user_collection.update_one({'username': followerUsername}, {
+                                                '$pull': {'following': target_id}})
             resp = HttpResponse(
                 dumps({"response": result.matched_count > 0}, sort_keys=True, indent=4, default=json_util.default))
             resp['Content-Type'] = 'application/json'
             return resp
         except pymongo.errors.PyMongoError as e:
-            resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+            resp = HttpResponse(dumps(
+                {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
             resp['Content-Type'] = 'application/json'
 
 
@@ -528,15 +558,19 @@ def checkFollowingByUsername(request):
     db = client['tootaloo']
     user_collection = db['users']
 
-    followerUserFollowing = user_collection.find_one({"username": followerUsername}, {"_id": 0, "following": 1})
-    targetUserId = user_collection.find_one({"username": targetUsername}, {"_id": 1})["_id"]
+    followerUserFollowing = user_collection.find_one(
+        {"username": followerUsername}, {"_id": 0, "following": 1})
+    targetUserId = user_collection.find_one(
+        {"username": targetUsername}, {"_id": 1})["_id"]
 
     if targetUserId in followerUserFollowing["following"]:
-        resp = HttpResponse(dumps({"response": "Following"}, sort_keys=True, indent=4, default=json_util.default))
+        resp = HttpResponse(dumps(
+            {"response": "Following"}, sort_keys=True, indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
     else:
-        resp = HttpResponse(dumps({"response": "Not Following"}, sort_keys=True, indent=4, default=json_util.default))
+        resp = HttpResponse(dumps(
+            {"response": "Not Following"}, sort_keys=True, indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
 
@@ -599,19 +633,25 @@ def login(request):
     response = {}
 
     if user == None:
-        response = {'status': "user_dne", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-        resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+        response = {'status': "user_dne", 'user_id': userID,
+                    'bathroom_preference': bathroom_preference}
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
 
     if user['passHash'] == passHash:
-        response = {'status': "good_login", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-        resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+        response = {'status': "good_login", 'user_id': userID,
+                    'bathroom_preference': bathroom_preference}
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
 
-    response = {'status': "bad_password", 'user_id': userID, 'bathroom_preference': bathroom_preference}
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    response = {'status': "bad_password", 'user_id': userID,
+                'bathroom_preference': bathroom_preference}
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -632,7 +672,8 @@ def user_register(request):
     pre_existing_user_email = user_collection.find_one({'email': email})
     if pre_existing_user_email != None:
         response = {'status': 'email_taken'}
-        resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+        resp = HttpResponse(dumps(response, sort_keys=True,
+                            indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
 
@@ -641,11 +682,13 @@ def user_register(request):
     if pre_existing_user == None:
         verification_code = send_verification_email(email)
         print("verification code sent to the user: ", verification_code)
-        response = {'status': 'register_success', 'verification_code': verification_code}
+        response = {'status': 'register_success',
+                    'verification_code': verification_code}
     else:
         response = {'status': 'username_taken'}
 
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -743,7 +786,7 @@ def send_verification_email(receiver_email):
 										<tr>
 											<td align="center" style="padding:10px 0 10px 0;background:#dff1ff;">
 													<img alt="" width="150" style="height:auto;display:block;" src="cid:tootalooLogo"/>
-           						</td>
+								</td>
 										</tr>
 										<tr>
 											<td style="padding:30px 3px 0px 30px;">
@@ -770,7 +813,8 @@ def send_verification_email(receiver_email):
     message.attach(MIMEText(html, "html"))
 
     # Attach Tootaloo logo
-    logoPath = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'server/assets/tootalooLogo.png')
+    logoPath = os.path.join(os.path.dirname(
+        os.path.dirname(__file__)), 'server/assets/tootalooLogo.png')
     fp = open(logoPath, 'rb')
     messageImage = MIMEImage(fp.read())
     fp.close()
@@ -859,7 +903,7 @@ def updateUserReports(request):
     users_collection.update_one(query, update_expression)
 
     if reported_user != None and reported_user['reported_users'] != None and user_id not in reported_user[
-        'reported_users']:
+            'reported_users']:
         id_query = {'_id': reported_id}
         new_voted = {'$push': {'reported_users': user_id}}
         users_collection.update_one(id_query, new_voted)
@@ -907,7 +951,8 @@ def restroom_id_by_name(request):
     restroom = restrooms_collection.find_one({'building': building, 'room' : room})
 
     response = {'status': "success", 'id': restroom['_id']}
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -921,7 +966,8 @@ def restroomById(request):
     restroom = restrooms_collection.find_one({'_id': restroom_id})
 
     response = {'status': "success", 'restroom': restroom}
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -956,7 +1002,8 @@ def reportedUsers(request):
     print(users)
 
     # Return response
-    resp = HttpResponse(dumps(users, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(users, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
 
     return resp
@@ -971,7 +1018,8 @@ def userById(request):
     print(user)
 
     response = {'status': "success", 'user': user}
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -989,7 +1037,8 @@ def favoriteRestroom(request):
 
     user = users_collection.find_one({'_id': user_id})
     response = {'response': "success", "user": user}
-    resp = HttpResponse(dumps(response, sort_keys=True, indent=4, default=json_util.default))
+    resp = HttpResponse(dumps(response, sort_keys=True,
+                        indent=4, default=json_util.default))
     resp['Content-Type'] = 'application/json'
     return resp
 
@@ -1003,12 +1052,15 @@ def unfavoriteRestroom(request):
     users_collection = db['users']
 
     try:
-        result = users_collection.update_one({'_id': user_id}, {'$pull': {'favorite_restrooms': restroom_id}})
-        resp = HttpResponse(dumps({"response": "success"}, sort_keys=True, indent=4, default=json_util.default))
+        result = users_collection.update_one(
+            {'_id': user_id}, {'$pull': {'favorite_restrooms': restroom_id}})
+        resp = HttpResponse(dumps(
+            {"response": "success"}, sort_keys=True, indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
     except pymongo.errors.PyMongoError as e:
-        resp = HttpResponse(dumps({"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
+        resp = HttpResponse(dumps(
+            {"response": "failure"}, sort_keys=True, indent=4, default=json_util.default))
         resp['Content-Type'] = 'application/json'
         return resp
 
