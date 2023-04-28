@@ -202,6 +202,7 @@ def edit_rating(request):
 				'cleanliness': float(body['cleanliness']),
 				'internet': float(body['internet']),
 				'vibe': float(body['vibe']),
+				'privacy': float(body['privacy']),
 				'review': body['review'],
 			}
 		})
