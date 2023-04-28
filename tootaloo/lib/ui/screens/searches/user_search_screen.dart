@@ -7,7 +7,7 @@ import 'package:tootaloo/ui/components/bottom_nav_bar.dart';
 import 'package:tootaloo/ui/components/search_nav_bar.dart';
 import 'package:tootaloo/ui/components/top_nav_bar.dart';
 import 'package:tootaloo/ui/components/searches_tiles/UserTileItem.dart';
-import 'package:tootaloo/ui/models/User.dart';
+import 'package:tootaloo/ui/models/user.dart';
 import 'package:tootaloo/ui/models/rating.dart';
 import 'package:tootaloo/SharedPref.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -38,7 +38,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       posts_ids: [],
       following_ids: [],
       preference: "",
-      id: "");
+      id: "",
+      followers: 0);
   late List<Rating> _ratings;
 
   @override
@@ -102,7 +103,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                         preference: user.preference,
                                         following_ids: user.following_ids,
                                         favorite_restrooms_ids:
-                                            user.favorite_restrooms_ids);
+                                            user.favorite_restrooms_ids,
+                                        followers: user.followers);
                                   }),
                                   if (_currUser.id != "null")
                                     {
@@ -160,7 +162,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                         color: Colors.black,
                                         width: 1.0,
                                         style: BorderStyle.solid))),
-                            child: Text(_user.following_ids.length.toString())),
+                            child: Text(_user.followers.toString())),
                         const Text("followers"),
                       ],
                     )),
@@ -198,6 +200,9 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                               unfollowed
                                                   ? _followed = false
                                                   : _followed = true;
+                                              if (unfollowed) {
+                                                _user.followers -= 1;
+                                              }
                                             })
                                           })
                                   : followUser(appUser.username, _selectedUser)
@@ -206,6 +211,9 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                                               followed
                                                   ? _followed = true
                                                   : _followed = false;
+                                              if (followed) {
+                                                _user.followers += 1;
+                                              }
                                             })
                                           })
                             });
@@ -301,7 +309,8 @@ Future<User> getSearchedUser(String userId) async {
       posts_ids: responseData["user"]["posts"],
       following_ids: responseData["user"]["following"],
       preference: responseData["user"]["bathroom_preference"],
-      favorite_restrooms_ids: responseData["user"]["favorite_restrooms"]);
+      favorite_restrooms_ids: responseData["user"]["favorite_restrooms"],
+      followers: responseData["user"]["followers"]);
 
   return userData;
 }
