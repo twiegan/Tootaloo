@@ -375,7 +375,7 @@ def following_ratings(request):
 	ratings_collection = db['ratings']
 
 	ratings = ratings_collection.find(
-		{'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
+		{'by_id': {'$in': following}}).sort('createdAt', -1).limit(40)
 
 	resp = HttpResponse(dumps(ratings, sort_keys=True,
 						indent=4, default=json_util.default))
