@@ -425,25 +425,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
                             edit(
                                 widget.id,
                                 _restroom,
-                                roundDouble(
-                                    (_vibe + _internet + _cleanliness) / 3.0,
-                                    1),
                                 _cleanliness,
                                 _internet,
                                 _vibe,
                                 _privacy,
-                                _review);
+                                roundDouble(
+                                    (_vibe + _internet + _cleanliness) / 3.0,
+                                    1),
+                                _review,
+                                );
                           } else {
                             submit(
                                 _restroom,
-                                roundDouble(
-                                    (_vibe + _internet + _cleanliness) / 3.0,
-                                    1),
                                 _cleanliness,
                                 _internet,
                                 _vibe,
                                 _privacy,
-                                _review);
+                                roundDouble(
+                                    (_vibe + _internet + _cleanliness) / 3.0,
+                                    1),
+                                _review,
+                                );
                           }
                         },
                         child: const Text('     Submit     '))))
