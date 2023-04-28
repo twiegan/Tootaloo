@@ -224,6 +224,9 @@ class _RestroomSearchScreenState extends State<RestroomSearchScreen> {
                                 style: const TextStyle(fontSize: 22)),
                             Text("Vibe: ${roundDouble(_restroom.vibe, 2)}",
                                 style: const TextStyle(fontSize: 22)),
+                            Text(
+                                "Privacy: ${roundDouble(_restroom.privacy, 2)}",
+                                style: const TextStyle(fontSize: 22)),
                           ],
                         ),
                       ),

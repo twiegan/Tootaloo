@@ -189,7 +189,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
         'vibe': vibe.toString(),
         'privacy': privacy.toString(),
         'overall_rating': overallRating.toString(),
-        'review': review
+        'review': review,
       }),
     );
     Navigator.push(
@@ -321,7 +321,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       max: 5.0,
                       divisions: 50,
                       value: _cleanliness,
-                      label: '${roundDouble(_cleanliness, 1)}',
+                      label: '${roundDouble(_cleanliness, 2)}',
                       onChanged: (value) {
                         setState(() {
                           _cleanliness = value;
@@ -342,7 +342,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       max: 5.0,
                       divisions: 50,
                       value: _internet,
-                      label: '${roundDouble(_internet, 1)}',
+                      label: '${roundDouble(_internet, 2)}',
                       onChanged: (value) {
                         setState(() {
                           _internet = value;
@@ -363,7 +363,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       max: 5.0,
                       divisions: 50,
                       value: _vibe,
-                      label: '${roundDouble(_vibe, 1)}',
+                      label: '${roundDouble(_vibe, 2)}',
                       onChanged: (value) {
                         setState(() {
                           _vibe = value;
@@ -384,7 +384,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       max: 5.0,
                       divisions: 50,
                       value: _privacy,
-                      label: '${roundDouble(_privacy, 1)}',
+                      label: '${roundDouble(_privacy, 2)}',
                       onChanged: (value) {
                         setState(() {
                           _privacy = value;
@@ -398,7 +398,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 child: Row(
                   children: [
                     Text(
-                        'Overall Rating: ${roundDouble((_vibe + _internet + _cleanliness) / 3.0, 1)}',
+                        'Overall Rating: ${roundDouble((_vibe + _internet + _cleanliness + _privacy) / 4.0, 2)}',
                         style: const TextStyle(fontSize: 20)),
                   ],
                 )),
@@ -423,27 +423,37 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         onPressed: () {
                           if (widget.id != "") {
                             edit(
-                                widget.id,
-                                _restroom,
-                                roundDouble(
-                                    (_vibe + _internet + _cleanliness) / 3.0,
-                                    1),
-                                _cleanliness,
-                                _internet,
-                                _vibe,
-                                _privacy,
-                                _review);
+                              widget.id,
+                              _restroom,
+                              _cleanliness,
+                              _internet,
+                              _vibe,
+                              _privacy,
+                              roundDouble(
+                                  (_vibe +
+                                          _internet +
+                                          _cleanliness +
+                                          _privacy) /
+                                      4.0,
+                                  1),
+                              _review,
+                            );
                           } else {
                             submit(
-                                _restroom,
-                                roundDouble(
-                                    (_vibe + _internet + _cleanliness) / 3.0,
-                                    1),
-                                _cleanliness,
-                                _internet,
-                                _vibe,
-                                _privacy,
-                                _review);
+                              _restroom,
+                              _cleanliness,
+                              _internet,
+                              _vibe,
+                              _privacy,
+                              roundDouble(
+                                  (_vibe +
+                                          _internet +
+                                          _cleanliness +
+                                          _privacy) /
+                                      4.0,
+                                  4),
+                              _review,
+                            );
                           }
                         },
                         child: const Text('     Submit     '))))

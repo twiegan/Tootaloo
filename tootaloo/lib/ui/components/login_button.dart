@@ -64,12 +64,11 @@ class LoginButton extends StatelessWidget {
               //   print(currUser.id);
               // }
               // ignore: use_build_context_synchronously
-              if(username == "shradmin") {
+              if (username == "shradmin") {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return const UserJudgementScreen();
                 }));
-              }
-              else {
+              } else {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return const TrendingScreen(
                     title: "Trending",
@@ -79,9 +78,16 @@ class LoginButton extends StatelessWidget {
               break;
             case "bad_password":
               print("wrong password");
+              // TODO: add pop up
+              // ignore: use_build_context_synchronously
+              showPopupMessage(context, const Icon(Icons.error),
+                  " Incorrect password", "Please try again");
               break;
             case "user_dne":
               print("user does not exist");
+              // ignore: use_build_context_synchronously
+              showPopupMessage(context, const Icon(Icons.error),
+                  " User does not exist", "Please try again");
               break;
           }
         },
@@ -89,5 +95,34 @@ class LoginButton extends StatelessWidget {
           "Login",
           style: TextStyle(color: Colors.black),
         ));
+  }
+
+  void showPopupMessage(
+      BuildContext context, Icon icon, String title, String text) {
+    showDialog(
+        context: context,
+        barrierDismissible:
+            false, // disables popup to close if tapped outside popup (need a button to close)
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                icon,
+                Text(
+                  title,
+                ),
+              ],
+            ),
+            content: Text(text),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }, //closes popup
+              ),
+            ],
+          );
+        });
   }
 }
