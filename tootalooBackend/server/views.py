@@ -188,57 +188,74 @@ def edit_rating(request):
     if ' ' in body['restroom']:
         building, room = body['restroom'].split()
 
-    db = client['tootaloo']
-    restroom_collection = db['restrooms']
-    restroom = restroom_collection.find_one(
-        {'building': building, 'room': room})
-    if restroom:
-        ratings_collection = db['ratings']
-        ratings_collection.update_one({'_id': rating_id}, {
-            '$set': {
-                'building': building,
-                'room': room,
-                'overall_rating': float(body['overall_rating']),
-                'cleanliness': float(body['cleanliness']),
-                'internet': float(body['internet']),
-                'vibe': float(body['vibe']),
-                'review': body['review'],
-            }
-        })
-        
-        old_rating = ratings_collection.find_one({'_id': rating_id})
+	db = client['tootaloo']
+	restroom_collection = db['restrooms']
+	restroom = restroom_collection.find_one(
+		{'building': building, 'room': room})
 
-        # remove old rating
-        # new_cleanliess -= restroom['cleanliness']
-        # new_internet -= restroom['internet']
-        # new_vibe -= restroom['vibe']
-        # new_privacy -= restroom['privacy']
 
-        print("========= inside of edit rating")
+	if restroom:
+		ratings_collection = db['ratings']
+		old_rating = ratings_collection.find_one({'_id': rating_id})
+		if len(restroom['ratings']) - 1 == 0:
+			# handle division by zero
+			new_cleanliness = new_internet = new_vibe = new_privacy = 0
+		else:
+			new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) - float(old_rating['cleanliness'])) / (
+				len(restroom['ratings']) - 1)
+			new_internet = ((restroom['internet'] * len(restroom['ratings'])) - float(old_rating['internet'])) / (
+				len(restroom['ratings']) - 1)
+			new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) - float(old_rating['vibe'])) / (
+				len(restroom['ratings']) - 1)
+			new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) - float(old_rating['privacy'])) / (
+				len(restroom['ratings']) - 1)
 
-        new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings']) - old_rating['cleanliness']) + float(body['cleanliness'])) / (
-            len(restroom['ratings']))
-        new_internet = ((restroom['internet'] * len(restroom['ratings']) - old_rating['internet']) + float(body['internet'])) / (
-            len(restroom['ratings']))
-        new_vibe = ((restroom['vibe'] * len(restroom['ratings']) - old_rating['vibe']) + float(body['vibe'])) / (
-            len(restroom['ratings']))
-        new_privacy = ((restroom['privacy'] * len(restroom['ratings']) - old_rating['privacy']) + float(body['privacy'])) / (
-            len(restroom['ratings']))
-        new_overall = (new_cleanliness + new_internet +
-                       new_vibe + new_privacy) / 4
-        
-        print("========= inside of edit rating")
-        print(new_cleanliness, new_internet, new_vibe, new_privacy)
 
-        restroom_collection.update_one({'_id': restroom['_id']}, {
-            '$set': {
-                'cleanliness': new_cleanliness,
-                'internet': new_internet,
-                'vibe': new_vibe,
-                'privacy': new_privacy,
-                'rating': new_overall,
-            }
-        })
+		new_overall = (new_cleanliness + new_internet +
+						new_vibe + new_privacy) / 4
+		restroom_collection.update_one({'_id': restroom['_id']}, {
+			'$set': {
+				'cleanliness': new_cleanliness,
+				'internet': new_internet,
+				'vibe': new_vibe,
+				'privacy': new_privacy,
+				'rating': new_overall,
+			}
+		})
+		restroom = restroom_collection.find_one(
+		{'building': building, 'room': room})
+
+		ratings_collection.update_one({'_id': rating_id}, {
+			'$set': {
+				'building': building,
+				'room': room,
+				'overall_rating': float(body['overall_rating']),
+				'cleanliness': float(body['cleanliness']),
+				'internet': float(body['internet']),
+				'vibe': float(body['vibe']),
+				'privacy': float(body['privacy']),
+				'review': body['review'],
+			}
+		})
+		new_cleanliness = ((restroom['cleanliness'] * len(restroom['ratings'])) + float(body['cleanliness'])) / (
+			len(restroom['ratings']) + 1)
+		new_internet = ((restroom['internet'] * len(restroom['ratings'])) + float(body['internet'])) / (
+			len(restroom['ratings']) + 1)
+		new_vibe = ((restroom['vibe'] * len(restroom['ratings'])) + float(body['vibe'])) / (
+			len(restroom['ratings']) + 1)
+		new_privacy = ((restroom['privacy'] * len(restroom['ratings'])) + float(body['privacy'])) / (
+			len(restroom['ratings']) + 1)
+		new_overall = (new_cleanliness + new_internet +
+					new_vibe + new_privacy) / 4
+		restroom_collection.update_one({'_id': restroom['_id']}, {
+			'$set': {
+				'cleanliness': new_cleanliness,
+				'internet': new_internet,
+				'vibe': new_vibe,
+				'privacy': new_privacy,
+				'rating': new_overall,
+			}
+		})
 
     return HttpResponse()
 
@@ -256,10 +273,10 @@ def delete_post(request):
     if user_id == 'null':
         return HttpResponse('true')
 
-    if '{' in body['user_id']:
-        user_id = ObjectId(body['user_id'].split()[1].split('}')[0])
-    else:
-        rating_id = ObjectId(body['user_id'])
+	if '{' in body['user_id']:
+		user_id = ObjectId(body['user_id'].split()[1].split('}')[0])
+	else:
+		user_id = ObjectId(body['user_id'])
 
     db = client['tootaloo']
     rating_collection = db['ratings']
@@ -389,8 +406,8 @@ def following_ratings(request):
     following.append(user['_id'])
     ratings_collection = db['ratings']
 
-    ratings = ratings_collection.find(
-        {'by_id': {'$in': following}}).sort('createdAt', 1).limit(40)
+	ratings = ratings_collection.find(
+		{'by_id': {'$in': following}}).sort('createdAt', -1).limit(40)
 
     resp = HttpResponse(dumps(ratings, sort_keys=True,
                               indent=4, default=json_util.default))

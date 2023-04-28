@@ -55,8 +55,6 @@ class _FollowingScreenState extends State<FollowingScreen> {
                 _ratings.add(rating);
               }),
             },
-          _ratings.sort((a, b) => a.downvotes.compareTo(b.downvotes)),
-          _ratings.sort((b, a) => a.upvotes.compareTo(b.upvotes)),
         });
 
     _getUser().then((user) => {
