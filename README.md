@@ -1,35 +1,79 @@
-# Tootaloo Backend Setup
+<img src="tootaloo/assets/images/tootaloo_logo.png" />
 
-### Initial Setup:
+<br>
 
-- Install virtual environment wrapper:
+# Tootaloo
 
-  - Windows: `pip install virtualenvwrapper-win`
-  - Mac OS: `pip install virtualenvwrapper`
+Tootaloo is a restroom review app allowing users to quickly find and rate top lavtories in their area. Its implementation of social media-esque features allows users to create and view restroom ratings from around the community.
 
-- Create virtual environment (inside of tootalooBackend Directory):
-  - Windows: `mkvirtualenv .venv`
-  - Mac OS: `virtualenv .venv`
+Tootaloo was created in the Spring of 2023 for the CS40700 Software Engineering II class at Purdue University. It was completed over a period of 12 weeks broken down into three 4-week sprints. This project implemented some aspects of the Scrum management framework including the creation of artifacts such as a Project Design Document, Product Backlogs, and Sprint Backlogs, and the use of regular Sprint Reviews and Sprint Retrospectives. The development team consisted of four graduating seniors: **Kichul Kang** (*Github: kckang1003*), **Sam Tarr** (*Github: S-Tarr*), **John Werner** (*Github: jwerner51*), and **Thomas Wiegand** (*Github: twiegan*).
 
----
+<br>
 
-### Managing Packages (in the virtual environment):
+# Technologies
 
-- Install the packages needed in your virtual environment:
+- Frontend - Flutter (iOS and Android apps)
+- Backend - Django
+- Database - MongoDB
 
-  - `pip install -r requirements.txt`
+<br>
 
-- Whenever you install a package with pip, update requirements.txt:
-  - `pip freeze > requirements.txt`
-  - Inside the directory where requirements.txt exists. Make sure your virtual environment is activated when you perform this.
+# Main Features by Sprint
 
----
+| Sprint 1                            | Sprint 2                            | Sprint 3                            |
+| ----------------------------------- |:-----------------------------------:| -----------------------------------:|
+| Login/Logout (Firebase)             | Login/Logout Redesign (MongoDB)     | Guest/Admin Access                  |
+| Map and Location Services Setup     | Map Functionality (Nearest Bathroom)| Map Functionality (Filtering)       |
+| Account Creation                    | Following Functionality             | Favoriting Functionality            |
+| Basic UI Layout/Navigation          | Profile Preferences                 | Post Reporting/User Reporting       |
+| Trending/Following/Restrooms Pages  | Review Creation                     | Email Verification                  |
+|                                     | Bathroom/User Search                | Review Edit/Delete Functionality    |
 
-### To run the server:
+<br>
 
-- Activate the virtual environment:
-  - Windows: `workon .venv`
-  - Mac OS: `source .venv/bin/activate`
-- Start the server using the `python3 manage.py runserver` command.
+# Contribution Breakdown
+Although many portions of the project were a group effort, generally speaking individual team members were responsible for the following areas:
 
-- To deactivate the virtual environment, just type the command `deactivate`.
+- Kichul Kang
+  - Map and Location Services Setup
+  - Map Functionality (Nearest Bathroom)
+  - Map Functionality (Filtering, Floor Maps)
+  - Email Verification
+- Sam Tarr
+  - Trending/Following/Restrooms Pages
+  - Review Creation
+  - Review Edit/Delete Functionality
+  - Bathroom/User Search Page
+- John Werner
+  - Login/Logout
+  - Account Creation
+  - Profile Preferences
+  - Guest/Admin Access
+- Thomas Wiegand
+  - Following Functionality
+  - Favoriting Functionality
+  - Post Reporting/User Reporting
+  - Bathroom/User Search
+
+# Gallery
+
+Login<br>
+<img src="tootaloo/assets/images/gallery/login.png" width="200" height="400" />
+
+Trending<br>
+<img src="tootaloo/assets/images/gallery/trending.png" width="200" height="400" />
+
+Review<br>
+<img src="tootaloo/assets/images/gallery/review.png" width="200" height="400" />
+
+Restroom Search<br>
+<img src="tootaloo/assets/images/gallery/restroom_search.png" width="200" height="400" />
+
+User Search<br>
+<img src="tootaloo/assets/images/gallery/user_search.png" width="200" height="400" />
+
+Map<br>
+<img src="tootaloo/assets/images/gallery/map.png" width="200" height="400" />
+
+# Demo
+<video src="tootaloo/assets/final_demo.mov" width=200 height=400 controls="controls"> </video>
