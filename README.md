@@ -76,4 +76,4 @@ Map<br>
 <img src="tootaloo/assets/images/gallery/map.png" width="200" height="400" />
 
 # Demo
-<video src="tootaloo/assets/final_demo.mov" width=200 height=400 controls="controls"> </video>
+<video src="https://user-images.githubusercontent.com/53661240/235524916-61ccbdc0-21ef-47f7-9e09-5a0f0abcb89e.mov" width=200 height=400 controls="controls"> </video>
