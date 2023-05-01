@@ -4,7 +4,7 @@
 
 # Tootaloo
 
-Tootaloo is a restroom review app allowing users to quickly find and rate top lavtories in their area. Its implementation of social media-esque features allows users to create and view restroom ratings from around the community.
+Tootaloo is a restroom review app allowing users to quickly find and rate top lavatories in their area. Its implementation of social media-esque features allows users to create and view restroom ratings from around the community.
 
 Tootaloo was created in the Spring of 2023 for the CS40700 Software Engineering II class at Purdue University. It was completed over a period of 12 weeks broken down into three 4-week sprints. This project implemented some aspects of the Scrum management framework including the creation of artifacts such as a Project Design Document, Product Backlogs, and Sprint Backlogs, and the use of regular Sprint Reviews and Sprint Retrospectives. The development team consisted of four graduating seniors: **Kichul Kang** (*Github: kckang1003*), **Sam Tarr** (*Github: S-Tarr*), **John Werner** (*Github: jwerner51*), and **Thomas Wiegand** (*Github: twiegan*).
 
